@@ -8,6 +8,7 @@ Loads weight matrix and creates network model from it according to p_value
 & weight thresholding. Also includes option to create lesioned network.
 """
 
+import rich_plot
 import networkx as nx
 import numpy as np
 import scipy.io as sio
@@ -98,11 +99,12 @@ def import_weights_to_graph(weight_mat):
 
     # Add edges to list object according to names
     edges_to_add = []
-    for ri, row in enumerate(weight_mat):
+    for ri, row in enumerate(weight_mat['data']):
         for ci, col in enumerate(row):
-            edges_to_add.append((weight_mat['row_labels'][ri],
-                                 weight_mat['col_labels'][ci],
-                                 weight_mat['data'][ri, ci]))
+            if weight_mat['data'][ri,ci] > 0:
+                edges_to_add.append((weight_mat['row_labels'][ri],
+                                     weight_mat['col_labels'][ci],
+                                     weight_mat['data'][ri, ci]))
 
     # Add list of edges to graph object
     G.add_weighted_edges_from(edges_to_add)
@@ -115,16 +117,21 @@ if __name__ == '__main__':
     # Load weights & p-value
     W,P,row_labels,col_labels = load_weights(dir_name)
     # Threshold weights according to weights & p-values
-    W_net,mask = threshold(W,P)
+    W_net,mask = threshold(W,P,p_th=.01)
     # Set weights to zero if they don't satisfy threshold criteria
     W_net[W_net==-1] = 0.
+    # Set diagonal weights to zero
+    np.fill_diagonal(W_net,0)
     
     # Put everything in a dictionary
     W_net_dict = {'row_labels':row_labels,'col_labels':col_labels,
                   'data':W_net}
 
     # Plot log-connectivity matrix
-    plt.imshow(np.log(W_net),interpolation='nearest')
+#    plt.imshow(np.log(W_net),interpolation='nearest')
     
     # Convert to networkx graph object
     G = import_weights_to_graph(W_net_dict)    
+    
+    rich_plot.plot_node_btwn(G)
+    rich_plot.plot_edge_btwn(G)
