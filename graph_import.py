@@ -24,7 +24,7 @@ def import_weights_to_graph(weight_mat):
     G.add_nodes_from(weight_mat['col_labels'])
 
     # Add edges to list object according to names
-    # Potential for optimization in looping
+    # Potential target for optimization
     edges_to_add = []
     for ri, row in enumerate(weight_mat['data']):
         for ci, col in enumerate(row):
