@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def connection_strength(W,bins=10):
+    # Returns figure/axis and plots a histogram of connection strength
     W_new = W[W>0]
     
     Fig,ax = plt.subplots(1,1)
@@ -21,6 +22,7 @@ def connection_strength(W,bins=10):
     return Fig,ax
     
 def shortest_path_distribution(W):
+    # Returns figure/axis and plots a bar graph of shortest path distribution
     
     if type(W) != '<type \'numpy.ndarray\'>':
         W = np.array(W)
@@ -46,4 +48,3 @@ def shortest_path_distribution(W):
     plt.show()
     
     return Fig,ax
-    # Create bins and plot as barplot...
