@@ -24,12 +24,14 @@ def import_weights_to_graph(weight_mat):
     G.add_nodes_from(weight_mat['col_labels'])
 
     # Add edges to list object according to names
+    # Potential for optimization in looping
     edges_to_add = []
-    for ri, row in enumerate(weight_mat):
+    for ri, row in enumerate(weight_mat['data']):
         for ci, col in enumerate(row):
-            edges_to_add.append((weight_mat['row_labels'][ri],
-                                 weight_mat['col_labels'][ci],
-                                 weight_mat['data'][ri, ci]))
+            if weight_mat['data'][ri, ci] > 0:
+                edges_to_add.append((weight_mat['row_labels'][ri],
+                                    weight_mat['col_labels'][ci],
+                                    weight_mat['data'][ri, ci]))
 
     # Add list of edges to graph object
     G.add_weighted_edges_from(edges_to_add)
