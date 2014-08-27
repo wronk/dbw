@@ -14,7 +14,9 @@ def plot_node_btwn(G,bins=20):
     """Plot the node-betweenness distributions.
     
     Args:
-        G: networkx graph object"""
+        G: networkx graph object
+    Returns:
+        figure handle & axes array."""
     
     # Get node-betweenness dictionary
     node_btwn_dict = nx.betweenness_centrality(G)
@@ -31,7 +33,7 @@ def plot_node_btwn(G,bins=20):
     fig,axs = plt.subplots(2,1)
     # Plot histogram
     axs[0].hist(node_btwn_vec,bins)
-    axs[0].set_ylabel('Probability')
+    axs[0].set_ylabel('Occurrences')
     axs[0].set_xlabel('Node-betweenness')
     
     # Plot sorted node between values
@@ -40,11 +42,15 @@ def plot_node_btwn(G,bins=20):
     axs[1].set_xlabel('Area')
     axs[1].set_ylabel('Node-betweenness')
     
+    return fig
+    
 def plot_edge_btwn(G,bins=20):
     """Plot the edge-betweenness distributions.
     
     Args:
-        G: networkx graph object"""
+        G: networkx graph object
+    Returns:
+        figure handle & axes array."""
     
     # Get node-betweenness dictionary
     edge_btwn_dict = nx.edge_betweenness_centrality(G)
@@ -61,7 +67,7 @@ def plot_edge_btwn(G,bins=20):
     fig,axs = plt.subplots(2,1)
     # Plot histogram
     axs[0].hist(edge_btwn_vec,bins)
-    axs[0].set_ylabel('Probability')
+    axs[0].set_ylabel('Occurrences')
     axs[0].set_xlabel('Edge-betweenness')
     
     # Plot sorted node between values
@@ -69,3 +75,24 @@ def plot_edge_btwn(G,bins=20):
                    edge_btwn_vec_sorted,s=20,c='r')
     axs[1].set_xlabel('Area')
     axs[1].set_ylabel('Edge-betweenness')
+    
+    return fig
+    
+def plot_connected_components(G):
+    """Plot a distribution of the connected component sizes for a graph.
+    
+    Args:
+        G: A networkx graph object.
+    Returns:
+        figure handle & axis."""
+    
+    # Calculate list of connected component sizes
+    cc_sizes = [len(nodes) for nodes in nx.connected_components(G)]
+    # Sort connected component sizes & plot them
+    cc_sizes_sorted = sorted(cc_sizes,reverse=True)
+    
+    # Open plots
+    fig, ax = plt.subplots(1,1)
+    ax.scatter(np.arange(len(cc_sizes_sorted)),cc_sizes_sorted,s=20,c='r')
+    
+    return fig
