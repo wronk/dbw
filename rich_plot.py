@@ -10,6 +10,25 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 
+def plot_connected_components(G):
+    """Plot a distribution of the connected component sizes for a graph.
+    
+    Args:
+        G: A networkx graph object.
+    Returns:
+        figure handle & axis."""
+    
+    # Calculate list of connected component sizes
+    cc_sizes = [len(nodes) for nodes in nx.connected_components(G)]
+    # Sort connected component sizes & plot them
+    cc_sizes_sorted = sorted(cc_sizes,reverse=True)
+    
+    # Open plots
+    fig, ax = plt.subplots(1,1)
+    ax.scatter(np.arange(len(cc_sizes_sorted)),cc_sizes_sorted,s=20,c='r')
+    
+    return fig
+    
 def plot_node_btwn(G,bins=20):
     """Plot the node-betweenness distributions.
     
@@ -78,21 +97,42 @@ def plot_edge_btwn(G,bins=20):
     
     return fig
     
-def plot_connected_components(G):
-    """Plot a distribution of the connected component sizes for a graph.
+def plot_out_in_ratios(W_net,bins=20,labels=None,binarized=True):
+    """Plot a distribution of output/input connection ratios for a given
+    network (defined by a weight matrix W_net)"""
     
-    Args:
-        G: A networkx graph object.
-    Returns:
-        figure handle & axis."""
+    if binarized:
+        W = (W_net > 0).astype(float)
+    else:
+        W = W_net.copy()
+    if labels is None:
+        labels = np.arange(W.shape[0])
     
-    # Calculate list of connected component sizes
-    cc_sizes = [len(nodes) for nodes in nx.connected_components(G)]
-    # Sort connected component sizes & plot them
-    cc_sizes_sorted = sorted(cc_sizes,reverse=True)
+    # Calculate total output & input connections for each node
+    out_total = W.sum(axis=1)
+    in_total = W.sum(axis=0)
+    # Calculate out/in ratio
+    out_in_vec = out_total.astype(float)/in_total
     
-    # Open plots
-    fig, ax = plt.subplots(1,1)
-    ax.scatter(np.arange(len(cc_sizes_sorted)),cc_sizes_sorted,s=20,c='r')
+    # Make in_out_ratio dictionary
+    out_in_dict = {labels[idx]:out_in_vec[idx] for idx in range(len(labels))}
+    # Sort in_out_ratio
+    out_in_dict_sorted = sorted(out_in_dict.iteritems(),
+                                key=operator.itemgetter(1),reverse=True)
+    out_in_vec_sorted = [item[1] for item in out_in_dict_sorted]
+    out_in_labels_sorted = [item[0] for item in out_in_dict_sorted]
     
-    return fig
+    # Open figure & axes
+    fig, axs = plt.subplots(2,1)
+    # Plot histogram
+    axs[0].hist(out_in_vec,bins)
+    axs[0].set_ylabel('Occurrences')
+    axs[0].set_xlabel('Output/Input')
+    
+    # Plot sorted input/output ratios
+    axs[1].scatter(np.arange(len(out_in_vec_sorted)),
+                   out_in_vec_sorted,s=20,c='r')
+    axs[1].set_xlabel('Area')
+    axs[1].set_ylabel('Output/Input')
+    
+    return fig,axs

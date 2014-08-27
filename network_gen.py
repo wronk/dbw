@@ -12,7 +12,7 @@ import rich_plot
 import networkx as nx
 import numpy as np
 import scipy.io as sio
-import matplotlib.pylab as plt
+import matplotlib.pyplot as plt
 
 def load_weights(dir_name):
     """Load weights into matrix."""
@@ -135,3 +135,4 @@ if __name__ == '__main__':
     
     rich_plot.plot_node_btwn(G)
     rich_plot.plot_edge_btwn(G)
+    rich_plot.plot_connected_components(G)
