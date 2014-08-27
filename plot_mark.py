@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def plot_clustering_coeff_pdf(coeffs, bins=np.linspace(0, 1, 50)):
+def plot_clustering_coeff_pdf(coeffs, bins=np.linspace(0., 0.25, 150)):
     '''
     Plot clustering coefficient probability density function
     '''
@@ -22,8 +22,7 @@ def plot_clustering_coeff_pdf(coeffs, bins=np.linspace(0, 1, 50)):
     fig = plt.figure()
 
     # Plot coefficients according to bins
-    plt.hist(coeffs.flatten(), bins, histtype='step', fc='g', alpha=1,
-             normed=True)
+    plt.hist(coeffs.flatten(), bins, fc='g', alpha=.8, normed=True)
     plt.title('Clustering Coefficient PDF')
     plt.xlabel('Clustering Coefficient')
     plt.ylabel('Probability')
@@ -35,18 +34,26 @@ def plot_clustering_coeff_ranked(coeffs, names, num_ranked=10):
     '''
     Plot clustering coefficient ranked by maximum value
     '''
+    # Graph params
+    width = 0.5
+    xpos = np.arange(num_ranked)
 
     # Constuct figure
     fig = plt.figure()
 
+    sorted_tups = sorted(zip(coeffs, names), key=lambda tup: tup[0],
+                         reverse=True)[:num_ranked]
+
     # Plot top ranked coefficients according to bins
-    fig.bar(coeffs, names, fc='green', alpha=1)
-    fig.set_title('Ranked Clustering Coefficients')
-    fig.set_xlabel('Region')
-    fig.set_ylabel('Clustering Coefficient')
+    plt.bar(xpos, [w for w, _ in sorted_tups], fc='green',
+            width=width, alpha=.8)
+    plt.xticks(xpos + width / 2., [n for _, n in sorted_tups])
+
+    plt.title('Ranked Clustering Coefficients')
+    plt.xlabel('Region')
+    plt.ylabel('Clustering Coefficient')
 
     return fig
-
 
 if __name__ == '__main__':
 
@@ -55,11 +62,31 @@ if __name__ == '__main__':
 
     weights_dir = '/home/wronk/Builds/friday-harbor/linear_model/'
     D_W_ipsi = sio.loadmat(op.join(weights_dir, 'W_ipsi.mat'))
-    D_W_contra = sio.loadmat(op.join(weights_dir, 'W_ipsi.mat'))
-    D_PValue_ipsi = sio.loadmat(op.join(weights_dir, 'W_ipsi.mat'))
-    D_PValue_contra = sio.loadmat(op.join(weights_dir, 'W_ipsi.mat'))
 
     plt.ion()
 
-    fig = plot_clustering_coeff_pdf(D_W_ipsi['data'])
-    plt.show()
+    names = D_W_ipsi['row_labels']
+    coeffs = np.random.rand(len(names))
+
+    #fig = plot_clustering_coeff_pdf(D_W_ipsi['data'])
+    #fig = plot_clustering_coeff_ranked(coeffs, names)
+
+    # Graph params
+    num_ranked=10
+    width = 0.5
+    xpos = np.arange(num_ranked)
+
+    # Constuct figure
+    fig = plt.figure()
+
+    sorted_tups = sorted(zip(coeffs, names), key=lambda tup: tup[0],
+                         reverse=True)[:num_ranked]
+
+    # Plot top ranked coefficients according to bins
+    plt.bar(xpos, [w for w, _ in sorted_tups], fc='green',
+            width=width, alpha=.8)
+    plt.xticks(xpos+width/2., [n for _, n in sorted_tups])
+
+    plt.title('Ranked Clustering Coefficients')
+    plt.xlabel('Region')
+    plt.ylabel('Clustering Coefficient')
