@@ -292,3 +292,30 @@ def shortest_path_distribution(W):
     plt.show()
 
     return fig, ax
+
+def plot_degree_distribution(G):
+    ''' Plots the degree distribution of a graph object '''
+    degrees = G.degree()
+    degrees_list = [degrees[entry] for entry in degrees]
+    degrees_array = np.array(degrees_list)
+    uniques = np.unique(degrees_list)
+    int_uniques = [int(entry) for entry in uniques]
+    
+    counts = []
+    for j in range(len(uniques)):
+        current = uniques[j]
+        counts.append(sum(degrees_array == current))
+       
+    #deg_pdf = counts/sum(counts) 
+    Fig,ax = plt.subplots(1,1)
+    
+    ax.bar(uniques,counts)
+    ax.set_xlabel('Node degree')
+    ax.set_ylabel('PDF')
+    #ax.set_ylim((0,0.1))
+    #ax.set_xlim((0,120))
+    ax.set_title('Node degree distribution')
+    
+    plt.show()
+    
+    return Fig,ax
