@@ -9,6 +9,7 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 
+import network_compute
 
 def plot_connected_components(G):
     """
@@ -41,23 +42,18 @@ def plot_node_btwn(G, bins=20):
     Returns:
         figure handle & axes array.
     """
-
-    node_btwn_dict = nx.betweeness_centrality(G)
-    # Get node-betweenness dictionary node_btwn_dict = nx.betweenness_centrality(G)
-    # Determine histogram bins and bin labels
-    node_btwn_vec = np.array(node_btwn_dict.values())
+    # Calculate node-betweenness
+    node_btwn_dict = nx.betweenness_centrality(G)
 
     # Sort node-betweenness dictionary by node-betweenness values
-    node_btwn_dict_sorted = sorted(node_btwn_dict.iteritems(),
-                                   key=operator.itemgetter(1), reverse=True)
-    node_btwn_vec_sorted = [item[1] for item in node_btwn_dict_sorted]
-    node_btwn_labels_sorted = [item[0] for item in node_btwn_dict_sorted]
+    node_btwn_labels_sorted, node_btwn_vec_sorted = \
+        network_compute.get_ranked(node_btwn_dict)
 
     # Open figure & axes
     fig, axs = plt.subplots(2, 1)
 
     # Plot histogram
-    axs[0].hist(node_btwn_vec, bins)
+    axs[0].hist(node_btwn_vec_sorted, bins)
     axs[0].set_ylabel('Occurrences')
     axs[0].set_xlabel('Node-betweenness')
 
@@ -79,23 +75,17 @@ def plot_edge_btwn(G, bins=20):
     Returns:
         figure handle & axes array.
     """
-
-    # Get node-betweenness dictionary
+    # Get edge-betweenness dictionary
     edge_btwn_dict = nx.edge_betweenness_centrality(G)
-    # Determine histogram bins and bin labels
-    edge_btwn_vec = np.array(edge_btwn_dict.values())
 
-    # Sort edge-betweenness dictionary by node-betweenness values
-    edge_btwn_dict_sorted = sorted(edge_btwn_dict.iteritems(),
-                                   key=operator.itemgetter(1), reverse=True)
-    edge_btwn_vec_sorted = [item[1] for item in edge_btwn_dict_sorted]
-    edge_btwn_labels_sorted = ['%s->%s'%(item[0][0],item[0][1])
-                               for item in edge_btwn_dict_sorted]
+    # Sort edge-betweenness dictionary by edge-betweenness values
+    edge_btwn_labels_sorted, edge_btwn_vec_sorted = \
+        network_compute.get_ranked(edge_btwn_dict)
 
     # Open figure & axes
     fig, axs = plt.subplots(2, 1)
     # Plot histogram
-    axs[0].hist(edge_btwn_vec, bins)
+    axs[0].hist(edge_btwn_vec_sorted, bins)
     axs[0].set_ylabel('Occurrences')
     axs[0].set_xlabel('Edge-betweenness')
 
@@ -108,37 +98,25 @@ def plot_edge_btwn(G, bins=20):
     return fig
 
 
-def plot_out_in_ratios(W_net, bins=20, labels=None, binarized=True):
+def plot_out_in_ratios(W_net, labels=None, bins=20):
     """
     Plot a distribution of output/input connection ratios for a given
     network (defined by a weight matrix W_net)
     """
-
-    if binarized:
-        W = (W_net > 0).astype(float)
-    else:
-        W = W_net.copy()
+    
     if labels is None:
-        labels = np.arange(W.shape[0])
+        labels = np.arange(W_net.shape[0])
 
     # Calculate total output & input connections for each node
-    out_total = W.sum(axis=1)
-    in_total = W.sum(axis=0)
-    # Calculate out/in ratio
-    out_in_vec = out_total.astype(float) / in_total
-
-    # Make in_out_ratio dictionary
-    out_in_dict = {labels[idx]: out_in_vec[idx] for idx in range(len(labels))}
-    # Sort in_out_ratio
-    out_in_dict_sorted = sorted(out_in_dict.iteritems(),
-                                key=operator.itemgetter(1), reverse=True)
-    out_in_vec_sorted = [item[1] for item in out_in_dict_sorted]
-    out_in_labels_sorted = [item[0] for item in out_in_dict_sorted]
+    out_in_dict = network_compute.out_in_ratio(W_net,labels)
+    # Calculate ranked output/input ratios
+    out_in_labels_sorted, out_in_vec_sorted = \
+        network_compute.get_ranked(out_in_dict)
 
     # Open figure & axes
     fig, axs = plt.subplots(2, 1)
     # Plot histogram
-    axs[0].hist(out_in_vec, bins)
+    axs[0].hist(out_in_vec_sorted, bins)
     axs[0].set_ylabel('Occurrences')
     axs[0].set_xlabel('Output/Input')
 
@@ -150,14 +128,15 @@ def plot_out_in_ratios(W_net, bins=20, labels=None, binarized=True):
 
     return fig, axs
 
-def plot_clustering_coeff_pdf(coeffs, bins=np.linspace(0., 0.25, 150)):
+
+def plot_clustering_coeff_pdf(G, bins=np.linspace(0., 0.25, 150)):
     '''
     Plot clustering coefficient probability density function
 
     Parameters
     ----------
-    coeffs : array
-        matrix of clustering coefficients
+    G : networkx graph object
+        graph to calculate clustering coefficients of
     bins : array | list
         bin edges for histogram
 
@@ -167,6 +146,8 @@ def plot_clustering_coeff_pdf(coeffs, bins=np.linspace(0., 0.25, 150)):
         figure object of distribution histogram for plotting
     '''
 
+    ccoeff_dict = nx.clustering(G)
+    ccoeffs = np.array(ccoeff_dict.values())
     #TODO Need to normalize coefficients?
 
     # Constuct figure
@@ -174,7 +155,7 @@ def plot_clustering_coeff_pdf(coeffs, bins=np.linspace(0., 0.25, 150)):
     fig = plt.figure()
 
     # Plot coefficients according to bins
-    plt.hist(coeffs.flatten(), bins, fc='g', alpha=.8, normed=True)
+    plt.hist(ccoeffs, bins, fc='g', alpha=.8, normed=True)
     plt.title('Clustering Coefficient PDF')
     plt.xlabel('Clustering Coefficient')
     plt.ylabel('Probability')
@@ -182,17 +163,14 @@ def plot_clustering_coeff_pdf(coeffs, bins=np.linspace(0., 0.25, 150)):
     return fig
 
 
-def plot_clustering_coeff_ranked(coeffs, names, num_ranked=10):
+def plot_clustering_coeff_ranked(G, num_ranked=10):
     '''
     Plot clustering coefficient ranked by maximum value
 
     Parameters
     ----------
-    coeffs : list | array
-        matrix of clustering coefficients
-
-    names : list
-        labels corresponding to brain area acronyms
+    G : networkx graph object
+        graph to get clustering coefficients for
 
     num_ranked : int
         number of ranked brain areas to show
@@ -203,6 +181,9 @@ def plot_clustering_coeff_ranked(coeffs, names, num_ranked=10):
         figure object of distribution histogram for plotting
     '''
 
+    # Get clustering coefficients
+    ccoeff_dict = nx.clustering(G)
+    
     # Graph params width = 0.5
     xpos = np.arange(num_ranked)
     width = 0.8
@@ -210,9 +191,9 @@ def plot_clustering_coeff_ranked(coeffs, names, num_ranked=10):
     # Constuct figure
     fig = plt.figure()
 
-    sorted_tups = sorted(zip(coeffs, names), key=lambda tup: tup[0],
+    sorted_tups = sorted(zip(ccoeff_dict.values(),ccoeff_dict.keys()), key=lambda tup: tup[0],
                          reverse=True)[:num_ranked]
-
+    
     # Plot top ranked coefficients according to bins
     plt.bar(xpos, [w for w, _ in sorted_tups], fc='green',
             width=width, alpha=.8)
@@ -293,6 +274,7 @@ def plot_shortest_path_distribution(G):
     plt.show()
 
     return fig, ax
+    
 
 def plot_degree_distribution(G):
     ''' Plots the degree distribution of a graph object '''
@@ -301,22 +283,22 @@ def plot_degree_distribution(G):
     degrees_array = np.array(degrees_list)
     uniques = np.unique(degrees_list)
     int_uniques = [int(entry) for entry in uniques]
-
+    
     counts = []
     for j in range(len(uniques)):
         current = uniques[j]
         counts.append(sum(degrees_array == current))
-
-    #deg_pdf = counts/sum(counts)
+       
+    #deg_pdf = counts/sum(counts) 
     Fig,ax = plt.subplots(1,1)
-
+    
     ax.bar(uniques,counts)
     ax.set_xlabel('Node degree')
     ax.set_ylabel('PDF')
     #ax.set_ylim((0,0.1))
     #ax.set_xlim((0,120))
     ax.set_title('Node degree distribution')
-
+    
     plt.show()
-
+    
     return Fig,ax
