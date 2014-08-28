@@ -35,10 +35,12 @@ np.fill_diagonal(W_net, 0)
 # Put everything in a dictionary
 W_net_dict = {'row_labels': row_labels, 'col_labels': col_labels,
               'data': W_net}
-
+pdb.set_trace()
 # Convert to networkx graph object
 G = network_gen.import_weights_to_graph(W_net_dict)
 
+W_net_dict_return = network_gen
+##############################################################################
 ## Plot things
 # Plot cxn strengths
 fig, ax = plot_net.connection_strength(np.log(W_net), bins=30)
