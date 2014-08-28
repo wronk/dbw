@@ -12,7 +12,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 import network_gen
-import plot_net_properties
+import plot_net
 import shortest_path
 
 # Set parameters
@@ -40,16 +40,16 @@ G = network_gen.import_weights_to_graph(W_net_dict)
 
 ## Plot things
 # Plot cxn strengths
-plot_net_properties.connection_strength(W_net)
+plot_net.connection_strength(W_net)
 # Plot output/input ratios
-plot_net_properties.plot_out_in_ratios(W_net,labels=row_labels)
+plot_net.plot_out_in_ratios(W_net,labels=row_labels)
 # Plot shortest path lengths distribution
 SPLs = shortest_path.ShortestPaths(G)
-plot_net_properties.shortest_path_distribution(SPLs)
+plot_net.shortest_path_distribution(SPLs)
 # Plot node- & edge-betweenness
-plot_net_properties.plot_node_btwn(G) # Node-betweenness
-plot_net_properties.plot_edge_btwn(G) # Edge-betweenness
+plot_net.plot_node_btwn(G) # Node-betweenness
+plot_net.plot_edge_btwn(G) # Edge-betweenness
 # Plot clustering coefficients
 ccoeff_dict = nx.clustering(G)
-plot_net_properties.plot_clustering_coeff_pdf(ccoeff_dict.values())
-plot_net_properties.plot_clustering_coeff_ranked(ccoeff_dict.values(),ccoeff_dict.keys())
+plot_net.plot_clustering_coeff_pdf(np.array(ccoeff_dict.values()))
+plot_net.plot_clustering_coeff_ranked(np.array(ccoeff_dict.values()),np.array(ccoeff_dict.keys()))
