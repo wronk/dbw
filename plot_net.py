@@ -42,6 +42,7 @@ def plot_node_btwn(G, bins=20):
         figure handle & axes array.
     """
 
+    node_btwn_dict = nx.betweeness_centrality(G)
     # Get node-betweenness dictionary node_btwn_dict = nx.betweenness_centrality(G)
     # Determine histogram bins and bin labels
     node_btwn_vec = np.array(node_btwn_dict.values())
@@ -240,6 +241,7 @@ def connection_strength(W, bins=10):
     '''
 
     W_new = W[W > 0]
+    W_new = W[~(np.isinf(W) + np.isnan(W))]
 
     fig, ax = plt.subplots(1, 1)
     binnedW, bins, patches = plt.hist(W_new, bins, facecolor='red', alpha=0.5)
