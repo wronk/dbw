@@ -225,7 +225,7 @@ def plot_clustering_coeff_ranked(coeffs, names, num_ranked=10):
     return fig
 
 
-def connection_strength(W, bins=10):
+def plot_connection_strength(W, bins=10):
     '''
     Generate figure/axis and plots a histogram of connection strength
 
@@ -254,31 +254,32 @@ def connection_strength(W, bins=10):
     return fig, ax
 
 
-def shortest_path_distribution(W):
+def plot_shortest_path_distribution(G):
     '''
     Generate figure/axis and plots a bar graph of shortest path distribution
 
     Parameters
     ----------
-    W : 2-D array
-        weight matrix
+    G -- A graph object
 
     Returns
     --------
     fig, ax : fig, ax
         plotting objects showing distribution of shortest paths
     '''
-
-    if type(W) != '<type \'numpy.ndarray\'>':
-        W = np.array(W)
-
-    W_new = W[W > 0]
-    uniques = np.unique(W_new)
+    SP = nx.shortest_path_length(G)
+    Names = G.nodes()
+    
+    SP_values = [SP[entry].values() for entry in SP]
+    
+    All_SP_values = [item for sublist in SP_values for item in sublist]
+    
+    uniques = np.unique(All_SP_values)
     int_uniques = [int(entry) for entry in uniques]
     counts = []
     for j in range(len(uniques)):
         current = uniques[j]
-        counts.append(sum(W_new == current))
+        counts.append(sum(All_SP_values == current))
 
     fig, ax = plt.subplots(1, 1)
 
