@@ -35,3 +35,16 @@ def get_ranked(criteria_dict, high_to_low=True):
     criteria_sorted = [item[1] for item in dict_list_sorted]
 
     return labels_sorted, criteria_sorted
+    
+    
+def node_edge_overlap(node_list,edge_list):
+    """Calculate the overlap of a set of nodes and edges.
+    Returns which edges are touching a node and which connect two nodes."""
+    
+    # Calculate how many edges contain at least one node in node list
+    edges_touching = [edge for edge in edge_list if edge[0] in node_list
+                      or edge[1] in node_list]
+    edges_connecting = [edge for edge in edge_list if edge[0] in node_list
+                        and edge[1] in node_list]
+                        
+    return edges_touching, edges_connecting

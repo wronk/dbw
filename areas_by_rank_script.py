@@ -79,3 +79,15 @@ edge_btwn_dict = nx.edge_betweenness_centrality(G)
 edge_btwn_labels, edge_btwn_vals = network_compute.get_ranked(edge_btwn_dict)
 print 'By edge-betweenness:'
 print_net.print_edge_list(edge_btwn_labels,edge_btwn_vals,top_edge_btwn)
+
+# Print out what percent of the top edge-betweenness edges touch the top
+# node-betweenness nodes & what percent of them connect two top node-
+# betweenness nodes
+edges_touching, edges_connecting = \
+    network_compute.node_edge_overlap(node_btwn_labels[:top_node_btwn],
+                                      edge_btwn_labels[:top_edge_btwn])
+print 'Top edges touching top nodes:'
+print '%d/%d'%(len(edges_touching),top_edge_btwn)
+
+print 'Top edges connecting top nodes:'
+print '%d/%d'%(len(edges_connecting),top_edge_btwn)
