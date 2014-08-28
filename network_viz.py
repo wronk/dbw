@@ -6,6 +6,7 @@ Created on Tue Aug 27 2014
 network_viz.py
 '''
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def plot_3D_network(ont_names, ont_positions, edges):
@@ -27,7 +28,8 @@ def plot_3D_network(ont_names, ont_positions, edges):
         figure object of distribution histogram for plotting
     '''
 
-    # Initialize graph
+    # Initialize figure
+
 
     # Add nodes to graph
 
@@ -36,7 +38,6 @@ def plot_3D_network(ont_names, ont_positions, edges):
 if __name__ == '__main__':
 
     import networkx as nx
-    import matplotlib.pyplot as plt
 
     import network_gen
     plt.close('all')
@@ -64,3 +65,6 @@ if __name__ == '__main__':
 
     ont_names = row_labels[0:5]
     ont_positions = np.random.rand(5, 3)
+    edges = []
+
+    fig = plot_3D_network(ont_names, ont_positions, edges)
