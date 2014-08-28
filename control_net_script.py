@@ -12,7 +12,8 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 import network_gen
-import rich_plot as plot_net_properties
+import plot_net_properties
+import shortest_path
 
 # Set parameters
 p_th = .01 # P-value threshold
@@ -37,7 +38,18 @@ W_net_dict = {'row_labels':row_labels,'col_labels':col_labels,
 # Convert to networkx graph object
 G = network_gen.import_weights_to_graph(W_net_dict)    
 
-# Plot things
+## Plot things
+# Plot cxn strengths
+plot_net_properties.connection_strength(W_net)
+# Plot output/input ratios
+plot_net_properties.plot_out_in_ratios(W_net,labels=row_labels)
+# Plot shortest path lengths distribution
+SPLs = shortest_path.ShortestPaths(G)
+plot_net_properties.shortest_path_distribution(SPLs)
+# Plot node- & edge-betweenness
 plot_net_properties.plot_node_btwn(G) # Node-betweenness
 plot_net_properties.plot_edge_btwn(G) # Edge-betweenness
-plot_net_properties.plot_out_in_ratios(W_net,labels=row_labels)
+# Plot clustering coefficients
+ccoeff_dict = nx.clustering(G)
+plot_net_properties.plot_clustering_coeff_pdf(ccoeff_dict.values())
+plot_net_properties.plot_clustering_coeff_ranked(ccoeff_dict.values(),ccoeff_dict.keys())
