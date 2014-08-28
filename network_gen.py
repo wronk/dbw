@@ -8,11 +8,11 @@ Loads weight matrix and creates network model from it according to p_value
 & weight thresholding. Also includes option to create lesioned network.
 """
 
-import rich_plot
 import networkx as nx
 import numpy as np
 import scipy.io as sio
 import matplotlib.pyplot as plt
+
 
 def load_weights(dir_name):
     """Load weights into matrix."""
@@ -24,13 +24,13 @@ def load_weights(dir_name):
     D_PValue_contra = sio.loadmat(dir_name + '/PValue_contra.mat')
 
     # Make weight matrix for each side, then concatenate them
-    W_L = np.concatenate([D_W_ipsi['data'],D_W_contra['data']],1)
-    W_R = np.concatenate([D_W_contra['data'],D_W_ipsi['data']],1)
-    W = np.concatenate([W_L,W_R],0)
+    W_L = np.concatenate([D_W_ipsi['data'], D_W_contra['data']], 1)
+    W_R = np.concatenate([D_W_contra['data'], D_W_ipsi['data']], 1)
+    W = np.concatenate([W_L, W_R], 0)
     # Make p_value matrix in the same manner
-    P_L = np.concatenate([D_PValue_ipsi['data'],D_PValue_contra['data']],1)
-    P_R = np.concatenate([D_PValue_contra['data'],D_PValue_ipsi['data']],1)
-    P = np.concatenate([P_L,P_R],0)
+    P_L = np.concatenate([D_PValue_ipsi['data'], D_PValue_contra['data']], 1)
+    P_R = np.concatenate([D_PValue_contra['data'], D_PValue_ipsi['data']], 1)
+    P = np.concatenate([P_L, P_R], 0)
 
     col_labels = D_W_ipsi['col_labels']
     # Add ipsi & contra to col_labels
@@ -39,9 +39,10 @@ def load_weights(dir_name):
     col_labels_full = col_labels_L + col_labels_R
     row_labels_full = col_labels_full[:]
 
-    return W,P,row_labels_full,col_labels_full
+    return W, P, row_labels_full, col_labels_full
 
-def threshold(W,P,p_th=.01,w_th=0):
+
+def threshold(W, P, p_th=.01, w_th=0):
     """Threshold empirical weight matrix to get network weights.
 
     Args:
@@ -61,26 +62,28 @@ def threshold(W,P,p_th=.01,w_th=0):
 
     W_net[mask] = -1
 
-    return W_net,mask
+    return W_net, mask
 
-def lesion(W_net,area_idxs):
+
+def lesion(W_net, area_idxs):
     """Simulate a simple lesion in the network."""
     W_lesion = W_net.copy()
 
     # Make sure col_idxs is list
-    if not isinstance(area_idxs,list):
+    if not isinstance(area_idxs, list):
         area_idxs = [area_idxs]
 
     # Loop through all area idxs & simulate lesions by setting to zero
     # the row & column corresponding to that index
     for a_idx in area_idxs:
-        W_lesion[:,a_idx] = 0.
-        W_lesion[a_idx,:] = 0.
+        W_lesion[:, a_idx] = 0.
+        W_lesion[a_idx, :] = 0.
 
     # Count how many connections were lost due to the lesion
     num_cxns_lost = (W_lesion - W_net < 0).sum()
 
-    return W_lesion,num_cxns_lost
+    return W_lesion, num_cxns_lost
+
 
 def import_weights_to_graph(weight_mat):
     '''

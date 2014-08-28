@@ -4,12 +4,12 @@ Created on Tue Aug 27 2014
 @author: rkp, wronk, sidh0
 """
 
-import operator
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 
 import network_compute
+
 
 def plot_connected_components(G):
     """
@@ -103,12 +103,12 @@ def plot_out_in_ratios(W_net, labels=None, bins=20):
     Plot a distribution of output/input connection ratios for a given
     network (defined by a weight matrix W_net)
     """
-    
+
     if labels is None:
         labels = np.arange(W_net.shape[0])
 
     # Calculate total output & input connections for each node
-    out_in_dict = network_compute.out_in_ratio(W_net,labels)
+    out_in_dict = network_compute.out_in_ratio(W_net, labels)
     # Calculate ranked output/input ratios
     out_in_labels_sorted, out_in_vec_sorted = \
         network_compute.get_ranked(out_in_dict)
@@ -183,7 +183,7 @@ def plot_clustering_coeff_ranked(G, num_ranked=10):
 
     # Get clustering coefficients
     ccoeff_dict = nx.clustering(G)
-    
+
     # Graph params width = 0.5
     xpos = np.arange(num_ranked)
     width = 0.8
@@ -191,9 +191,9 @@ def plot_clustering_coeff_ranked(G, num_ranked=10):
     # Constuct figure
     fig = plt.figure()
 
-    sorted_tups = sorted(zip(ccoeff_dict.values(),ccoeff_dict.keys()), key=lambda tup: tup[0],
-                         reverse=True)[:num_ranked]
-    
+    sorted_tups = sorted(zip(ccoeff_dict.values(), ccoeff_dict.keys()),
+                         key=lambda tup: tup[0], reverse=True)[:num_ranked]
+
     # Plot top ranked coefficients according to bins
     plt.bar(xpos, [w for w, _ in sorted_tups], fc='green',
             width=width, alpha=.8)
@@ -250,11 +250,11 @@ def plot_shortest_path_distribution(G):
     '''
     SP = nx.shortest_path_length(G)
     Names = G.nodes()
-    
+
     SP_values = [SP[entry].values() for entry in SP]
-    
+
     All_SP_values = [item for sublist in SP_values for item in sublist]
-    
+
     uniques = np.unique(All_SP_values)
     int_uniques = [int(entry) for entry in uniques]
     counts = []
@@ -274,7 +274,7 @@ def plot_shortest_path_distribution(G):
     plt.show()
 
     return fig, ax
-    
+
 
 def plot_degree_distribution(G):
     ''' Plots the degree distribution of a graph object '''
@@ -283,22 +283,22 @@ def plot_degree_distribution(G):
     degrees_array = np.array(degrees_list)
     uniques = np.unique(degrees_list)
     int_uniques = [int(entry) for entry in uniques]
-    
+
     counts = []
     for j in range(len(uniques)):
         current = uniques[j]
         counts.append(sum(degrees_array == current))
-       
-    #deg_pdf = counts/sum(counts) 
-    Fig,ax = plt.subplots(1,1)
-    
-    ax.bar(uniques,counts)
+
+    #deg_pdf = counts/sum(counts)
+    fig, ax = plt.subplots(1,1)
+
+    ax.bar(uniques, counts)
     ax.set_xlabel('Node degree')
     ax.set_ylabel('PDF')
     #ax.set_ylim((0,0.1))
     #ax.set_xlim((0,120))
     ax.set_title('Node degree distribution')
-    
+
     plt.show()
-    
-    return Fig,ax
+
+    return fig, ax

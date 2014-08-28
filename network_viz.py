@@ -35,15 +35,10 @@ def plot_3D_network(ont_names, ont_positions, edges):
 
 if __name__ == '__main__':
 
-    import scipy.io as sio
-    import os.path as op
-
     import networkx as nx
     import matplotlib.pyplot as plt
 
     import network_gen
-    import plot_net
-    import shortest_path
     plt.close('all')
 
     # Set parameters
@@ -68,3 +63,4 @@ if __name__ == '__main__':
     G = network_gen.import_weights_to_graph(W_net_dict)
 
     ont_names = row_labels[0:5]
+    ont_positions = np.random.rand(5, 3)

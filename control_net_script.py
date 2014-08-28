@@ -17,27 +17,27 @@ import plot_net
 import shortest_path
 
 # Set parameters
-p_th = .01 # P-value threshold
-w_th = 0 # Weight-value threshold
+p_th = .01  # P-value threshold
+w_th = 0  # Weight-value threshold
 
 # Set relative directory path
 dir_name = '../friday-harbor/linear_model'
 
 # Load weights & p-values
-W,P,row_labels,col_labels = network_gen.load_weights(dir_name)
+W, P, row_labels, col_labels = network_gen.load_weights(dir_name)
 # Threshold weights according to weights & p-values
-W_net,mask = network_gen.threshold(W,P,p_th=p_th,w_th=w_th)
+W_net, mask = network_gen.threshold(W, P, p_th=p_th, w_th=w_th)
 # Set weights to zero if they don't satisfy threshold criteria
-W_net[W_net==-1] = 0.
+W_net[W_net == -1] = 0.
 # Set diagonal weights to zero
-np.fill_diagonal(W_net,0)
+np.fill_diagonal(W_net, 0)
 
 # Put everything in a dictionary
-W_net_dict = {'row_labels':row_labels,'col_labels':col_labels,
-              'data':W_net}
+W_net_dict = {'row_labels': row_labels, 'col_labels': col_labels,
+              'data': W_net}
 
 # Convert to networkx graph object
-G = network_gen.import_weights_to_graph(W_net_dict)    
+G = network_gen.import_weights_to_graph(W_net_dict)
 
 W_net_dict_return = network_gen
 ##############################################################################
@@ -45,17 +45,19 @@ W_net_dict_return = network_gen
 # Plot cxn strengths
 pdb.set_trace()
 W_net[W_net == 0] = -np.inf
-fig,ax = plot_net.connection_strength(np.log(W_net),bins=30)
-ax.set_xlim(-10,4)
+fig, ax = plot_net.connection_strength(np.log(W_net), bins=30)
+ax.set_xlim(-10, 4)
 # Plot output/input ratios
-plot_net.plot_out_in_ratios(W_net,labels=row_labels)
+plot_net.plot_out_in_ratios(W_net, labels=row_labels)
 # Plot shortest path lengths distribution
 SPLs = shortest_path.ShortestPaths(G)
 plot_net.shortest_path_distribution(SPLs)
 # Plot node- & edge-betweenness
-plot_net.plot_node_btwn(G) # Node-betweenness
-plot_net.plot_edge_btwn(G) # Edge-betweenness
+plot_net.plot_node_btwn(G)  # Node-betweenness
+plot_net.plot_edge_btwn(G)  # Edge-betweenness
 # Plot clustering coefficients
 ccoeff_dict = nx.clustering(G)
-plot_net.plot_clustering_coeff_pdf(np.array(ccoeff_dict.values()),bins=20)
-plot_net.plot_clustering_coeff_ranked(np.array(ccoeff_dict.values()),np.array(ccoeff_dict.keys()),num_ranked=400)
+plot_net.plot_clustering_coeff_pdf(np.array(ccoeff_dict.values()), bins=20)
+plot_net.plot_clustering_coeff_ranked(np.array(ccoeff_dict.values()),
+                                      np.array(ccoeff_dict.keys()),
+                                      num_ranked=400)
