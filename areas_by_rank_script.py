@@ -51,8 +51,7 @@ num_top_deg = 3
 for top_deg_idx in range(num_top_deg):
     # Get pair of areas
     area0 = sorted_areas['degree_labels'][2*top_deg_idx]
-    area1 = sorted_areas['degree_labels'][2*top_deg_idx+1]
-    # Get neighbors for each area
+    area1 = sorted_areas['degree_labels'][2*top_deg_idx+1] # Get neighbors for each area
     neighbors0 = area_dict[area0]['neighbors']
     neighbors1 = area_dict[area1]['neighbors']
     # Get edges for each area
@@ -66,6 +65,8 @@ for top_deg_idx in range(num_top_deg):
     # Get centroids for nodes
     all_centroids = [area_dict[area]['centroid'] for area in all_nodes]
     all_centroids = np.array(all_centroids)
+    # Swap columns so that S <-> I is on z axis
+    all_centroids = all_centroids.take([0, 2, 1], 1)
     # Get logical indices of area nodes
     area_nodes = np.array([name in [area0, area1] for name in all_nodes])
     node_label_set = area_nodes
