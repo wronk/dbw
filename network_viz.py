@@ -12,7 +12,8 @@ from mpl_toolkits.mplot3d import Axes3D
 
 def plot_3D_network(node_names, node_positions, node_label_set, edges,
                     edge_label_set, node_sizes=None, node_colors=None,
-                    edge_sizes=None, edge_colors=None):
+                    node_alpha=None, edge_sizes=None, edge_colors=None,
+                    edge_alpha=None):
     '''
     Plot clustering coefficient probability density function
 
@@ -54,25 +55,30 @@ def plot_3D_network(node_names, node_positions, node_label_set, edges,
     edge_label_offset = 0.05
 
     ###################################
+
     if node_sizes is None:
         node_sizes = [50] * len(node_names)
     if node_colors is None:
-        node_colors = ['g'] * len(node_names)
+        node_colors = ['green'] * len(node_names)
+    if node_alpha is None:
+        node_alpha = [1.] * len(node_names)
     if edge_sizes is None:
         edge_sizes = [1] * len(edges)
     if edge_colors is None:
-        edge_colors = ['b'] * len(edges)
+        edge_colors = ['blue'] * len(edges)
+    if edge_alpha is None:
+        edge_alpha = [1.] * len(edges)
 
     ###################################
     # Add nodes to graph
-    ax.scatter(node_positions[:, 0], node_positions[:, 1],
-               node_positions[:, 2], s=node_sizes, c=node_colors,
-               depthshade=False)
     for ni, node_pt in enumerate(node_positions):
+        ax.scatter(node_pt[0], node_pt[1], node_pt[2],
+                   s=node_sizes[ni], c=node_colors[ni],
+                   alpha=node_alpha[ni], depthshade=False)
         if node_label_set[ni]:
             ax.text(node_positions[ni, 0], node_positions[ni, 1],
                     node_positions[ni, 2] + node_label_offset, node_names[ni],
-                    color=node_colors[ni], ha='center')
+                    color=node_colors[ni], alpha=node_alpha[ni], ha='center')
 
     ###################################
     # Convert edges to list
@@ -88,7 +94,7 @@ def plot_3D_network(node_names, node_positions, node_label_set, edges,
     for ei, edge_pt in enumerate(edge_positions):
         ax.plot(edge_pt[:, 0], edge_pt[:, 1], edge_pt[:, 2],
                 lw=edge_sizes[ei], c=edge_colors[ei],
-                dash_capstyle='round', zorder=-1)
+                alpha=edge_alpha[ei], dash_capstyle='round', zorder=-1)
 
         # Add text edge label to graph
         if edge_label_set[ei]:
@@ -98,7 +104,7 @@ def plot_3D_network(node_names, node_positions, node_label_set, edges,
             ax.text(mean_pt[0], mean_pt[1], mean_pt[2] + edge_label_offset,
                     node_names[edge_inds[ei][0]] + '<->' +
                     node_names[edge_inds[ei][1]], vec_dir,
-                    color=edge_colors[ei], ha='center')
+                    alpha=edge_alpha[ei], color=edge_colors[ei], ha='center')
 
     # Cleanup
     ax.set_xlabel('X pos')
@@ -142,18 +148,19 @@ if __name__ == '__main__':
     edges = [('AAA_L', 'ACAv_L'), ('AD_L', 'ACAd_L')]
 
     node_sizes = np.random.randint(20, high=300, size=len(node_names))
-    node_colors = ['g'] * len(node_names)
+    node_colors = ['green'] * len(node_names)
+    node_alpha = list(np.arange(.1, 1., 1. / len(node_names)))
 
     edge_sizes = np.random.randint(1, high=4, size=len(edges))
-    edge_colors = ['b'] * len(edges)
+    edge_colors = ['blue'] * len(edges)
     edge_labels = [False] * len(edges)
+    edge_alpha = list(np.arange(.1, 1., 1. / len(node_names)))
 
     fig, ax = plot_3D_network(node_names, node_positions, node_labels, edges,
-                              edge_labels, node_sizes, node_colors,
-                              edge_sizes, edge_colors)
+                              edge_labels, node_sizes, node_colors, node_alpha,
+                              edge_sizes, edge_colors, edge_alpha)
     fig, ax = plot_3D_network(node_names, node_positions, node_labels, edges,
                               edge_labels)
-
 
     plt.draw()
     plt.show()
