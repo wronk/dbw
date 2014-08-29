@@ -152,15 +152,15 @@ def plot_clustering_coeff_pdf(G, bins=np.linspace(0., 0.25, 150)):
 
     # Constuct figure
     #fig, (ax0, ax1) = plt.subplots(ncols=1)
-    fig = plt.figure()
+    fig,axs = plt.subplots(ncols=1)
 
     # Plot coefficients according to bins
-    plt.hist(ccoeffs, bins, fc='g', alpha=.8, normed=True)
+    plt.hist(ccoeffs, bins, fc='g', alpha=.8, normed=False)
     plt.title('Clustering Coefficient PDF')
     plt.xlabel('Clustering Coefficient')
     plt.ylabel('Probability')
 
-    return fig
+    return fig,axs
 
 
 def plot_clustering_coeff_ranked(G, num_ranked=10):
