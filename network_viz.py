@@ -30,13 +30,13 @@ def plot_3D_network(node_names, node_positions, node_label_set, edges,
         edges between nodes (use graph.edges())
     edge_label_set : list of bool
         whether or not to label the edges
-    node_sizes : list | array of ints
+    node_sizes : list | None
         size of each node's marker in the graph
-    node_colors : list
+    node_colors : list | None
         color of each node's marker
-    edge_sizes : list
+    edge_sizes : list | None
         size of each edge's line
-    edge_colors : list
+    edge_colors : list | None
         color of each edge's line
 
     Returns
@@ -50,7 +50,7 @@ def plot_3D_network(node_names, node_positions, node_label_set, edges,
     # Initialize figure
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    node_label_offset = 0.01
+    node_label_offset = 0.05
     edge_label_offset = 0.05
 
     ###################################
@@ -146,7 +146,7 @@ if __name__ == '__main__':
 
     edge_sizes = np.random.randint(1, high=4, size=len(edges))
     edge_colors = ['b'] * len(edges)
-    edge_labels = [True] * len(edges)
+    edge_labels = [False] * len(edges)
 
     fig, ax = plot_3D_network(node_names, node_positions, node_labels, edges,
                               edge_labels, node_sizes, node_colors,
