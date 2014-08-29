@@ -76,7 +76,7 @@ if show_example_plots:
         all_centroids = np.array(all_centroids)
         # Swap columns so that S <-> I is on z axis
         all_centroids = all_centroids.take([0, 2, 1], 1)
-        all_centroids[:,1] *= -1
+        all_centroids[:,2] *= -1
         # Get logical indices of area nodes
         area_nodes = np.array([name in [area0, area1] for name in all_nodes])
         node_label_set = area_nodes
