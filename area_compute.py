@@ -36,7 +36,7 @@ def get_feature_dicts(area_list,G,W,W_labels):
     # Get value that are easier to compute all at once
     node_btwn_dict = nx.betweenness_centrality(G)
     ccoeff_dict = nx.clustering(G)
-    out_in_dict = network_compute.out_in_ratio(W,W_labels)
+    out_dict, in_dict, out_in_dict = network_compute.out_in(W,W_labels,binarized=False)
 
     # Make area dictionary
     area_dict = {}
@@ -65,6 +65,8 @@ def get_feature_dicts(area_list,G,W,W_labels):
         feat_dict['degree'] = G.degree()[area]
         feat_dict['ccoeff'] = ccoeff_dict[area]
         feat_dict['out_in'] = out_in_dict[area]
+        feat_dict['out_deg'] = out_dict[area]
+        feat_dict['in_deg'] = in_dict[area]
         # Graph theory lists
         feat_dict['neighbors'] = G.neighbors(area)
         
