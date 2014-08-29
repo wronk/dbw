@@ -10,7 +10,7 @@ import networkx as nx
 import numpy as np
 
 
-def import_weights_to_graph(weight_mat):
+def import_weights_to_graph(weight_mat, directed=False):
     '''
     Convert a weight dict into a NetworkX graph object
     '''
@@ -20,7 +20,10 @@ def import_weights_to_graph(weight_mat):
     assert 'col_labels' in weight_mat.keys(), 'col_labels not in weight matrix'
 
     # Initialize the graph
-    G = nx.Graph()
+    if directed:
+        G = nx.DiGraph()
+    else:
+        G = nx.Graph()
 
     # Add nodes to graph according to names
     G.add_nodes_from(weight_mat['col_labels'])
@@ -41,7 +44,8 @@ def import_weights_to_graph(weight_mat):
     return G
 
 
-def import_graphs_to_weights(graph, node_labels):
+# TODO can't handle undirected graphs (2x too many edges)
+def import_graph_to_weights(graph, node_labels):
     '''
     Convert a NetworkX graph object into a weight matrix
 
