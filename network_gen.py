@@ -85,7 +85,7 @@ def lesion(W_net, area_idxs):
     return W_lesion, num_cxns_lost
 
 
-def import_weights_to_graph(weight_mat):
+def import_weights_to_graph(weight_mat, directed=False):
     '''
     Convert a weight dict into a NetworkX graph object
     '''
@@ -95,7 +95,10 @@ def import_weights_to_graph(weight_mat):
     assert 'col_labels' in weight_mat.keys(), 'col_labels not in weight matrix'
 
     # Initialize the graph
-    G = nx.Graph()
+    if directed:
+        G = nx.DiGraph()
+    else:
+        G = nx.Graph()
 
     # Add nodes to graph according to names
     G.add_nodes_from(weight_mat['col_labels'])
