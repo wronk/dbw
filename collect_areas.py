@@ -21,7 +21,7 @@ w_th = 0  # Weight-value threshold
 # Analysis parameters
 top_out_in = 10
 bot_out_in = 10
-top_node_btwn = 6
+top_node_btwn = 10
 top_edge_btwn = top_node_btwn*(top_node_btwn-1)/2
 top_degree = 6
 top_ccoeff = 10
@@ -36,7 +36,9 @@ def collect_and_sort(G,W_net,labels,print_out=True):
     degree_labels, degree_vals = network_compute.get_ranked(degree_dict)
     
     # Collect nodes ranked according to output/input ratio
-    out_in_dict = network_compute.out_in_ratio(W_net, labels=labels)
+    out_dict,in_dict,out_in_dict = network_compute.out_in(W_net, labels=labels,binarized=False)
+    out_labels, out_vals = network_compute.get_ranked(out_dict)
+    in_labels, in_vals = network_compute.get_ranked(in_dict)
     out_in_labels, out_in_vals = network_compute.get_ranked(out_in_dict)
     
     # Collect nodes ranked according to clustering coefficient
@@ -89,6 +91,10 @@ def collect_and_sort(G,W_net,labels,print_out=True):
         
     sorted_dict = {'degree_labels':degree_labels,
                    'degree_vals':degree_vals,
+                   'out_labels':out_labels,
+                   'out_vals':out_vals,
+                   'in_labels':in_labels,
+                   'in_vals':in_vals,
                    'out_in_labels':out_in_labels,
                    'out_in_vals':out_in_vals,
                    'ccoeff_labels':ccoeff_labels,
