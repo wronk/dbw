@@ -140,7 +140,7 @@ if __name__ == '__main__':
     # Put everything in a dictionary
     W_net_dict = {'row_labels': row_labels, 'col_labels': col_labels,
                   'data': W_net}
-    G = network_gen.import_weights_to_graph(W_net_dict)
+    G = network_gen.import_weights_to_graph(W_net_dict, directed=True)
 
     node_names = row_labels[0:5]
     node_positions = np.random.rand(5, 3)
