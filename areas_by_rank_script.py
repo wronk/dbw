@@ -45,12 +45,12 @@ if calc_nets:
                   'data': W_net}
     # Convert to networkx graph object
     G = network_gen.import_weights_to_graph(W_net_dict)
-    
+
     # Collect & sort areas & edges according to various attributes
     sorted_areas = collect_areas.collect_and_sort(G,W_net,labels=row_labels,
                                                   print_out=True)
 
-if calc_features:    
+if calc_features:
     # Compute feature dictionary for all areas
     area_dict = area_compute.get_feature_dicts(G.nodes(),G,W_net,row_labels)
 
@@ -81,18 +81,24 @@ if show_example_plots:
         node_label_set = area_nodes
         edge_label_set = np.zeros((len(all_edges),),dtype=bool)
         # Specify sizes
-        node_sizes = 20*np.ones((len(all_nodes),))
+        node_sizes = 20 * np.ones((len(all_nodes),))
         node_sizes[area_nodes] = 100
         node_colors = np.array(['k' for node_idx in range(len(all_nodes))])
         node_colors[area_nodes] = 'r'
+        node_alpha = np.ones((len(all_nodes),))
+        node_alpha[area_nodes] = 1
+
+        edge_alpha = np.ones((len(all_edges),))
         # Plot 3D nodes
         network_viz.plot_3D_network(node_names=all_nodes,
                                     node_positions=all_centroids,
                                     node_label_set=node_label_set,
-                                    edges=all_edges,
-                                    edge_label_set=edge_label_set,
                                     node_sizes=node_sizes,
-                                    node_colors=node_colors)
+                                    node_colors=node_colors,
+                                    edges=all_edges,
+                                    edge_alpha=edge_alpha,
+                                    edge_label_set=edge_label_set,
+                                    edge_alpha=edge_alpha)
 
 if show_stat_plots:
     feats = [['inj_volume','degree'],['inj_volume','out_deg']]
