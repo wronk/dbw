@@ -48,6 +48,10 @@ W_net_dict = {'row_labels': row_labels, 'col_labels': col_labels,
 # Convert to networkx graph object
 G = network_gen.import_weights_to_graph(W_net_dict)
 
+###############################################################################
+## Collect ranked nodes
+###############################################################################
+
 # Collect nodes ranked according to degree distribution
 degree_dict = G.degree()
 degree_labels, degree_vals = network_compute.get_ranked(degree_dict)
@@ -86,8 +90,19 @@ print_net.print_edge_list(edge_btwn_labels,edge_btwn_vals,top_edge_btwn)
 edges_touching, edges_connecting = \
     network_compute.node_edge_overlap(node_btwn_labels[:top_node_btwn],
                                       edge_btwn_labels[:top_edge_btwn])
-print 'Top edges touching top nodes:'
+print 'Top edges touching top nodes (by node-betweenness):'
 print '%d/%d'%(len(edges_touching),top_edge_btwn)
 
-print 'Top edges connecting top nodes:'
+print 'Top edges connecting top nodes (by node-betweenness):'
+print '%d/%d'%(len(edges_connecting),top_edge_btwn)
+
+# Print out what percent of the top edge-betweenness edges touch the top
+# degree nodes & what percent of them connect two top degree nodes
+edges_touching, edges_connecting = \
+    network_compute.node_edge_overlap(degree_labels[:top_degree],
+                                      edge_btwn_labels[:top_edge_btwn])
+print 'Top edges touching top nodes (by degree):'
+print '%d/%d'%(len(edges_touching),top_edge_btwn)
+
+print 'Top edges connecting top nodes (by degree):'
 print '%d/%d'%(len(edges_connecting),top_edge_btwn)
