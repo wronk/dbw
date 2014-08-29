@@ -14,6 +14,7 @@ plt.close('all')
 
 import network_gen
 import plot_net
+import network_compute
 
 # Set parameters
 p_th = .01 # P-value threshold
@@ -38,11 +39,13 @@ W_net_dict = {'row_labels':row_labels,'col_labels':col_labels,
 # Convert to networkx graph object
 G = network_gen.import_weights_to_graph(W_net_dict)    
 
-W_net_dict_return = network_gen
+# Calculate out reciprocity coefficient
+recip_coeff = network_compute.reciprocity(W_net)
+print 'Reciprocity coefficient: %.2f'%recip_coeff
+
 ##############################################################################
 ## Plot things
 # Plot cxn strengths
-pdb.set_trace()
 W_net[W_net == 0] = -np.inf
 fig,ax = plot_net.plot_connection_strength(np.log(W_net),bins=30)
 ax.set_xlim(-10,4)

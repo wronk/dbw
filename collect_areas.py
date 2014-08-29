@@ -21,9 +21,9 @@ w_th = 0  # Weight-value threshold
 # Analysis parameters
 top_out_in = 10
 bot_out_in = 10
-top_node_btwn = 10
+top_node_btwn = 6
 top_edge_btwn = top_node_btwn*(top_node_btwn-1)/2
-top_degree = 10
+top_degree = 6
 top_ccoeff = 10
 
 def collect_and_sort(G,W_net,labels,print_out=True):
