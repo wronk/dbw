@@ -11,12 +11,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 import network_gen
 
+# Random graph colors
+RGCs = {'ER':'k','WS':'g','BA':'r'}
+
+PLOT_HISTS = True
+
 # Set parameters
 p_th = .01 # P-value threshold
 w_th = 0 # Weight-value threshold
 
 # Set relative directory path
-dir_name = '../linear-model/linear_model'
+dir_name = '../friday-harbor/linear_model'
 
 # Load weights & p-values
 W,P,row_labels,col_labels = network_gen.load_weights(dir_name)
@@ -76,3 +81,35 @@ ax_BA.set_title('Barabasi-Albert scale-free network')
 ax_WS.set_title('Watts-Strogatz small world network')
 
 plt.show()
+
+if PLOT_HISTS:
+    # Plot degree histogram overlaid w/ random graph degree histograms
+    bins = np.linspace(0,140,50)
+    fig,ax = plot_net.plot_degree_distribution(G,bins=bins)
+    plot_net.line_hist(ax,G_ER,'degree',bins=bins,c=RGCs['ER'],lw=3)
+    plot_net.line_hist(ax,G_WS,'degree',bins=bins,c=RGCs['WS'],lw=3)
+    plot_net.line_hist(ax,G_BA,'degree',bins=bins,c=RGCs['BA'],lw=3)
+    for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
+                ax.get_xticklabels() + ax.get_yticklabels()):
+                    item.set_fontsize(16)
+    
+    # Plot clustering coeff histogram overlaid w/ random graph histograms
+    bins = np.linspace(0,1,50)
+    fig,ax = plot_net.plot_clustering_coeff_pdf(G,bins=bins)
+    plot_net.line_hist(ax,G_ER,'ccoeff',bins=bins,c=RGCs['ER'],lw=3)
+    plot_net.line_hist(ax,G_WS,'ccoeff',bins=bins,c=RGCs['WS'],lw=3)
+    plot_net.line_hist(ax,G_BA,'ccoeff',bins=bins,c=RGCs['BA'],lw=3)
+    for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
+                ax.get_xticklabels() + ax.get_yticklabels()):
+                    item.set_fontsize(16)
+    
+    # Plot node-betweenness overlaid w/ random graph histograms
+    bins = np.linspace(0,.02,50)
+    fig,ax = plot_net.plot_node_btwn(G,bins=bins)
+    plot_net.line_hist(ax,G_ER,'node_btwn',bins=bins,c=RGCs['ER'],lw=3)
+    plot_net.line_hist(ax,G_WS,'node_btwn',bins=bins,c=RGCs['WS'],lw=3)
+    plot_net.line_hist(ax,G_BA,'node_btwn',bins=bins,c=RGCs['BA'],lw=3)
+    ax.set_xlim(0,.02)
+    for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
+                ax.get_xticklabels() + ax.get_yticklabels()):
+                    item.set_fontsize(16)

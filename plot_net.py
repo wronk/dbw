@@ -33,7 +33,7 @@ def plot_connected_components(G):
     return fig
 
 
-def plot_node_btwn(G, bins=20):
+def plot_node_btwn(G, bins=20,ranked=False):
     """
     Plot the node-betweenness distributions.
 
@@ -50,20 +50,30 @@ def plot_node_btwn(G, bins=20):
         network_compute.get_ranked(node_btwn_dict)
 
     # Open figure & axes
-    fig, axs = plt.subplots(2, 1)
+    if ranked:
+        fig, axs = plt.subplots(2, 1,facecolor='w')
 
-    # Plot histogram
-    axs[0].hist(node_btwn_vec_sorted, bins)
-    axs[0].set_ylabel('Occurrences')
-    axs[0].set_xlabel('Node-betweenness')
+        # Plot histogram
+        axs[0].hist(node_btwn_vec_sorted, bins)
+        axs[0].set_ylabel('Occurrences')
+        axs[0].set_xlabel('Node-betweenness')
+    
+        # Plot sorted node between values
+        axs[1].scatter(np.arange(len(node_btwn_vec_sorted)),
+                       node_btwn_vec_sorted, s=20, c='r')
+        axs[1].set_xlabel('Area')
+        axs[1].set_ylabel('Node-betweenness')
 
-    # Plot sorted node between values
-    axs[1].scatter(np.arange(len(node_btwn_vec_sorted)),
-                   node_btwn_vec_sorted, s=20, c='r')
-    axs[1].set_xlabel('Area')
-    axs[1].set_ylabel('Node-betweenness')
-
-    return fig
+        return fig,axs
+    else:
+        fig, ax = plt.subplots(1,1,facecolor='w')
+        
+        # Plot histogram
+        ax.hist(node_btwn_vec_sorted,bins=bins)
+        ax.set_xlabel('Betweenness centrality')
+        ax.set_ylabel('Occurrences')
+        ax.set_title('Betweenness centrality')
+        return fig,ax
 
 
 def plot_edge_btwn(G, bins=20):
@@ -152,13 +162,13 @@ def plot_clustering_coeff_pdf(G, bins=np.linspace(0., 0.25, 150)):
 
     # Constuct figure
     #fig, (ax0, ax1) = plt.subplots(ncols=1)
-    fig,axs = plt.subplots(ncols=1)
+    fig,axs = plt.subplots(ncols=1,facecolor='white')
 
     # Plot coefficients according to bins
-    plt.hist(ccoeffs, bins, fc='g', alpha=.8, normed=False)
-    plt.title('Clustering Coefficient PDF')
+    plt.hist(ccoeffs, bins)
+    plt.title('Clustering Coefficient')
     plt.xlabel('Clustering Coefficient')
-    plt.ylabel('Probability')
+    plt.ylabel('Occurrences')
 
     return fig,axs
 
@@ -276,29 +286,37 @@ def plot_shortest_path_distribution(G):
     return fig, ax
 
 
-def plot_degree_distribution(G):
+def plot_degree_distribution(G,bins=np.linspace(0,140,50)):
     ''' Plots the degree distribution of a graph object '''
-    degrees = G.degree()
-    degrees_list = [degrees[entry] for entry in degrees]
-    degrees_array = np.array(degrees_list)
-    uniques = np.unique(degrees_list)
-    int_uniques = [int(entry) for entry in uniques]
+    degrees = G.degree().values()
+    fig, ax = plt.subplots(1,1,facecolor='white')
 
-    counts = []
-    for j in range(len(uniques)):
-        current = uniques[j]
-        counts.append(sum(degrees_array == current))
-
-    #deg_pdf = counts/sum(counts)
-    fig, ax = plt.subplots(1,1)
-
-    ax.bar(uniques, counts)
-    ax.set_xlabel('Node degree')
-    ax.set_ylabel('PDF')
-    #ax.set_ylim((0,0.1))
-    #ax.set_xlim((0,120))
-    ax.set_title('Node degree distribution')
+    ax.hist(degrees,bins)
+    ax.set_xlabel('Degree')
+    ax.set_ylabel('Occurrences')
+    ax.set_title('Degree distribution')
 
     plt.show()
 
     return fig, ax
+
+
+def line_hist(ax,G,feature,bins,**kwargs):
+    """Plot a histogram of a specified feature as a line on specified axis"""
+    # Get data vector to use
+    if feature == 'degree':
+        data_vec = G.degree().values()
+    elif feature == 'ccoeff':
+        data_vec = nx.clustering(G).values()
+    elif feature == 'node_btwn':
+        data_vec = nx.betweenness_centrality(G).values()
+    
+    # Calculate histogram
+    cts,bins = np.histogram(data_vec,bins)
+    
+    # Get bin centers
+    bcents = .5*(bins[:-1] + bins[1:])
+    
+    # Plot line
+    ax.plot(bcents,cts,**kwargs)
+    
