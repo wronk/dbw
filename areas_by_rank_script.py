@@ -76,6 +76,7 @@ if show_example_plots:
         all_centroids = np.array(all_centroids)
         # Swap columns so that S <-> I is on z axis
         all_centroids = all_centroids.take([0, 2, 1], 1)
+        all_centroids[:,2] *= -1
         # Get logical indices of area nodes
         area_nodes = np.array([name in [area0, area1] for name in all_nodes])
         node_label_set = area_nodes
@@ -96,12 +97,13 @@ if show_example_plots:
                                     node_sizes=node_sizes,
                                     node_colors=node_colors,
                                     edges=all_edges,
-                                    edge_alpha=edge_alpha,
                                     edge_label_set=edge_label_set,
                                     edge_alpha=edge_alpha)
 
 if show_stat_plots:
-    feats = [['inj_volume','degree'],['inj_volume','out_deg']]
-    fig,axs = plt.subplots(1,len(feats))
-    for ax_idx,ax in enumerate(axs):
-        area_plot.scatter_2D(ax,area_dict,feats[ax_idx][0],feats[ax_idx][1],s=50,c='r')
+    feats_lists = [[['inj_volume','degree'],['inj_volume','out_deg']],
+                   [['degree','node_btwn'],['degree','ccoeff']]]
+    for feats in feats_lists:
+        fig,axs = plt.subplots(1,len(feats))
+        for ax_idx,ax in enumerate(axs):
+            area_plot.scatter_2D(ax,area_dict,feats[ax_idx][0],feats[ax_idx][1],s=50,c='r')

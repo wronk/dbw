@@ -108,7 +108,7 @@ def plot_out_in_ratios(W_net, labels=None, bins=20):
         labels = np.arange(W_net.shape[0])
 
     # Calculate total output & input connections for each node
-    out_in_dict = network_compute.out_in_ratio(W_net, labels)
+    _,_,out_in_dict = network_compute.out_in(W_net, labels,binarized=False)
     # Calculate ranked output/input ratios
     out_in_labels_sorted, out_in_vec_sorted = \
         network_compute.get_ranked(out_in_dict)
