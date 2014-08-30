@@ -302,8 +302,4 @@ def plot_degree_distribution(G):
     plt.show()
 
     return fig, ax
-
-def plot_graph_xy(G,x,y):
-    xaxis = G.x.values()
-    yaxis = G.y
     
