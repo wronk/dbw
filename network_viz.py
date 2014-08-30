@@ -79,7 +79,7 @@ def plot_3D_network(node_names, node_positions, node_label_set, edges,
     for ni, node_pt in enumerate(node_positions):
         ax.scatter(node_pt[0], node_pt[1], node_pt[2],
                    s=node_sizes[ni], c=node_colors[ni],
-                   alpha=node_alpha[ni], depthshade=False)
+                   alpha=node_alpha[ni], depthshade=False, lw=0)
         if node_label_set[ni]:
             ax.text(node_positions[ni, 0], node_positions[ni, 1],
                     node_positions[ni, 2] + node_label_offset, node_names[ni],
@@ -112,10 +112,10 @@ def plot_3D_network(node_names, node_positions, node_label_set, edges,
                     alpha=edge_alpha[ei], color=edge_colors[ei], ha='center')
 
     # Cleanup
-    ax.set_xlabel('Anterior <-> Posterior')
-    ax.set_ylabel('Lateral <-> Medial <-> Lateral')
-    ax.set_zlabel('Superior <-> Inferior')
-    ax.set_title('Brain Graph')
+    ax.set_xlabel('A <-> P')
+    ax.set_ylabel('L <-> M <-> L')
+    #ax.set_zlabel('S <-> I')
+    ax.set_title('Top Clustering Coefficients')
 
     if(save_movie):
         for ai, ang in enumerate(np.arange(0, 360, 3)):

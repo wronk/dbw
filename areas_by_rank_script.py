@@ -56,11 +56,11 @@ if calc_features:
 
 if show_example_plots:
     # Visualize individual areas & their cxns
-    num_top_deg = 3
-    for top_deg_idx in range(num_top_deg):
+    num_top_deg = 1
+    for top_deg_idx in [1]:
         # Get pair of areas
-        area0 = sorted_areas['degree_labels'][2*top_deg_idx]
-        area1 = sorted_areas['degree_labels'][2*top_deg_idx+1] # Get neighbors for each area
+        area0 = sorted_areas['ccoeff_labels'][2 * top_deg_idx]
+        area1 = sorted_areas['ccoeff_labels'][2 * top_deg_idx +1] # Get neighbors for each area
         neighbors0 = area_dict[area0]['neighbors']
         neighbors1 = area_dict[area1]['neighbors']
         # Get edges for each area
@@ -79,37 +79,42 @@ if show_example_plots:
         # Get volumes
         all_vols = [area_dict[node]['volume'] for node in all_nodes]
         all_vols = np.array(all_vols)
-        all_vols *= (400/all_vols.max())
+        all_vols *= (1000. / all_vols.max())
         # Get centroids
         all_centroids = [area_dict[node]['centroid'] for node in all_nodes]
         all_centroids = np.array(all_centroids)
         # Swap columns so that S <-> I is on z axis
         all_centroids = all_centroids.take([0, 2, 1], 1)
-        all_centroids[:,2] *= -1
+        all_centroids[:, 2] *= -1
         # Get logical indices of area nodes
         neighbor_idxs = np.array([name in nodes for name in all_nodes])
-        area_idxs = np.array([name in [area0,area1] for name in all_nodes])
+        area_idxs = np.array([name in [area0, area1] for name in all_nodes])
         # Set sizes & alphas
         node_sizes = all_vols
-        node_alphas = .5*np.ones((len(all_nodes),),dtype=float) # Whole brain
+        node_alphas = .25 * np.ones((len(all_nodes),), dtype=float)  # Whole brain
         node_alphas[neighbor_idxs] = .5
-        node_alphas[area_idxs] = 1
-        edge_alphas = .8*np.ones((len(edges),),dtype=float)
+        node_alphas[area_idxs] = .8
+        edge_sizes = 2 * np.ones((len(edges),))
+        edge_alphas = .5 * np.ones((len(edges),), dtype=float)
         # Specify colors
         node_colors = np.array(['k' for node_idx in range(len(all_nodes))])
         node_colors[neighbor_idxs] = 'r'
         node_colors[area_idxs] = 'b'
+        edge_colors = np.array(['b' for edge_idx in range(len(edges))])
 
         # Plot 3D nodes
         network_viz.plot_3D_network(node_names=nodes,
                                     node_positions=all_centroids,
-                                    node_label_set=[False]*len(all_nodes),
+                                    node_label_set=[False] * len(all_nodes),
                                     node_sizes=node_sizes,
                                     node_colors=node_colors,
                                     node_alpha=node_alphas,
                                     edges=edges,
-                                    edge_label_set=[False]*len(edges),
-                                    edge_alpha=edge_alphas)
+                                    edge_label_set=[False] * len(edges),
+                                    edge_colors=edge_colors,
+                                    edge_alpha=edge_alphas,
+                                    edge_sizes=edge_sizes,
+                                    save_movie=True)
 
 if show_stat_plots:
     feats_lists = [[['inj_volume','degree'],['inj_volume','out_deg']],
