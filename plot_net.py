@@ -63,7 +63,7 @@ def plot_node_btwn(G, bins=20):
     axs[1].set_xlabel('Area')
     axs[1].set_ylabel('Node-betweenness')
 
-    return fig
+    return fig,axs
 
 
 def plot_edge_btwn(G, bins=20):
@@ -95,7 +95,7 @@ def plot_edge_btwn(G, bins=20):
     axs[1].set_xlabel('Area')
     axs[1].set_ylabel('Edge-betweenness')
 
-    return fig
+    return fig,axs
 
 
 def plot_out_in_ratios(W_net, labels=None, bins=20):
@@ -302,3 +302,8 @@ def plot_degree_distribution(G):
     plt.show()
 
     return fig, ax
+
+def plot_graph_xy(G,x,y):
+    xaxis = G.x.values()
+    yaxis = G.y
+    
