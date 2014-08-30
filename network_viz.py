@@ -8,12 +8,13 @@ network_viz.py
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from os import path as op
 
 
 def plot_3D_network(node_names, node_positions, node_label_set, edges,
                     edge_label_set, node_sizes=None, node_colors=None,
                     node_alpha=None, edge_sizes=None, edge_colors=None,
-                    edge_alpha=None):
+                    edge_alpha=None, save_movie=False):
     '''
     Plot clustering coefficient probability density function
 
@@ -47,6 +48,10 @@ def plot_3D_network(node_names, node_positions, node_label_set, edges,
     ax : ax
         figure axis
     '''
+
+    # Png params
+    movie_path = './movie'
+    elev = 15.  # elevation angle for movie
 
     # Initialize figure
     fig = plt.figure()
@@ -107,10 +112,15 @@ def plot_3D_network(node_names, node_positions, node_label_set, edges,
                     alpha=edge_alpha[ei], color=edge_colors[ei], ha='center')
 
     # Cleanup
-    ax.set_xlabel('X pos')
-    ax.set_ylabel('Y pos')
-    ax.set_zlabel('Z pos')
+    ax.set_xlabel('Anterior <-> Posterior')
+    ax.set_ylabel('Lateral <-> Medial <-> Lateral')
+    ax.set_zlabel('Superior <-> Inferior')
     ax.set_title('Brain Graph')
+
+    if(save_movie):
+        for ang in np.arange(0, 360):
+            ax.view_init(elev=elev, azim=ang)
+            plt.savefig(op.join(movie_path, 'mov_%s.png' % str(ang)))
 
     return fig, ax
 
