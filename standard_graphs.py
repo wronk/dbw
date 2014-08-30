@@ -48,14 +48,14 @@ G_WS = nx.watts_strogatz_graph(N,36,0.159)
 
 # Here you can specify which plotting function you want to run.
 #x   It needs to take a single graph as input!
-plotfunction = plot_net.plot_degree_distribution
+plotfunction = plot_net.plot_edge_btwn
 
-myrange = np.linspace(0,1,20)
+myrange = np.linspace(0,0.002,50)
 
-Fig,ax = plotfunction(G)
-Fig_ER,ax_ER = plotfunction(G_ER)
-Fig_BA,ax_BA = plotfunction(G_BA)
-Fig_WS,ax_WS = plotfunction(G_WS)
+Fig,ax = plotfunction(G,myrange)
+Fig_ER,ax_ER = plotfunction(G_ER,myrange)
+Fig_BA,ax_BA = plotfunction(G_BA,myrange)
+Fig_WS,ax_WS = plotfunction(G_WS,myrange)
 
 if type(ax) == type(np.ndarray([0])):
     ax = ax[0]

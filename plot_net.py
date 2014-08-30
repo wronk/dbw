@@ -105,7 +105,7 @@ def plot_edge_btwn(G, bins=20):
     axs[1].set_xlabel('Area')
     axs[1].set_ylabel('Edge-betweenness')
 
-    return fig
+    return fig,axs
 
 
 def plot_out_in_ratios(W_net, labels=None, bins=20):
@@ -319,4 +319,3 @@ def line_hist(ax,G,feature,bins,**kwargs):
     
     # Plot line
     ax.plot(bcents,cts,**kwargs)
-    
