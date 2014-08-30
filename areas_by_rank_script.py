@@ -25,8 +25,8 @@ w_th = 0  # Weight-value threshold
 
 calc_nets = True
 calc_features = True
-show_example_plots = False
-show_stat_plots = True
+show_example_plots = True
+show_stat_plots = False
 
 if calc_nets:
     # Set relative directory path to linear model & ontology
@@ -67,38 +67,49 @@ if show_example_plots:
         edges0 = [(area0,areaX) for areaX in neighbors0]
         edges1 = [(area1,areaX) for areaX in neighbors1]
         # Put areas and neighbors together & remove duplicates
-        all_nodes = [area0,area1] + neighbors0 + neighbors1
-        all_edges = edges0 + edges1
-        all_nodes = list(np.unique(all_nodes))
-        all_edges = list(np.unique(all_edges))
-        # Get centroids for nodes
-        all_centroids = [area_dict[area]['centroid'] for area in all_nodes]
+        nodes = [area0,area1] + neighbors0 + neighbors1
+        edges = edges0 + edges1
+        nodes = list(np.unique(nodes))
+        edges = list(np.unique(edges))
+        # Get remaining nodes
+        rem_nodes = [area for area in sorted_areas['degree_labels']
+                     if area not in nodes]
+        # Make combined list
+        all_nodes = nodes + rem_nodes
+        # Get volumes
+        all_vols = [area_dict[node]['volume'] for node in all_nodes]
+        all_vols = np.array(all_vols)
+        all_vols *= (400/all_vols.max())
+        # Get centroids
+        all_centroids = [area_dict[node]['centroid'] for node in all_nodes]
         all_centroids = np.array(all_centroids)
         # Swap columns so that S <-> I is on z axis
         all_centroids = all_centroids.take([0, 2, 1], 1)
         all_centroids[:,2] *= -1
         # Get logical indices of area nodes
-        area_nodes = np.array([name in [area0, area1] for name in all_nodes])
-        node_label_set = area_nodes
-        edge_label_set = np.zeros((len(all_edges),),dtype=bool)
-        # Specify sizes
-        node_sizes = 20 * np.ones((len(all_nodes),))
-        node_sizes[area_nodes] = 100
+        neighbor_idxs = np.array([name in nodes for name in all_nodes])
+        area_idxs = np.array([name in [area0,area1] for name in all_nodes])
+        # Set sizes & alphas
+        node_sizes = all_vols
+        node_alphas = .5*np.ones((len(all_nodes),),dtype=float) # Whole brain
+        node_alphas[neighbor_idxs] = .5
+        node_alphas[area_idxs] = 1
+        edge_alphas = .8*np.ones((len(edges),),dtype=float)
+        # Specify colors
         node_colors = np.array(['k' for node_idx in range(len(all_nodes))])
-        node_colors[area_nodes] = 'r'
-        node_alpha = np.ones((len(all_nodes),))
-        node_alpha[area_nodes] = 1
+        node_colors[neighbor_idxs] = 'r'
+        node_colors[area_idxs] = 'b'
 
-        edge_alpha = np.ones((len(all_edges),))
         # Plot 3D nodes
-        network_viz.plot_3D_network(node_names=all_nodes,
+        network_viz.plot_3D_network(node_names=nodes,
                                     node_positions=all_centroids,
-                                    node_label_set=node_label_set,
+                                    node_label_set=[False]*len(all_nodes),
                                     node_sizes=node_sizes,
                                     node_colors=node_colors,
-                                    edges=all_edges,
-                                    edge_label_set=edge_label_set,
-                                    edge_alpha=edge_alpha)
+                                    node_alpha=node_alphas,
+                                    edges=edges,
+                                    edge_label_set=[False]*len(edges),
+                                    edge_alpha=edge_alphas)
 
 if show_stat_plots:
     feats_lists = [[['inj_volume','degree'],['inj_volume','out_deg']],
