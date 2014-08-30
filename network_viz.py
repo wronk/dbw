@@ -50,7 +50,7 @@ def plot_3D_network(node_names, node_positions, node_label_set, edges,
     '''
 
     # Png params
-    movie_path = './movie'
+    movie_path = './movie/images/'
     elev = 15.  # elevation angle for movie
 
     # Initialize figure
@@ -118,9 +118,9 @@ def plot_3D_network(node_names, node_positions, node_label_set, edges,
     ax.set_title('Brain Graph')
 
     if(save_movie):
-        for ang in np.arange(0, 360):
+        for ai, ang in enumerate(np.arange(0, 360, 3)):
             ax.view_init(elev=elev, azim=ang)
-            plt.savefig(op.join(movie_path, 'mov_%s.png' % str(ang)))
+            plt.savefig(op.join(movie_path, 'mov_%03i.png' % ai))
 
     return fig, ax
 
@@ -168,7 +168,7 @@ if __name__ == '__main__':
 
     fig, ax = plot_3D_network(node_names, node_positions, node_labels, edges,
                               edge_labels, node_sizes, node_colors, node_alpha,
-                              edge_sizes, edge_colors, edge_alpha)
+                              edge_sizes, edge_colors, edge_alpha, True)
     fig, ax = plot_3D_network(node_names, node_positions, node_labels, edges,
                               edge_labels)
 
