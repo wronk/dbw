@@ -12,6 +12,7 @@ import networkx as nx
 import numpy as np
 import scipy.io as sio
 import matplotlib.pyplot as plt
+from copy import deepcopy
 
 
 def load_weights(dir_name):
@@ -54,7 +55,7 @@ def threshold(W, P, p_th=.01, w_th=0):
         weight matrix with all sub-threshold values set to -1
     """
 
-    W_net = W.deepcopy()
+    W_net = deepcopy(W)
 
     W_mask = W <= w_th
     P_mask = P >= p_th
@@ -81,7 +82,7 @@ def lesion_node(W_net, idxs):
         matrix reflecting lesion
     '''
 
-    W_lesion = W_net.deepcopy()
+    W_lesion = deepcopy(W_net)
 
     # Make sure col_idxs is iterable
     assert hasattr(idxs, '__iter__'), 'Lesion specified not iterable'
@@ -114,7 +115,7 @@ def lesion_edge(W_net, idxs):
         matrix reflecting lesion
     '''
 
-    W_lesion = W_net.deepcopy()
+    W_lesion = deepcopy(W_net)
 
     # Make sure col_idxs is iterable
     assert hasattr(idxs, '__iter__'), 'Lesion specified not iterable'
