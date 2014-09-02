@@ -67,7 +67,7 @@ def threshold(W, P, p_th=.01, w_th=0):
 
 
 def lesion_node(W_net, idxs):
-    '''Simulate a simple node lesion in the network.
+    '''Simulate a simple node lesion in the network and pass back copy.
 
     Parameters
     ----------
@@ -100,7 +100,7 @@ def lesion_node(W_net, idxs):
 
 
 def lesion_edge(W_net, idxs):
-    '''Simulate a simple edge lesion in the network.
+    '''Simulate a simple edge lesion in the network and pass back copy.
 
     Parameters
     ----------
