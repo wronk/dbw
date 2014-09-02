@@ -54,7 +54,7 @@ def threshold(W, P, p_th=.01, w_th=0):
         weight matrix with all sub-threshold values set to -1
     """
 
-    W_net = W.copy()
+    W_net = W.deepcopy()
 
     W_mask = W <= w_th
     P_mask = P >= p_th
@@ -65,22 +65,67 @@ def threshold(W, P, p_th=.01, w_th=0):
     return W_net, mask
 
 
-def lesion(W_net, area_idxs):
-    """Simulate a simple lesion in the network."""
-    W_lesion = W_net.copy()
+def lesion_node(W_net, idxs):
+    '''Simulate a simple node lesion in the network.
 
-    # Make sure col_idxs is list
-    if not isinstance(area_idxs, list):
-        area_idxs = [area_idxs]
+    Parameters
+    ----------
+    W_net : matrix
+        matrix of weights specifying network
+    idxs : list | N x 1 matrix
+        node indices needing to be lesioned (set to zero in W_net)
 
-    # Loop through all area idxs & simulate lesions by setting to zero
-    # the row & column corresponding to that index
-    for a_idx in area_idxs:
+    Returns
+    -------
+    W_lesion : matrix
+        matrix reflecting lesion
+    '''
+
+    W_lesion = W_net.deepcopy()
+
+    # Make sure col_idxs is iterable
+    assert hasattr(idxs, '__iter__'), 'Lesion specified not iterable'
+
+    # Loop through all area idxs & simulate lesions by setting
+    # the row & column corresponding to that index to zero
+    for a_idx in idxs:
         W_lesion[:, a_idx] = 0.
         W_lesion[a_idx, :] = 0.
 
     # Count how many connections were lost due to the lesion
-    num_cxns_lost = (W_lesion - W_net < 0).sum()
+    num_cxns_lost = (W_lesion - W_net <= 0).sum()
+
+    return W_lesion, num_cxns_lost
+
+
+def lesion_edge(W_net, idxs):
+    '''Simulate a simple edge lesion in the network.
+
+    Parameters
+    ----------
+    W_net : matrix
+        matrix of weights specifying network
+    idxs : list of 2d lists | N x 2 matrix
+        row/column indices needing to be lesioned (set to zero in W_net)
+
+    Returns
+    -------
+    W_lesion : matrix
+        matrix reflecting lesion
+    '''
+
+    W_lesion = W_net.deepcopy()
+
+    # Make sure col_idxs is iterable
+    assert hasattr(idxs, '__iter__'), 'Lesion specified not iterable'
+
+    # Loop through all idxs & simulate lesions by setting # the cell indexed
+    # to zero
+    for a_idx in idxs:
+        W_lesion[a_idx[0], a_idx[1]] = 0.
+
+    # Count how many connections were lost due to the lesion
+    num_cxns_lost = (W_lesion - W_net <= 0).sum()
 
     return W_lesion, num_cxns_lost
 
