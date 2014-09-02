@@ -96,7 +96,8 @@ for i in range(num_lesions):
 
     # TODO: modify to delete the labels as well
     # Convert to networkx graph object
-    W_lesion_dict = {'data': W_lesion, 'row_labels': W_net_dict['row_labels'],
+    W_lesion_dict = {'data': W_lesion,
+                     'row_labels': W_net_dict['row_labels'],
                      'col_labels': W_net_dict['col_labels']}
     graph_list.append(network_gen.import_weights_to_graph(W_lesion_dict,
                                                           directed=False))
