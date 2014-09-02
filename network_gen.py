@@ -98,6 +98,7 @@ def lesion_node(W_net, idxs):
 
         W_lesion = np.delete(W_lesion, a_idx, axis=0)
         W_lesion = np.delete(W_lesion, a_idx, axis=1)
+        print W_lesion.shape
 
     return W_lesion, num_cxns_lost
 
@@ -150,7 +151,7 @@ def import_weights_to_graph(graph_dict, directed=False):
         G = nx.Graph()
 
     # Add nodes to graph according to names
-    G.add_nodes_from(graph_dict['col_labels'])
+    G.add_nodes_from(graph_dict['row_labels'])
 
     # Add edges to list object according to names
     edges_to_add = []
