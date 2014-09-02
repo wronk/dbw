@@ -66,13 +66,13 @@ def threshold(W, P, p_th=.01, w_th=0):
     return W_net, mask
 
 
-def lesion_node(W_net, idxs):
+def lesion_node(graph_dict, idxs):
     '''Simulate a simple node lesion in the network and pass back copy.
 
     Parameters
     ----------
-    W_net : matrix
-        matrix of weights specifying network
+    graph_dict : dict
+        dict of weight matrix and list of labels specifying network
     idxs : list | N x 1 matrix
         node indices needing to be lesioned (set to zero in W_net)
 
@@ -84,32 +84,39 @@ def lesion_node(W_net, idxs):
 
     # Make sure col_idxs is iterable
     assert hasattr(idxs, '__iter__'), 'Lesion idxs specified not iterable'
+    assert 'data' in graph_dict.keys(), 'data not in weight matrix'
+    assert 'row_labels' in graph_dict.keys(), 'row_labels not in weight matrix'
+    assert 'col_labels' in graph_dict.keys(), 'col_labels not in weight matrix'
 
     # Count how many connections were lost due to the lesion
     num_cxns_lost = 0
 
     # Loop through all area idxs & simulate lesions by setting
     # the row & column corresponding to that index to zero
-    W_lesion = deepcopy(W_net)
+    lesion_dict = deepcopy(graph_dict)
     for a_idx in idxs:
         # Count how many connections were lost due to the lesion
-        num_cxns_lost += ((W_lesion[:, a_idx] > 0).sum() +
-                          (W_lesion[a_idx, :] > 0).sum())
+        num_cxns_lost += ((graph_dict['data'][:, a_idx] > 0).sum() +
+                          (graph_dict['data'][a_idx, :] > 0).sum())
 
-        W_lesion = np.delete(W_lesion, a_idx, axis=0)
-        W_lesion = np.delete(W_lesion, a_idx, axis=1)
-        print W_lesion.shape
+        lesion_dict['data'] = np.delete(lesion_dict['data'], a_idx, axis=0)
+        lesion_dict['data'] = np.delete(lesion_dict['data'], a_idx, axis=1)
 
-    return W_lesion, num_cxns_lost
+        lesion_dict['row_labels'].pop(a_idx)
+        lesion_dict['col_labels'].pop(a_idx)
+
+    lesion_dict['num_cxns_lost'] = num_cxns_lost
+
+    return lesion_dict
 
 
-def lesion_edge(W_net, idxs):
+def lesion_edge(graph_dict, idxs):
     '''Simulate a simple edge lesion in the network and pass back copy.
 
     Parameters
     ----------
-    W_net : matrix
-        matrix of weights specifying network
+    graph_dict : matrix
+        dict specifying matrix of weights specifying network
     idxs : list of 2d lists | N x 2 matrix
         row/column indices needing to be lesioned (set to zero in W_net)
 
@@ -119,20 +126,24 @@ def lesion_edge(W_net, idxs):
         matrix reflecting lesion
     '''
 
-    W_lesion = deepcopy(W_net)
+    lesion_dict = deepcopy(graph_dict)
 
     # Make sure col_idxs is iterable
     assert hasattr(idxs, '__iter__'), 'Lesion specified not iterable'
+    assert 'data' in graph_dict.keys(), 'data not in weight matrix'
+    assert 'row_labels' in graph_dict.keys(), 'row_labels not in weight matrix'
+    assert 'col_labels' in graph_dict.keys(), 'col_labels not in weight matrix'
 
     # Loop through all idxs & simulate lesions by setting # the cell indexed
     # to zero
     for a_idx in idxs:
-        W_lesion[a_idx[0], a_idx[1]] = 0.
+        lesion_dict['data'][a_idx[0], a_idx[1]] = 0.
 
     # Count how many connections were lost due to the lesion
-    num_cxns_lost = (W_lesion - W_net <= 0).sum()
+    num_cxns_lost = np.sum(graph_dict['data'] != lesion_dict['data'])
+    lesion_dict['num_cxns_lost'] = num_cxns_lost
 
-    return W_lesion, num_cxns_lost
+    return lesion_dict
 
 
 def import_weights_to_graph(graph_dict, directed=False):
