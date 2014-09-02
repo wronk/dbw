@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import network_compute
 
 
-def plot_connected_components(G):
+def plot_connected_components(ax, G):
     """
     Plot a distribution of the connected component sizes for a graph.
 
@@ -30,10 +30,8 @@ def plot_connected_components(G):
     fig, ax = plt.subplots(1, 1)
     ax.scatter(np.arange(len(cc_sizes_sorted)), cc_sizes_sorted, s=20, c='r')
 
-    return fig
 
-
-def plot_node_btwn(G, bins=20,ranked=False):
+def plot_node_btwn(G, bins=20, ranked=False):
     """
     Plot the node-betweenness distributions.
 
@@ -51,29 +49,29 @@ def plot_node_btwn(G, bins=20,ranked=False):
 
     # Open figure & axes
     if ranked:
-        fig, axs = plt.subplots(2, 1,facecolor='w')
+        fig, axs = plt.subplots(2, 1, facecolor='w')
 
         # Plot histogram
         axs[0].hist(node_btwn_vec_sorted, bins)
         axs[0].set_ylabel('Occurrences')
         axs[0].set_xlabel('Node-betweenness')
-    
+
         # Plot sorted node between values
         axs[1].scatter(np.arange(len(node_btwn_vec_sorted)),
                        node_btwn_vec_sorted, s=20, c='r')
         axs[1].set_xlabel('Area')
         axs[1].set_ylabel('Node-betweenness')
 
-        return fig,axs
+        return fig, axs
     else:
-        fig, ax = plt.subplots(1,1,facecolor='w')
-        
+        fig, ax = plt.subplots(1, 1, facecolor='w')
+
         # Plot histogram
-        ax.hist(node_btwn_vec_sorted,bins=bins)
+        ax.hist(node_btwn_vec_sorted, bins=bins)
         ax.set_xlabel('Betweenness centrality')
         ax.set_ylabel('Occurrences')
         ax.set_title('Betweenness centrality')
-        return fig,ax
+        return fig, ax
 
 
 def plot_edge_btwn(G, bins=20):
@@ -105,7 +103,7 @@ def plot_edge_btwn(G, bins=20):
     axs[1].set_xlabel('Area')
     axs[1].set_ylabel('Edge-betweenness')
 
-    return fig,axs
+    return fig, axs
 
 
 def plot_out_in_ratios(W_net, labels=None, bins=20):
@@ -139,7 +137,7 @@ def plot_out_in_ratios(W_net, labels=None, bins=20):
     return fig, axs
 
 
-def plot_clustering_coeff_pdf(G, bins=np.linspace(0., 0.25, 150)):
+def plot_clustering_coeff_pdf(ax, G, bins=np.linspace(0., 0.25, 150)):
     '''
     Plot clustering coefficient probability density function
 
@@ -160,20 +158,14 @@ def plot_clustering_coeff_pdf(G, bins=np.linspace(0., 0.25, 150)):
     ccoeffs = np.array(ccoeff_dict.values())
     #TODO Need to normalize coefficients?
 
-    # Constuct figure
-    #fig, (ax0, ax1) = plt.subplots(ncols=1)
-    fig,axs = plt.subplots(ncols=1,facecolor='white')
-
     # Plot coefficients according to bins
-    plt.hist(ccoeffs, bins)
-    plt.title('Clustering Coefficient')
-    plt.xlabel('Clustering Coefficient')
-    plt.ylabel('Occurrences')
-
-    return fig,axs
+    ax.hist(ccoeffs, bins)
+    ax.set_title('Clustering Coefficient')
+    ax.set_xlabel('Clustering Coefficient')
+    ax.set_ylabel('Occurrences')
 
 
-def plot_clustering_coeff_ranked(G, num_ranked=10):
+def plot_clustering_coeff_ranked(ax, G, num_ranked=10):
     '''
     Plot clustering coefficient ranked by maximum value
 
@@ -199,24 +191,22 @@ def plot_clustering_coeff_ranked(G, num_ranked=10):
     width = 0.8
 
     # Constuct figure
-    fig = plt.figure()
+    fig, ax = plt.subplot(1, 1)
 
     sorted_tups = sorted(zip(ccoeff_dict.values(), ccoeff_dict.keys()),
                          key=lambda tup: tup[0], reverse=True)[:num_ranked]
 
     # Plot top ranked coefficients according to bins
-    plt.bar(xpos, [w for w, _ in sorted_tups], fc='green',
-            width=width, alpha=.8)
-    plt.xticks(xpos + width / 2., [n for _, n in sorted_tups])
+    ax.bar(xpos, [w for w, _ in sorted_tups], fc='green',
+           width=width, alpha=.8)
+    ax.xticks(xpos + width / 2., [n for _, n in sorted_tups])
 
-    plt.title('Ranked Clustering Coefficients')
-    plt.xlabel('Region')
-    plt.ylabel('Clustering Coefficient')
-
-    return fig
+    ax.set_title('Ranked Clustering Coefficients')
+    plt.set_xlabel('Region')
+    plt.set_ylabel('Clustering Coefficient')
 
 
-def plot_connection_strength(W, bins=10):
+def plot_connection_strength(ax, W, bins=10):
     '''
     Generate figure/axis and plots a histogram of connection strength
 
@@ -234,18 +224,14 @@ def plot_connection_strength(W, bins=10):
     W_new = W[W > 0]
     W_new = W[~(np.isinf(W) + np.isnan(W))]
 
-    fig, ax = plt.subplots(1, 1)
     binnedW, bins, patches = plt.hist(W_new, bins, facecolor='red', alpha=0.5)
 
     ax.set_xlabel('Weight value')
     ax.set_ylabel('Frequency')
     ax.set_title('Connection strength')
-    plt.show()
-
-    return fig, ax
 
 
-def plot_shortest_path_distribution(G):
+def plot_shortest_path_distribution(ax, G):
     '''
     Generate figure/axis and plots a bar graph of shortest path distribution
 
@@ -259,7 +245,7 @@ def plot_shortest_path_distribution(G):
         plotting objects showing distribution of shortest paths
     '''
     SP = nx.shortest_path_length(G)
-    Names = G.nodes()
+    names = G.nodes()
 
     SP_values = [SP[entry].values() for entry in SP]
 
@@ -272,8 +258,6 @@ def plot_shortest_path_distribution(G):
         current = uniques[j]
         counts.append(sum(All_SP_values == current))
 
-    fig, ax = plt.subplots(1, 1)
-
     ax.bar(uniques, counts)
     ax.set_xlabel('Number of nodes in shortest path')
     ax.set_ylabel('Frequency')
@@ -281,27 +265,18 @@ def plot_shortest_path_distribution(G):
     ax.set_xticklabels(int_uniques)
     ax.set_title('Distribution of shortest path lengths')
 
-    plt.show()
 
-    return fig, ax
-
-
-def plot_degree_distribution(G,bins=np.linspace(0,140,50)):
+def plot_degree_distribution(ax, G, bins=np.linspace(0, 140, 50)):
     ''' Plots the degree distribution of a graph object '''
     degrees = G.degree().values()
-    fig, ax = plt.subplots(1,1,facecolor='white')
 
-    ax.hist(degrees,bins)
+    ax.hist(degrees, bins)
     ax.set_xlabel('Degree')
     ax.set_ylabel('Occurrences')
     ax.set_title('Degree distribution')
 
-    plt.show()
 
-    return fig, ax
-
-
-def line_hist(ax,G,feature,bins,**kwargs):
+def line_hist(ax, G, feature, bins, **kwargs):
     """Plot a histogram of a specified feature as a line on specified axis"""
     # Get data vector to use
     if feature == 'degree':
@@ -310,12 +285,12 @@ def line_hist(ax,G,feature,bins,**kwargs):
         data_vec = nx.clustering(G).values()
     elif feature == 'node_btwn':
         data_vec = nx.betweenness_centrality(G).values()
-    
+
     # Calculate histogram
-    cts,bins = np.histogram(data_vec,bins)
-    
+    cts, bins = np.histogram(data_vec, bins)
+
     # Get bin centers
-    bcents = .5*(bins[:-1] + bins[1:])
-    
+    bcents = .5 * (bins[:-1] + bins[1:])
+
     # Plot line
-    ax.plot(bcents,cts,**kwargs)
+    ax.plot(bcents, cts, **kwargs)
