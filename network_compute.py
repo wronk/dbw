@@ -64,3 +64,38 @@ def node_edge_overlap(node_list,edge_list):
                         and edge[1] in node_list]
                         
     return edges_touching, edges_connecting
+    
+def bidirectional_metrics(W_net, coords, labels, binarized=False):
+    """Calculate bidirectionality metrics for a graph given its weights.
+    
+    Returns:
+        List of labeled nonzero edges, (Ne x 3) array of distance, 
+        bidirectionality coefficient, and connection strength."""
+    if binarized:
+        W_bi = (W_net > 0).astype(float)
+    else:
+        W_bi = W_net.copy()
+    
+    # Get nonzero elements of W_bi
+    nz_idxs = np.array(W_bi.nonzero()).T
+    nz_idxs = np.array([nz_idx for nz_idx in nz_idxs
+                        if labels[nz_idx[0]][:-2] != labels[nz_idx[1]][:-2]])
+    
+    # Generate edge labels
+    edges = [(labels[nz_idx[0]],labels[nz_idx[1]]) for nz_idx in nz_idxs]
+    
+    # Make array for storing bidirectional metrics
+    bd_metrics = np.zeros((len(edges),3),dtype=float)
+    
+    # Calculate all metrics
+    for e_idx,nz in enumerate(nz_idxs):
+        # Distance
+        d = np.sqrt(np.sum((coords[nz[0],:] - coords[nz[1],:])**2))
+        # Strength
+        s = W_bi[nz[0],nz[1]] + W_bi[nz[1],nz[0]]
+        # Bidirectionality coefficient
+        bdc = 1 - np.abs(W_bi[nz[0],nz[1]] - W_bi[nz[1],nz[0]])/s
+        # Store metrics
+        bd_metrics[e_idx,:] = [d,bdc,s]
+        
+    return edges, bd_metrics
