@@ -17,6 +17,8 @@ import network_gen
 import area_compute
 import network_viz
 import area_plot
+import plot_net
+from copy import deepcopy
 
 # Network generation parameters
 p_th = .01  # P-value threshold
@@ -60,11 +62,12 @@ lesion_is_node = True  # Set if node or edge lesion
 # out, in, in, out_in
 lesion_attr = 'degree_labels'
 bilateral = True
-num_lesions = 2
+num_lesions = 1
 
 # Record pre-lesioned network statistics
 lesion_results = [area_compute.get_feature_dicts(G.nodes(), G, W_net,
                                                  row_labels)]
+graph_list = [deepcopy(G)]
 
 # Lesion areas
 for i in range(num_lesions):
@@ -92,20 +95,28 @@ for i in range(num_lesions):
     # Convert to networkx graph object
     W_net_dict['data'] = W_lesioned
     G = network_gen.import_weights_to_graph(W_net_dict)
+    graph_list.append(deepcopy(G))
 
     # Compute feature dictionary for all areas
     lesion_results.append(area_compute.get_feature_dicts(G.nodes(), G, W_net,
                                                          row_labels))
 
 if show_stat_plots:
-    feats_lists = [[['inj_volume', 'degree'], ['inj_volume', 'out_deg']],
-                   [['degree', 'node_btwn'], ['degree', 'ccoeff']]]
-    for g in lesion_results:
+    feats_lists = [[['degree', 'node_btwn'], ['degree', 'ccoeff']]]
+    #[['inj_volume', 'degree'], ['inj_volume', 'out_deg']]
+    for gi, g in enumerate(graph_list):
         for feats in feats_lists:
             fig, axs = plt.subplots(1, len(feats))
             for ax_idx, ax in enumerate(axs):
-                area_plot.scatter_2D(ax, g, feats[ax_idx][0],
+                area_plot.scatter_2D(ax, lesion_results[gi], feats[ax_idx][0],
                                      feats[ax_idx][1], s=50, c='r')
+
+        fig2, axs2 = plt.subplots(1, 3)
+
+        plot_net.plot_degree_distribution(axs2[0], g)
+        plot_net.plot_shortest_path_distribution(axs2[1], g)
+        plot_net.plot_clustering_coeff_pdf(axs2[2], g, np.linspace(0, 2, 100))
+
 '''
 if show_example_plots:
     # Visualize individual areas & their cxns
