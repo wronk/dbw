@@ -10,7 +10,6 @@ specific criteria.
 
 import pprint as pp
 import numpy as np
-import networkx as nx
 import matplotlib.pyplot as plt
 
 import collect_areas
@@ -23,49 +22,96 @@ import area_plot
 p_th = .01  # P-value threshold
 w_th = 0  # Weight-value threshold
 
-calc_nets = True
 calc_features = True
 show_example_plots = True
-show_stat_plots = False
+show_stat_plots = True
 
-if calc_nets:
-    # Set relative directory path to linear model & ontology
-    dir_LM = '../friday-harbor/linear_model'
+###################################
+### Create network
+# Set relative directory path to linear model & ontology
+dir_LM = '../friday-harbor/linear_model'
 
-    # Load weights & p-values
-    W, P, row_labels, col_labels = network_gen.load_weights(dir_LM)
-    # Threshold weights according to weights & p-values
-    W_net, mask = network_gen.threshold(W, P, p_th=p_th, w_th=w_th)
+# Load weights & p-values
+W, P, row_labels, col_labels = network_gen.load_weights(dir_LM)
+# Threshold weights according to weights & p-values
+W_net, mask = network_gen.threshold(W, P, p_th=p_th, w_th=w_th)
 
-    # Set weights to zero if they don't satisfy threshold criteria
-    W_net[W_net == -1] = 0.
-    # Set diagonal weights to zero
-    np.fill_diagonal(W_net, 0)
+# Set weights to zero if they don't satisfy threshold criteria
+W_net[W_net == -1] = 0.
+# Set diagonal weights to zero
+np.fill_diagonal(W_net, 0)
 
-    # Put everything in a dictionary
-    W_net_dict = {'row_labels': row_labels, 'col_labels': col_labels,
-                  'data': W_net}
+# Put everything in a dictionary
+W_net_dict = {'row_labels': row_labels, 'col_labels': col_labels,
+              'data': W_net}
+
+# Create networkx graph
+G = network_gen.import_weights_to_graph(W_net_dict)
+
+# Collect & sort areas & edges according to various attributes
+sorted_areas = collect_areas.collect_and_sort(G, W_net, labels=row_labels,
+                                              print_out=True)
+
+###################################
+### Lesion areas num_lesions = 1  # Set number of lesions
+lesion_is_node = True  # Set if node or edge lesion
+
+# Find areas to lesion. node_btwn, ccoeff, degree, edge_btwn
+# out, in, in, out_in
+lesion_attr = 'degree_labels'
+bilateral = True
+num_lesions = 2
+
+# Record pre-lesioned network statistics
+lesion_results = [area_compute.get_feature_dicts(G.nodes(), G, W_net,
+                                                 row_labels)]
+
+# Lesion areas
+for i in range(num_lesions):
+    if lesion_is_node:
+        # Find target indices (relative to weight matrix)
+        target_inds = [row_labels.index(t) for t in
+                       sorted_areas[lesion_attr][0: num_lesions *
+                                                 (1 + bilateral)]]
+        # Call lesion function, update weight mat
+        W_lesioned, cxns = network_gen.lesion_node(W_net_dict['data'],
+                                                   target_inds)
+
+    else:
+        # Find names of nodes between target edges
+        target_edges = [[n_from, n_to] for n_from, n_to in
+                        sorted_areas[lesion_attr][0: num_lesions *
+                                                  (1 + bilateral)]]
+        # Find target indices (relative to weight matrix)
+        target_edge_inds = [[row_labels.index(n_from), col_labels.index(n_to)]
+                            for n_from, n_to in target_edges]
+        # Call lesion function, update weight mat
+        W_lesioned, cxns = network_gen.lesion_edge(W_net_dict['data'],
+                                                   target_inds)
 
     # Convert to networkx graph object
+    W_net_dict['data'] = W_lesioned
     G = network_gen.import_weights_to_graph(W_net_dict)
 
-    # Collect & sort areas & edges according to various attributes
-    sorted_areas = collect_areas.collect_and_sort(G, W_net, labels=row_labels,
-                                                  print_out=True)
-
-    ###################################
-    # Lesion areas
-    num_lesions = 1
-    pdb.set_trace()
-
-if calc_features:
     # Compute feature dictionary for all areas
-    area_dict = area_compute.get_feature_dicts(G.nodes(), G, W_net, row_labels)
+    lesion_results.append(area_compute.get_feature_dicts(G.nodes(), G, W_net,
+                                                         row_labels))
 
+if show_stat_plots:
+    feats_lists = [[['inj_volume', 'degree'], ['inj_volume', 'out_deg']],
+                   [['degree', 'node_btwn'], ['degree', 'ccoeff']]]
+    for g in lesion_results:
+        for feats in feats_lists:
+            fig, axs = plt.subplots(1, len(feats))
+            for ax_idx, ax in enumerate(axs):
+                area_plot.scatter_2D(ax, g, feats[ax_idx][0],
+                                     feats[ax_idx][1], s=50, c='r')
+'''
 if show_example_plots:
     # Visualize individual areas & their cxns
-    num_top_deg = 1
-    for top_deg_idx in [0]:
+    num_nets_to_plot = 1
+    for net_dict in lesion_results[0:num_nets_to_plot]
+
         # Get pair of areas
         area0 = sorted_areas['ccoeff_labels'][2 * top_deg_idx]
         # Get neighbors for each area
@@ -131,12 +177,4 @@ if show_example_plots:
                                     edge_alpha=edge_alphas,
                                     edge_sizes=edge_sizes,
                                     save_movie=True)
-
-if show_stat_plots:
-    feats_lists = [[['inj_volume', 'degree'], ['inj_volume', 'out_deg']],
-                   [['degree', 'node_btwn'], ['degree', 'ccoeff']]]
-    for feats in feats_lists:
-        fig, axs = plt.subplots(1, len(feats))
-        for ax_idx, ax in enumerate(axs):
-            area_plot.scatter_2D(ax, area_dict, feats[ax_idx][0],
-                                 feats[ax_idx][1], s=50, c='r')
+'''
