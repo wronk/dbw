@@ -68,17 +68,19 @@ num_lesions = 1
 lesion_results = [area_compute.get_feature_dicts(G.nodes(), G, W_net,
                                                  row_labels)]
 graph_list = [deepcopy(G)]
+weight_list = [deepcopy(W_net)]
 
 # Lesion areas
 for i in range(num_lesions):
     if lesion_is_node:
         # Find target indices (relative to weight matrix)
+        # Unilateral  0:1, 1:2, 2:3
+        # Bilateral   0:2, 2:4, 4:6
         target_inds = [row_labels.index(t) for t in
-                       sorted_areas[lesion_attr][0: num_lesions *
-                                                 (1 + bilateral)]]
+                       sorted_areas[lesion_attr][i * (bilateral + 1):
+                                                 (i + 1) * (bilateral + 1)]]
         # Call lesion function, update weight mat
-        W_lesioned, cxns = network_gen.lesion_node(W_net_dict['data'],
-                                                   target_inds)
+        W_lesion, cxns = network_gen.lesion_node(weight_list[-1], target_inds)
 
     else:
         # Find names of nodes between target edges
@@ -88,18 +90,22 @@ for i in range(num_lesions):
         # Find target indices (relative to weight matrix)
         target_edge_inds = [[row_labels.index(n_from), col_labels.index(n_to)]
                             for n_from, n_to in target_edges]
-        # Call lesion function, update weight mat
-        W_lesioned, cxns = network_gen.lesion_edge(W_net_dict['data'],
-                                                   target_inds)
+        # Call lesion function, get copy of updated weight mat
+        W_lesion, cxns = network_gen.lesion_edge(graph_list[-1]['data'],
+                                                 target_inds)
 
+    # TODO: modify to delete the labels as well
     # Convert to networkx graph object
-    W_net_dict['data'] = W_lesioned
-    G = network_gen.import_weights_to_graph(W_net_dict)
-    graph_list.append(deepcopy(G))
+    W_lesion_dict = {'data': W_lesion,
+                     'row_labels': W_net_dict['row_labels'],
+                     'col_labels': W_net_dict['col_labels']}
+    graph_list.append(network_gen.import_weights_to_graph(W_lesion_dict,
+                                                          directed=False))
+    weight_list.append(deepcopy(W_lesion))
 
     # Compute feature dictionary for all areas
-    lesion_results.append(area_compute.get_feature_dicts(G.nodes(), G, W_net,
-                                                         row_labels))
+    lesion_results.append(area_compute.get_feature_dicts(
+        graph_list[-1].nodes(), graph_list[-1], weight_list[-1], row_labels))
 
 if show_stat_plots:
     feats_lists = [[['degree', 'node_btwn'], ['degree', 'ccoeff']]]

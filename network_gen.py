@@ -79,22 +79,26 @@ def lesion_node(W_net, idxs):
     Returns
     -------
     W_lesion : matrix
-        matrix reflecting lesion
+        matrix with rows and columns deleted to reflect lesion
     '''
 
-    W_lesion = deepcopy(W_net)
-
     # Make sure col_idxs is iterable
-    assert hasattr(idxs, '__iter__'), 'Lesion specified not iterable'
+    assert hasattr(idxs, '__iter__'), 'Lesion idxs specified not iterable'
+
+    # Count how many connections were lost due to the lesion
+    num_cxns_lost = 0
 
     # Loop through all area idxs & simulate lesions by setting
     # the row & column corresponding to that index to zero
+    W_lesion = deepcopy(W_net)
     for a_idx in idxs:
-        W_lesion[:, a_idx] = 0.
-        W_lesion[a_idx, :] = 0.
+        # Count how many connections were lost due to the lesion
+        num_cxns_lost += ((W_lesion[:, a_idx] > 0).sum() +
+                          (W_lesion[a_idx, :] > 0).sum())
 
-    # Count how many connections were lost due to the lesion
-    num_cxns_lost = (W_lesion - W_net <= 0).sum()
+        W_lesion = np.delete(W_lesion, a_idx, axis=0)
+        W_lesion = np.delete(W_lesion, a_idx, axis=1)
+        print W_lesion.shape
 
     return W_lesion, num_cxns_lost
 
@@ -131,14 +135,14 @@ def lesion_edge(W_net, idxs):
     return W_lesion, num_cxns_lost
 
 
-def import_weights_to_graph(weight_mat, directed=False):
+def import_weights_to_graph(graph_dict, directed=False):
     '''
-    Convert a weight dict into a NetworkX graph object
+    Convert a weight/label dict into a NetworkX graph object
     '''
 
-    assert 'data' in weight_mat.keys(), 'data not in weight matrix'
-    assert 'row_labels' in weight_mat.keys(), 'row_labels not in weight matrix'
-    assert 'col_labels' in weight_mat.keys(), 'col_labels not in weight matrix'
+    assert 'data' in graph_dict.keys(), 'data not in weight matrix'
+    assert 'row_labels' in graph_dict.keys(), 'row_labels not in weight matrix'
+    assert 'col_labels' in graph_dict.keys(), 'col_labels not in weight matrix'
 
     # Initialize the graph
     if directed:
@@ -147,14 +151,14 @@ def import_weights_to_graph(weight_mat, directed=False):
         G = nx.Graph()
 
     # Add nodes to graph according to names
-    G.add_nodes_from(weight_mat['col_labels'])
+    G.add_nodes_from(graph_dict['row_labels'])
 
     # Add edges to list object according to names
     edges_to_add = []
-    for ri, row in enumerate(weight_mat['row_labels']):
-        for ci, col in enumerate(weight_mat['col_labels']):
-            if weight_mat['data'][ri, ci] > 0:
-                edges_to_add.append((row, col, weight_mat['data'][ri, ci]))
+    for ri, row in enumerate(graph_dict['row_labels']):
+        for ci, col in enumerate(graph_dict['col_labels']):
+            if graph_dict['data'][ri, ci] > 0:
+                edges_to_add.append((row, col, graph_dict['data'][ri, ci]))
 
     # Add list of edges to graph object
     G.add_weighted_edges_from(edges_to_add, weight='weight')
