@@ -167,6 +167,21 @@ def import_weights_to_graph(graph_dict, directed=False):
     return G
 
 
+def quick_net(p_th=.01,w_th=0,dir_name='../friday-harbor/linear_model'):
+    """Quickly load and threshold the weight matrix."""
+
+    # Load weights & p-values
+    W,P,row_labels,col_labels = load_weights(dir_name)
+    # Threshold weights according to weights & p-values
+    W_net,mask = threshold(W,P,p_th=p_th,w_th=w_th)
+    # Set weights to zero if they don't satisfy threshold criteria
+    W_net[W_net==-1] = 0.
+    # Set diagonal weights to zero
+    np.fill_diagonal(W_net,0)
+    
+    return W_net,row_labels,col_labels
+    
+
 ## function becomes symmetric unintentionally by nature of nondirected graph
 #def import_graph_to_weights(graph, node_labels):
 #    '''
@@ -201,16 +216,8 @@ def import_weights_to_graph(graph_dict, directed=False):
 
 
 if __name__ == '__main__':
-    dir_name = '../friday-harbor/linear_model'
-
-    # Load weights & p-value
-    W, P, row_labels, col_labels = load_weights(dir_name)
-    # Threshold weights according to weights & p-values
-    W_net, mask = threshold(W, P, p_th=.01)
-    # Set weights to zero if they don't satisfy threshold criteria
-    W_net[W_net == -1] = 0.
-    # Set diagonal weights to zero
-    np.fill_diagonal(W_net, 0)
+    
+    W_net,row_labels,col_labels = quick_net()
 
     # Put everything in a dictionary
     W_net_dict = {'row_labels': row_labels, 'col_labels': col_labels,
