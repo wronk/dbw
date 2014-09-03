@@ -104,8 +104,8 @@ def lesion_node(graph_dict, idxs):
         lesion_dict['data'] = np.delete(lesion_dict['data'], a_idx, axis=0)
         lesion_dict['data'] = np.delete(lesion_dict['data'], a_idx, axis=1)
 
-        print(lesion_dict['row_labels'].pop(a_idx))
-        print(lesion_dict['col_labels'].pop(a_idx))
+        lesion_dict['row_labels'].pop(a_idx)
+        lesion_dict['col_labels'].pop(a_idx)
 
     lesion_dict['num_cxns_lost'] = num_cxns_lost
 
