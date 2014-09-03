@@ -73,8 +73,8 @@ def lesion_node(graph_dict, idxs):
     ----------
     graph_dict : dict
         dict of weight matrix and list of labels specifying network
-    idxs : list | N x 1 matrix
-        node indices needing to be lesioned (set to zero in W_net)
+    idxs : list
+        node names needing to be lesioned (set to zero in W_net)
 
     Returns
     -------
@@ -94,7 +94,9 @@ def lesion_node(graph_dict, idxs):
     # Loop through all area idxs & simulate lesions by setting
     # the row & column corresponding to that index to zero
     lesion_dict = deepcopy(graph_dict)
-    for a_idx in idxs:
+    for node_name in idxs:
+        a_idx = graph_dict['row_labels'].index(node_name)
+
         # Count how many connections were lost due to the lesion
         num_cxns_lost += ((graph_dict['data'][:, a_idx] > 0).sum() +
                           (graph_dict['data'][a_idx, :] > 0).sum())
@@ -189,9 +191,9 @@ def quick_net(p_th=.01,w_th=0,dir_name='../friday-harbor/linear_model'):
     W_net[W_net==-1] = 0.
     # Set diagonal weights to zero
     np.fill_diagonal(W_net,0)
-    
+
     return W_net,row_labels,col_labels
-    
+
 
 ## function becomes symmetric unintentionally by nature of nondirected graph
 #def import_graph_to_weights(graph, node_labels):
@@ -227,7 +229,7 @@ def quick_net(p_th=.01,w_th=0,dir_name='../friday-harbor/linear_model'):
 
 
 if __name__ == '__main__':
-    
+
     W_net,row_labels,col_labels = quick_net()
 
     # Put everything in a dictionary
