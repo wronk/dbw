@@ -62,9 +62,9 @@ lesion_is_node = True  # Set if node or edge lesion
 
 # Find areas to lesion. node_btwn, ccoeff, degree, edge_btwn
 # out, in, in, out_in
-lesion_attr = 'degree_labels'
-bilateral = True
-num_lesions = 30
+lesion_attr = 'ccoeff_labels'
+bilateral = False
+num_lesions = 150
 
 ###################################
 
@@ -82,11 +82,14 @@ for i in range(num_lesions):
         # Find target indices (relative to weight matrix)
         # Unilateral  0:1, 1:2, 2:3
         # Bilateral   0:2, 2:4, 4:6
-        target_inds = [row_labels.index(t) for t in
+        target_inds = [l for l in
                        sorted_areas[lesion_attr][i * (bilateral + 1):
                                                  (i + 1) * (bilateral + 1)]]
+
         # Call lesion function, update weight mat
         W_lesion_dict = network_gen.lesion_node(net_dict_list[-1], target_inds)
+        print 'Removed ' + str(target_inds) + ', Weight matrix size: ' + \
+            str(W_lesion_dict['data'].shape)
 
     else:
         # Find names of nodes between target edges
@@ -117,7 +120,7 @@ for i in range(num_lesions):
 if show_whole_stats:
 
     stats_to_graph = ['avg_shortest_path', 'avg_eccentricity', 'avg_ccoeff',
-                      'avg_node_btwn', 'avg_edge_btwn']
+                      'avg_node_btwn', 'avg_edge_btwn', 'isolates']
 
     # Construct matrix out of stats
     stat_mat = np.zeros((len(net_dict_list), len(stats_to_graph)))
@@ -135,6 +138,7 @@ if show_whole_stats:
             axes[ai / 3, ai % 3].set_title('Lesion by ' + lesion_attr)
         if(ai / 3 == 1):
             axes[ai / 3, ai % 3].set_xlabel('Number of Lesions')
+    plt.show()
 
 if show_area_stats:
     feats_lists = [[['degree', 'node_btwn'], ['degree', 'ccoeff']]]
