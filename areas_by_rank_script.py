@@ -8,9 +8,7 @@ Analyze properties of specific brain areas with extreme ranks according to
 specific criteria.
 """
 
-import pprint as pp
 import numpy as np
-import networkx as nx
 import matplotlib.pyplot as plt
 
 import collect_areas
@@ -47,27 +45,27 @@ if calc_nets:
     G = network_gen.import_weights_to_graph(W_net_dict)
 
     # Collect & sort areas & edges according to various attributes
-    sorted_areas = collect_areas.collect_and_sort(G,W_net,labels=row_labels,
-                                                  print_out=True)
+    sorted_areas = collect_areas.collect_and_sort(G, W_net, labels=row_labels,
+                                                  print_out=False)
 
 if calc_features:
     # Compute feature dictionary for all areas
-    area_dict = area_compute.get_feature_dicts(G.nodes(),G,W_net,row_labels)
+    area_dict = area_compute.get_feature_dicts(G.nodes(), G, W_net, row_labels)
 
 if show_example_plots:
     # Visualize individual areas & their cxns
     num_top_deg = 1
     for top_deg_idx in [1]:
-        # Get pair of areas
+        # Get pair of neighbors for each area
         area0 = sorted_areas['ccoeff_labels'][2 * top_deg_idx]
-        area1 = sorted_areas['ccoeff_labels'][2 * top_deg_idx +1] # Get neighbors for each area
+        area1 = sorted_areas['ccoeff_labels'][2 * top_deg_idx + 1]
         neighbors0 = area_dict[area0]['neighbors']
         neighbors1 = area_dict[area1]['neighbors']
         # Get edges for each area
-        edges0 = [(area0,areaX) for areaX in neighbors0]
-        edges1 = [(area1,areaX) for areaX in neighbors1]
+        edges0 = [(area0, areaX) for areaX in neighbors0]
+        edges1 = [(area1, areaX) for areaX in neighbors1]
         # Put areas and neighbors together & remove duplicates
-        nodes = [area0,area1] + neighbors0 + neighbors1
+        nodes = [area0, area1] + neighbors0 + neighbors1
         edges = edges0 + edges1
         nodes = list(np.unique(nodes))
         edges = list(np.unique(edges))
@@ -89,18 +87,21 @@ if show_example_plots:
         # Get logical indices of area nodes
         neighbor_idxs = np.array([name in nodes for name in all_nodes])
         area_idxs = np.array([name in [area0, area1] for name in all_nodes])
-        # Set sizes & alphas
+
+        # Set sizes, colors, and alphas
         node_sizes = all_vols
-        node_alphas = .25 * np.ones((len(all_nodes),), dtype=float)  # Whole brain
+        edge_sizes = 2 * np.ones((len(edges),))
+
+        node_colors = np.array(['WhiteSmoke' for node_idx in
+                                range(len(all_nodes))])
+        node_colors[neighbor_idxs] = '#00B200'
+        node_colors[area_idxs] = 'DodgerBlue'
+        edge_colors = np.array(['#1565B2' for edge_idx in range(len(edges))])
+
+        node_alphas = .2 * np.ones((len(all_nodes),), dtype=float)
         node_alphas[neighbor_idxs] = .5
         node_alphas[area_idxs] = .8
-        edge_sizes = 2 * np.ones((len(edges),))
-        edge_alphas = .5 * np.ones((len(edges),), dtype=float)
-        # Specify colors
-        node_colors = np.array(['k' for node_idx in range(len(all_nodes))])
-        node_colors[neighbor_idxs] = 'r'
-        node_colors[area_idxs] = 'b'
-        edge_colors = np.array(['b' for edge_idx in range(len(edges))])
+        edge_alphas = .6 * np.ones((len(edges),), dtype=float)
 
         # Plot 3D nodes
         network_viz.plot_3D_network(node_names=nodes,
@@ -114,12 +115,13 @@ if show_example_plots:
                                     edge_colors=edge_colors,
                                     edge_alpha=edge_alphas,
                                     edge_sizes=edge_sizes,
-                                    save_movie=True)
+                                    save_movie='./movie/images/')
 
 if show_stat_plots:
-    feats_lists = [[['inj_volume','degree'],['inj_volume','out_deg']],
-                   [['degree','node_btwn'],['degree','ccoeff']]]
+    feats_lists = [[['inj_volume', 'degree'], ['inj_volume', 'out_deg']],
+                   [['degree', 'node_btwn'], ['degree', 'ccoeff']]]
     for feats in feats_lists:
-        fig,axs = plt.subplots(1,len(feats))
-        for ax_idx,ax in enumerate(axs):
-            area_plot.scatter_2D(ax,area_dict,feats[ax_idx][0],feats[ax_idx][1],s=50,c='r')
+        fig, axs = plt.subplots(1, len(feats))
+        for ax_idx, ax in enumerate(axs):
+            area_plot.scatter_2D(ax, area_dict, feats[ax_idx][0],
+                                 feats[ax_idx][1], s=50, c='r')
