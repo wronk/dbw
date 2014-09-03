@@ -108,7 +108,7 @@ def whole_graph_metrics(graph, weighted=False):
     graph_metrics = {}
 
     # Shortest average path length
-    graph_metrics['avg_shortest_avg_path'] = \
+    graph_metrics['avg_shortest__path'] = \
         nx.average_shortest_path_length(graph)
 
     # Average eccentricity
@@ -120,11 +120,13 @@ def whole_graph_metrics(graph, weighted=False):
         nx.average_clustering(graph, weight=weighted, count_zeros=True)
 
     # Average node betweeness
+    avg_node_btwn_dict = nx.betweenness_centrality(graph, normalized=True)
     graph_metrics['avg_node_btwn'] = \
-        nx.betweenness_centrality(graph, normalized=True)
+        np.mean(np.array(avg_node_btwn_dict.values()))
 
     # Average edge betweeness
+    avg_edge_btwn_dict = nx.edge_betweenness_centrality(graph, normalized=True)
     graph_metrics['avg_edge_btwn'] = \
-        nx.edge_betweenness_centrality(graph, normalized=True)
+        np.mean(np.array(avg_edge_btwn_dict.values()))
 
     return graph_metrics
