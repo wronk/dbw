@@ -95,7 +95,7 @@ def lesion_node(graph_dict, idxs):
     # the row & column corresponding to that index to zero
     lesion_dict = deepcopy(graph_dict)
     for node_name in idxs:
-        a_idx = graph_dict['row_labels'].index(node_name)
+        a_idx = lesion_dict['row_labels'].index(node_name)
 
         # Count how many connections were lost due to the lesion
         num_cxns_lost += ((graph_dict['data'][:, a_idx] > 0).sum() +
@@ -104,8 +104,8 @@ def lesion_node(graph_dict, idxs):
         lesion_dict['data'] = np.delete(lesion_dict['data'], a_idx, axis=0)
         lesion_dict['data'] = np.delete(lesion_dict['data'], a_idx, axis=1)
 
-        lesion_dict['row_labels'].pop(a_idx)
-        lesion_dict['col_labels'].pop(a_idx)
+        print(lesion_dict['row_labels'].pop(a_idx))
+        print(lesion_dict['col_labels'].pop(a_idx))
 
     lesion_dict['num_cxns_lost'] = num_cxns_lost
 
