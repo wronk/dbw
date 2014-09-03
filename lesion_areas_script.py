@@ -18,6 +18,7 @@ import area_compute
 import network_viz
 import area_plot
 import plot_net
+import network_compute
 from copy import deepcopy
 
 # Network generation parameters
@@ -26,7 +27,8 @@ w_th = 0  # Weight-value threshold
 
 calc_features = True
 show_example_plots = True
-show_stat_plots = True
+show_area_stats = False
+show_whole_stats = True
 
 ###################################
 ### Create network
@@ -62,13 +64,17 @@ lesion_is_node = True  # Set if node or edge lesion
 # out, in, in, out_in
 lesion_attr = 'degree_labels'
 bilateral = True
-num_lesions = 1
+num_lesions = 30
+
+###################################
 
 # Record pre-lesioned network statistics
-lesion_results = [area_compute.get_feature_dicts(G.nodes(), G, W_net,
-                                                 row_labels)]
+#lesion_results = [area_compute.get_feature_dicts(G.nodes(), G, W_net,
+#                                                 row_labels)]
+
 graph_list = [deepcopy(G)]
-weight_list = [deepcopy(W_net)]
+net_dict_list = [deepcopy(W_net_dict)]
+graph_stats = [network_compute.whole_graph_metrics(G)]
 
 # Lesion areas
 for i in range(num_lesions):
@@ -80,7 +86,7 @@ for i in range(num_lesions):
                        sorted_areas[lesion_attr][i * (bilateral + 1):
                                                  (i + 1) * (bilateral + 1)]]
         # Call lesion function, update weight mat
-        W_lesion, cxns = network_gen.lesion_node(weight_list[-1], target_inds)
+        W_lesion_dict = network_gen.lesion_node(net_dict_list[-1], target_inds)
 
     else:
         # Find names of nodes between target edges
@@ -91,23 +97,46 @@ for i in range(num_lesions):
         target_edge_inds = [[row_labels.index(n_from), col_labels.index(n_to)]
                             for n_from, n_to in target_edges]
         # Call lesion function, get copy of updated weight mat
-        W_lesion, cxns = network_gen.lesion_edge(graph_list[-1]['data'],
+        W_lesion, cxns = network_gen.lesion_edge(net_dict_list[-1]['data'],
                                                  target_inds)
 
-    # TODO: modify to delete the labels as well
     # Convert to networkx graph object
-    W_lesion_dict = {'data': W_lesion,
-                     'row_labels': W_net_dict['row_labels'],
-                     'col_labels': W_net_dict['col_labels']}
     graph_list.append(network_gen.import_weights_to_graph(W_lesion_dict,
                                                           directed=False))
-    weight_list.append(deepcopy(W_lesion))
+    net_dict_list.append(deepcopy(W_lesion_dict))
 
-    # Compute feature dictionary for all areas
+    # Compute statistics for all areas
+    '''
     lesion_results.append(area_compute.get_feature_dicts(
-        graph_list[-1].nodes(), graph_list[-1], weight_list[-1], row_labels))
+        graph_list[-1].nodes(), graph_list[-1], net_dict_list[-1]['data'],
+        net_dict_list[-1]['row_labels']))
+    '''
+    graph_stats.append(network_compute.whole_graph_metrics(graph_list[-1]))
 
-if show_stat_plots:
+
+if show_whole_stats:
+
+    stats_to_graph = ['avg_shortest_path', 'avg_eccentricity', 'avg_ccoeff',
+                      'avg_node_btwn', 'avg_edge_btwn']
+
+    # Construct matrix out of stats
+    stat_mat = np.zeros((len(net_dict_list), len(stats_to_graph)))
+
+    for gi in range(len(graph_stats)):
+        for si, stat in enumerate(stats_to_graph):
+            stat_mat[gi, si] = graph_stats[gi][stats_to_graph[si]]
+
+    fig, axes = plt.subplots(nrows=2, ncols=3, sharex=True)
+    for ai in range(len(stats_to_graph)):
+        axes[ai / 3, ai % 3].scatter(range(len(graph_stats)), stat_mat[:, ai])
+        axes[ai / 3, ai % 3].set_ylabel(stats_to_graph[ai])
+        axes[ai / 3, ai % 3].set_xlim([0, num_lesions + 1])
+        if(ai / 3 == 0 and ai % 3 == 1):
+            axes[ai / 3, ai % 3].set_title('Lesion by ' + lesion_attr)
+        if(ai / 3 == 1):
+            axes[ai / 3, ai % 3].set_xlabel('Number of Lesions')
+
+if show_area_stats:
     feats_lists = [[['degree', 'node_btwn'], ['degree', 'ccoeff']]]
     #[['inj_volume', 'degree'], ['inj_volume', 'out_deg']]
     for gi, g in enumerate(graph_list):
