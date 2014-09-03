@@ -116,6 +116,7 @@ def whole_graph_metrics(graph, weighted=False):
     graph_metrics['avg_eccentricity'] = np.mean(np.array(ecc_dict.values()))
 
     # Average clustering coefficient
+    # NOTE: Option to include or exclude zeros
     graph_metrics['avg_ccoeff'] = \
         nx.average_clustering(graph, weight=weighted, count_zeros=True)
 
@@ -128,5 +129,8 @@ def whole_graph_metrics(graph, weighted=False):
     avg_edge_btwn_dict = nx.edge_betweenness_centrality(graph, normalized=True)
     graph_metrics['avg_edge_btwn'] = \
         np.mean(np.array(avg_edge_btwn_dict.values()))
+
+    # Number of isolates
+    graph_metrics['isolates'] = len(nx.isolates(graph))
 
     return graph_metrics
