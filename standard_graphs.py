@@ -10,9 +10,10 @@ import plot_net
 import matplotlib.pyplot as plt
 import numpy as np
 import network_gen
+import aux_random_graphs
 
 # Random graph colors
-RGCs = {'ER':'k','WS':'g','BA':'r'}
+RGCs = {'ER':'k','WS':'g','BA':'r','BA_cc':'b'}
 
 PLOT_HISTS = True
 
@@ -45,6 +46,7 @@ N = len(G.nodes())
 G_ER = nx.erdos_renyi_graph(N,0.085)
 G_BA = nx.barabasi_albert_graph(N,19)
 G_WS = nx.watts_strogatz_graph(N,36,0.159)
+G_BA_cc = aux_random_graphs.scale_free_cc_graph(n=N,m=25,k0=3,p=np.array([1]),fp=np.array([1]))
 
 # Here you can specify which plotting function you want to run.
 #x   It needs to take a single graph as input!
@@ -85,20 +87,24 @@ plt.show()
 if PLOT_HISTS:
     # Plot degree histogram overlaid w/ random graph degree histograms
     bins = np.linspace(0,140,50)
-    fig,ax = plot_net.plot_degree_distribution(G,bins=bins)
+    fig,ax = plt.subplots(1,1,facecolor='w')
+    plot_net.plot_degree_distribution(ax,G,bins=bins)
     plot_net.line_hist(ax,G_ER,'degree',bins=bins,c=RGCs['ER'],lw=3)
     plot_net.line_hist(ax,G_WS,'degree',bins=bins,c=RGCs['WS'],lw=3)
     plot_net.line_hist(ax,G_BA,'degree',bins=bins,c=RGCs['BA'],lw=3)
+    plot_net.line_hist(ax,G_BA_cc,'degree',bins=bins,c=RGCs['BA_cc'],lw=3)
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
                 ax.get_xticklabels() + ax.get_yticklabels()):
                     item.set_fontsize(16)
     
     # Plot clustering coeff histogram overlaid w/ random graph histograms
     bins = np.linspace(0,1,50)
-    fig,ax = plot_net.plot_clustering_coeff_pdf(G,bins=bins)
+    fig,ax = plt.subplots(1,1,facecolor='w')
+    plot_net.plot_clustering_coeff_pdf(ax,G,bins=bins)
     plot_net.line_hist(ax,G_ER,'ccoeff',bins=bins,c=RGCs['ER'],lw=3)
     plot_net.line_hist(ax,G_WS,'ccoeff',bins=bins,c=RGCs['WS'],lw=3)
     plot_net.line_hist(ax,G_BA,'ccoeff',bins=bins,c=RGCs['BA'],lw=3)
+    plot_net.line_hist(ax,G_BA_cc,'ccoeff',bins=bins,c=RGCs['BA_cc'],lw=3)
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
                 ax.get_xticklabels() + ax.get_yticklabels()):
                     item.set_fontsize(16)
@@ -109,6 +115,7 @@ if PLOT_HISTS:
     plot_net.line_hist(ax,G_ER,'node_btwn',bins=bins,c=RGCs['ER'],lw=3)
     plot_net.line_hist(ax,G_WS,'node_btwn',bins=bins,c=RGCs['WS'],lw=3)
     plot_net.line_hist(ax,G_BA,'node_btwn',bins=bins,c=RGCs['BA'],lw=3)
+    plot_net.line_hist(ax,G_BA_cc,'node_btwn',bins=bins,c=RGCs['BA_cc'],lw=3)
     ax.set_xlim(0,.02)
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
                 ax.get_xticklabels() + ax.get_yticklabels()):

@@ -41,11 +41,12 @@ def scale_free_cc_graph(n=426,m=12,p=np.array([0,1.]),
     
     # Add initial edges
     for node in range(n0):
-        # Choose k0 connections
+        # Choose k connections
+        k = np.random.random_integers(1,k0)
         available_nodes = np.array(range(0,node) + range(node+1,n0))
-        selected_nodes = np.random.permutation(available_nodes)[:k0]
+        selected_nodes = np.random.permutation(available_nodes)[:k]
         # Add edges
-        G.add_edges_from(zip([node]*k0,selected_nodes))
+        G.add_edges_from(zip([node]*k,selected_nodes))
         
     # Grow graph
     for node in range(n0,n):
