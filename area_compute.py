@@ -28,11 +28,11 @@ INJ_MASK_UNION = Mask.union(*INJ_MASKS)
 
 def get_feature_dicts(area_list,G,W,W_labels):
     """Create a feature dictionary for each of a list of areas.
-    
+
     Returns:
         dict of dicts
             keys are labels, values are feature dictionaries"""
-    
+
     # Get value that are easier to compute all at once
     node_btwn_dict = nx.betweenness_centrality(G)
     ccoeff_dict = nx.clustering(G)
@@ -59,7 +59,7 @@ def get_feature_dicts(area_list,G,W,W_labels):
         feat_dict['inj_volume'] = float(len(inj_mask_intsct.mask[0]))
         # Find percent volume covered by injection masks
         feat_dict['inj_percent'] = feat_dict['inj_volume']/feat_dict['volume']
-        
+
         # Get graph theory scalars
         feat_dict['node_btwn'] = node_btwn_dict[area]
         feat_dict['degree'] = G.degree()[area]
@@ -69,8 +69,8 @@ def get_feature_dicts(area_list,G,W,W_labels):
         feat_dict['in_deg'] = in_dict[area]
         # Graph theory lists
         feat_dict['neighbors'] = G.neighbors(area)
-        
+
         # Associate this feature dictionary to this area
         area_dict[area] = feat_dict.copy()
-        
+
     return area_dict
