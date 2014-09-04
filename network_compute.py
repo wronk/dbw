@@ -109,7 +109,7 @@ def whole_graph_metrics(graph, weighted=False):
 
     # Shortest average path length
     graph_metrics['avg_shortest_path'] = \
-        nx.average_shortest_path_length(graph)
+        nx.average_shortest_path_length(graph, weight=weighted)
 
     # Average eccentricity
     ecc_dict = nx.eccentricity(graph)

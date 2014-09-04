@@ -7,14 +7,13 @@ network_viz.py
 '''
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from os import path as op
 
 
 def plot_3D_network(node_names, node_positions, node_label_set, edges,
                     edge_label_set, node_sizes=None, node_colors=None,
                     node_alpha=None, edge_sizes=None, edge_colors=None,
-                    edge_alpha=None, save_movie=False):
+                    edge_alpha=None, save_fpath=None):
     '''
     Plot clustering coefficient probability density function
 
@@ -40,6 +39,8 @@ def plot_3D_network(node_names, node_positions, node_label_set, edges,
         size of each edge's line
     edge_colors : list | None
         color of each edge's line
+    save_fpath : str | None
+        name of filepath to save images (if not None)
 
     Returns
     --------
@@ -50,12 +51,12 @@ def plot_3D_network(node_names, node_positions, node_label_set, edges,
     '''
 
     # Png params
-    movie_path = './movie/images/'
-    elev = 15.  # elevation angle for movie
+    elev = 20.  # elevation angle for movie
 
     # Initialize figure
     fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+    ax = fig.add_subplot(111, projection='3d', axisbg='black')
+    fig.set_facecolor('black')
     node_label_offset = 0.05
     edge_label_offset = 0.05
 
@@ -115,12 +116,15 @@ def plot_3D_network(node_names, node_positions, node_label_set, edges,
     ax.set_xlabel('A <-> P')
     ax.set_ylabel('L <-> M <-> L')
     #ax.set_zlabel('S <-> I')
+    ax.set_axis_off()
+
     ax.set_title('Top Clustering Coefficients')
 
-    if(save_movie):
-        for ai, ang in enumerate(np.arange(0, 360, 3)):
+    if(save_fpath is not None):
+        for ai, ang in enumerate(np.arange(-270, 90, 3)):
             ax.view_init(elev=elev, azim=ang)
-            plt.savefig(op.join(movie_path, 'mov_%03i.png' % ai))
+            plt.savefig(op.join(save_fpath, 'mov_%03i.png' % ai), ec='black',
+                        fc='black', bbox_inches='tight', pad_inches=0.)
 
     return fig, ax
 
@@ -168,7 +172,7 @@ if __name__ == '__main__':
 
     fig, ax = plot_3D_network(node_names, node_positions, node_labels, edges,
                               edge_labels, node_sizes, node_colors, node_alpha,
-                              edge_sizes, edge_colors, edge_alpha, True)
+                              edge_sizes, edge_colors, edge_alpha, False)
     fig, ax = plot_3D_network(node_names, node_positions, node_labels, edges,
                               edge_labels)
 

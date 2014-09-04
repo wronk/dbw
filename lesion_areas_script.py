@@ -8,7 +8,6 @@ Analyze properties of specific brain areas with extreme ranks according to
 specific criteria.
 """
 
-import pprint as pp
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -20,49 +19,91 @@ import area_plot
 import plot_net
 import network_compute
 from copy import deepcopy
+import networkx as nx
 
 # Network generation parameters
 p_th = .01  # P-value threshold
 w_th = 0  # Weight-value threshold
 
-calc_features = True
-show_example_plots = True
-show_area_stats = False
-show_whole_stats = True
-
-###################################
-### Create network
 # Set relative directory path to linear model & ontology
 dir_LM = '../friday-harbor/linear_model'
 
-# Load weights & p-values
-W, P, row_labels, col_labels = network_gen.load_weights(dir_LM)
-# Threshold weights according to weights & p-values
-W_net, mask = network_gen.threshold(W, P, p_th=p_th, w_th=w_th)
+calc_features = True
+show_example_plots = True
+show_whole_stats = True
+show_area_stats = False
 
-# Set weights to zero if they don't satisfy threshold criteria
-W_net[W_net == -1] = 0.
-# Set diagonal weights to zero
-np.fill_diagonal(W_net, 0)
+network_type = 'allen'
+###################################
+### Create network
+if network_type is 'allen':
+    # Load weights & p-values
+    W, P, row_labels, col_labels = network_gen.load_weights(dir_LM)
+    # Threshold weights according to weights & p-values
+    W_net, mask = network_gen.threshold(W, P, p_th=p_th, w_th=w_th)
 
-# Put everything in a dictionary
-W_net_dict = {'row_labels': row_labels, 'col_labels': col_labels,
-              'data': W_net}
+    # Set weights to zero if they don't satisfy threshold criteria
+    W_net[W_net == -1] = 0.
+    # Set diagonal weights to zero
+    np.fill_diagonal(W_net, 0)
 
-# Create networkx graph
-G = network_gen.import_weights_to_graph(W_net_dict)
+    # Put everything in a dictionary
+    net_dict = {'row_labels': row_labels, 'col_labels': col_labels,
+                'data': W_net}
+    # Create networkx graph
+    G = network_gen.import_weights_to_graph(net_dict)
+
+    W_net = nx.adjacency_matrix(G, nodelist=row_labels).toarray()
+    net_dict['data'] = W_net
+
+elif network_type == 'powerlaw_cluster':
+    n = 426
+    row_labels = range(n)
+    col_labels = range(n)
+
+    # Create networkx graph
+    temp_G = nx.powerlaw_cluster_graph(n=n, m=20, p=.33)
+
+    # Set weights for all the egdes
+    wts = {}
+    for e in temp_G.edges():
+        wts[e] = 1.
+    nx.set_edge_attributes(temp_G, 'weight', wts)
+
+    W_net = nx.adjacency_matrix(temp_G, nodelist=row_labels).toarray()
+
+    # Put everything in a dictionary
+    net_dict = {'row_labels': row_labels, 'col_labels': col_labels,
+                'data': W_net}
+    G = network_gen.import_weights_to_graph(net_dict)
+
+'''
+elif network_type == 'small_world':
+    # Load weights & p-values
+
+elif network_type == 'random':
+    # Load weights & p-values
+
+elif network_type == 'scale_free':
+    # Load weights & p-values
+
+
+'''
+
+###################################
 
 # Collect & sort areas & edges according to various attributes
 sorted_areas = collect_areas.collect_and_sort(G, W_net, labels=row_labels,
-                                              print_out=True)
+                                              print_out=False)
 
 ###################################
-### Lesion areas num_lesions = 1  # Set number of lesions
+### Lesion areas
+# Set number of lesions
 lesion_is_node = True  # Set if node or edge lesion
 
-# Find areas to lesion. node_btwn, ccoeff, degree, edge_btwn
-# out, in, in, out_in
-lesion_attr = 'ccoeff_labels'
+targeted_attack = False
+# Find areas to lesion. node_btwn, ccoeff, degree (append with _labels)
+lesion_attr = 'node_btwn_labels'
 bilateral = False
 num_lesions = 150
 
@@ -73,7 +114,7 @@ num_lesions = 150
 #                                                 row_labels)]
 
 graph_list = [deepcopy(G)]
-net_dict_list = [deepcopy(W_net_dict)]
+net_dict_list = [deepcopy(net_dict)]
 graph_stats = [network_compute.whole_graph_metrics(G)]
 
 # Lesion areas
@@ -82,16 +123,23 @@ for i in range(num_lesions):
         # Find target indices (relative to weight matrix)
         # Unilateral  0:1, 1:2, 2:3
         # Bilateral   0:2, 2:4, 4:6
-        target_inds = [l for l in
+        if targeted_attack:
+            targets = [l for l in
                        sorted_areas[lesion_attr][i * (bilateral + 1):
                                                  (i + 1) * (bilateral + 1)]]
+        else:
+            targets = np.random.choice(sorted_areas[lesion_attr],
+                                       size=(1 + bilateral), replace=False)
+            for t in targets:
+                sorted_areas[lesion_attr].remove(t)
 
         # Call lesion function, update weight mat
-        W_lesion_dict = network_gen.lesion_node(net_dict_list[-1], target_inds)
-        print 'Removed ' + str(target_inds) + ', Weight matrix size: ' + \
+        W_lesion_dict = network_gen.lesion_node(net_dict_list[-1], targets)
+        print 'Removed ' + str(targets) + ', Weight matrix size: ' + \
             str(W_lesion_dict['data'].shape)
 
     else:
+        # TODO: Edge attack untested
         # Find names of nodes between target edges
         target_edges = [[n_from, n_to] for n_from, n_to in
                         sorted_areas[lesion_attr][0: num_lesions *
@@ -101,21 +149,21 @@ for i in range(num_lesions):
                             for n_from, n_to in target_edges]
         # Call lesion function, get copy of updated weight mat
         W_lesion, cxns = network_gen.lesion_edge(net_dict_list[-1]['data'],
-                                                 target_inds)
+                                                 targets)
 
     # Convert to networkx graph object
     graph_list.append(network_gen.import_weights_to_graph(W_lesion_dict,
                                                           directed=False))
     net_dict_list.append(deepcopy(W_lesion_dict))
 
-    # Compute statistics for all areas
     '''
+    # Compute statistics for all areas
     lesion_results.append(area_compute.get_feature_dicts(
         graph_list[-1].nodes(), graph_list[-1], net_dict_list[-1]['data'],
         net_dict_list[-1]['row_labels']))
     '''
-    graph_stats.append(network_compute.whole_graph_metrics(graph_list[-1]))
-
+    graph_stats.append(network_compute.whole_graph_metrics(graph_list[-1],
+                                                           weighted=False))
 
 if show_whole_stats:
 
