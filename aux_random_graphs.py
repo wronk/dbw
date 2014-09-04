@@ -12,6 +12,17 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 
+def dist_mat(centroids):
+    """Compute a distance matrix from 3D centroids."""
+    
+    D = np.zeros((centroids.shape[0],centroids.shape[0]),dtype=float)
+    for r_idx in range(D.shape[0]):
+        for c_idx in range(D.shape[1]):
+            d = np.sqrt(np.sum((centroids[r_idx,:] - centroids[c_idx])**2))
+            D[r_idx,c_idx] = d
+    return D
+    
+    
 def scale_free_cc_graph(n=426,m=12,p=np.array([0,1.]),
                         fp=np.array([.5,.5]),k0=None):
     """Generate a random graph with both scale-free properties and a tunable
@@ -79,6 +90,53 @@ def scale_free_cc_graph(n=426,m=12,p=np.array([0,1.]),
         
     return G
     
+
+def biophysical_graph(N=426,N_edges=7804,L=1.,dims=[10.,10,10]):
+    """Create a biophysically inspired graph. Connection probabilities depend
+    on distance & degree.
+    
+    Returns:
+        Networkx graph object."""
+    # Pick node positions & calculate distance matrix
+    centroids = np.random.uniform([0,0,0],dims,(N,3))
+    # Calculate distance matrix
+    D = dist_mat(centroids)
+    D_exp = np.exp(-D/L)
+    # Initialize diagonal adjacency matrix
+    A = np.eye(N,dtype=float)
+    # Make graph object
+    G = nx.Graph()
+    G.add_nodes_from(np.arange(N))
+    fig,ax = plt.subplots(1,1)
+    # Randomly add edges
+    for edge in range(N_edges):
+        # Update degree list
+        degs = A.sum(1)
+        # Pick random node to draw edge from
+        node0_idx = np.random.random_integers(0,N-1)
+        # Continue if this node is already fully connected
+        if degs[node0_idx] == N-1:
+            print 'whoops'
+            continue
+        # Make list of impossible connections
+        unavail_mask = A[node0_idx,:] > 0
+        # Set unconnectable node degrees to zero to get zero cxn prob
+        degs[unavail_mask] = 0
+        # Calculate unnormalized connection probabilities
+        P_un = degs*D_exp[node0_idx,:]
+        # Normalize probabilities
+        P = P_un/float(P_un.sum())
+        ax.cla()
+        ax.bar(np.arange(len(P)),P)
+        plt.draw()
+        # Sample node from distribution
+        node1_idx = np.random.choice(np.arange(N),p=P)
+        # Add edge to graph
+        G.add_edge(node0_idx,node1_idx,{'d':D[node0_idx,node1_idx]})
+        # Add edge to adjacency matrix
+        A[node0_idx,node1_idx] = 1
+        A[node1_idx,node0_idx] = 1
+    return G
 
 
 if __name__ == '__main__':
