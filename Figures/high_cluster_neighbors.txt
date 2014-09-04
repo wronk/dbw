@@ -1,0 +1,46 @@
+CA_1_L: 
+
+clustering = .844
+degree = 10
+neighbors:
+[u'MS_L',
+ u'ENTl_L',
+ u'CA2_L',
+ u'CA3_R',
+ u'DG_L',
+ u'CA3_L',
+ u'MS_R',
+ u'NDB_L',
+ u'SUBd_L',
+ u'ENTm_L']
+
+MOB_L:
+
+clustering = .733
+degree = 6
+neighbors:
+[u'AON_L', 
+ u'AOB_L', 
+ u'MA_L', 
+ u'AON_R', 
+ u'PIR_L', 
+ u'AAA_L']
+
+NLOT_L:
+
+clustering = .667
+degree = 13
+neighbors:
+[u'RE_R',
+ u'COAp_L',
+ u'ENTl_L',
+ u'COAa_L',
+ u'BLA_R',
+ u'PAA_L',
+ u'OT_L',
+ u'PIR_L',
+ u'TR_L',
+ u'BLA_L',
+ u'NDB_L',
+ u'TT_L',
+ u'MS_R']

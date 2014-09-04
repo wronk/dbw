@@ -28,15 +28,15 @@ INJ_MASK_UNION = Mask.union(*INJ_MASKS)
 
 def get_feature_dicts(area_list,G,W,W_labels):
     """Create a feature dictionary for each of a list of areas.
-    
+
     Returns:
         dict of dicts
             keys are labels, values are feature dictionaries"""
-    
+
     # Get value that are easier to compute all at once
     node_btwn_dict = nx.betweenness_centrality(G)
     ccoeff_dict = nx.clustering(G)
-    out_in_dict = network_compute.out_in_ratio(W,W_labels)
+    out_dict, in_dict, out_in_dict = network_compute.out_in(W,W_labels,binarized=False)
 
     # Make area dictionary
     area_dict = {}
@@ -59,16 +59,31 @@ def get_feature_dicts(area_list,G,W,W_labels):
         feat_dict['inj_volume'] = float(len(inj_mask_intsct.mask[0]))
         # Find percent volume covered by injection masks
         feat_dict['inj_percent'] = feat_dict['inj_volume']/feat_dict['volume']
-        
+
         # Get graph theory scalars
         feat_dict['node_btwn'] = node_btwn_dict[area]
         feat_dict['degree'] = G.degree()[area]
         feat_dict['ccoeff'] = ccoeff_dict[area]
         feat_dict['out_in'] = out_in_dict[area]
+        feat_dict['out_deg'] = out_dict[area]
+        feat_dict['in_deg'] = in_dict[area]
         # Graph theory lists
         feat_dict['neighbors'] = G.neighbors(area)
-        
+
         # Associate this feature dictionary to this area
         area_dict[area] = feat_dict.copy()
-        
+
     return area_dict
+
+def get_centroids(labels):
+    """Return N x 3 array of centroids for all labels."""
+    centroids = np.zeros((len(labels),3),dtype=float)
+    for a_idx,area in enumerate(labels):
+        s_id = ONTO.structure_by_acronym(area[:-2]).structure_id
+        if area[-1] == 'L':
+            mask = ONTO.get_mask_from_id_left_hemisphere_nonzero(s_id)
+        elif area[-1] == 'R':
+            mask = ONTO.get_mask_from_id_right_hemisphere_nonzero(s_id)
+        centroids[a_idx,:] = mask.centroid
+        
+    return centroids

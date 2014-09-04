@@ -12,6 +12,7 @@ import networkx as nx
 import numpy as np
 import scipy.io as sio
 import matplotlib.pyplot as plt
+from copy import deepcopy
 
 
 def load_weights(dir_name):
@@ -54,7 +55,7 @@ def threshold(W, P, p_th=.01, w_th=0):
         weight matrix with all sub-threshold values set to -1
     """
 
-    W_net = W.copy()
+    W_net = deepcopy(W)
 
     W_mask = W <= w_th
     P_mask = P >= p_th
@@ -65,53 +66,133 @@ def threshold(W, P, p_th=.01, w_th=0):
     return W_net, mask
 
 
-def lesion(W_net, area_idxs):
-    """Simulate a simple lesion in the network."""
-    W_lesion = W_net.copy()
+def lesion_node(graph_dict, idxs):
+    '''Simulate a simple node lesion in the network and pass back copy.
 
-    # Make sure col_idxs is list
-    if not isinstance(area_idxs, list):
-        area_idxs = [area_idxs]
+    Parameters
+    ----------
+    graph_dict : dict
+        dict of weight matrix and list of labels specifying network
+    idxs : list
+        node names needing to be lesioned (set to zero in W_net)
 
-    # Loop through all area idxs & simulate lesions by setting to zero
-    # the row & column corresponding to that index
-    for a_idx in area_idxs:
-        W_lesion[:, a_idx] = 0.
-        W_lesion[a_idx, :] = 0.
+    Returns
+    -------
+    W_lesion : matrix
+        matrix with rows and columns deleted to reflect lesion
+    '''
+
+    # Make sure col_idxs is iterable
+    assert hasattr(idxs, '__iter__'), 'Lesion idxs specified not iterable'
+    assert 'data' in graph_dict.keys(), 'data not in weight matrix'
+    assert 'row_labels' in graph_dict.keys(), 'row_labels not in weight matrix'
+    assert 'col_labels' in graph_dict.keys(), 'col_labels not in weight matrix'
 
     # Count how many connections were lost due to the lesion
-    num_cxns_lost = (W_lesion - W_net < 0).sum()
+    num_cxns_lost = 0
 
-    return W_lesion, num_cxns_lost
+    # Loop through all area idxs & simulate lesions by setting
+    # the row & column corresponding to that index to zero
+    lesion_dict = deepcopy(graph_dict)
+    for node_name in idxs:
+        a_idx = lesion_dict['row_labels'].index(node_name)
+
+        # Count how many connections were lost due to the lesion
+        num_cxns_lost += ((graph_dict['data'][:, a_idx] > 0).sum() +
+                          (graph_dict['data'][a_idx, :] > 0).sum())
+
+        lesion_dict['data'] = np.delete(lesion_dict['data'], a_idx, axis=0)
+        lesion_dict['data'] = np.delete(lesion_dict['data'], a_idx, axis=1)
+
+        lesion_dict['row_labels'].pop(a_idx)
+        lesion_dict['col_labels'].pop(a_idx)
+
+    lesion_dict['num_cxns_lost'] = num_cxns_lost
+
+    return lesion_dict
 
 
-def import_weights_to_graph(weight_mat):
+def lesion_edge(graph_dict, idxs):
+    '''Simulate a simple edge lesion in the network and pass back copy.
+
+    Parameters
+    ----------
+    graph_dict : matrix
+        dict specifying matrix of weights specifying network
+    idxs : list of 2d lists | N x 2 matrix
+        row/column indices needing to be lesioned (set to zero in W_net)
+
+    Returns
+    -------
+    W_lesion : matrix
+        matrix reflecting lesion
     '''
-    Convert a weight dict into a NetworkX graph object
+
+    lesion_dict = deepcopy(graph_dict)
+
+    # Make sure col_idxs is iterable
+    assert hasattr(idxs, '__iter__'), 'Lesion specified not iterable'
+    assert 'data' in graph_dict.keys(), 'data not in weight matrix'
+    assert 'row_labels' in graph_dict.keys(), 'row_labels not in weight matrix'
+    assert 'col_labels' in graph_dict.keys(), 'col_labels not in weight matrix'
+
+    # Loop through all idxs & simulate lesions by setting # the cell indexed
+    # to zero
+    for a_idx in idxs:
+        lesion_dict['data'][a_idx[0], a_idx[1]] = 0.
+
+    # Count how many connections were lost due to the lesion
+    num_cxns_lost = np.sum(graph_dict['data'] != lesion_dict['data'])
+    lesion_dict['num_cxns_lost'] = num_cxns_lost
+
+    return lesion_dict
+
+
+def import_weights_to_graph(graph_dict, directed=False):
+    '''
+    Convert a weight/label dict into a NetworkX graph object
     '''
 
-    assert 'data' in weight_mat.keys(), 'data not in weight matrix'
-    assert 'row_labels' in weight_mat.keys(), 'row_labels not in weight matrix'
-    assert 'col_labels' in weight_mat.keys(), 'col_labels not in weight matrix'
+    assert 'data' in graph_dict.keys(), 'data not in weight matrix'
+    assert 'row_labels' in graph_dict.keys(), 'row_labels not in weight matrix'
+    assert 'col_labels' in graph_dict.keys(), 'col_labels not in weight matrix'
 
     # Initialize the graph
-    G = nx.Graph()
+    if directed:
+        G = nx.DiGraph()
+    else:
+        G = nx.Graph()
 
     # Add nodes to graph according to names
-    G.add_nodes_from(weight_mat['col_labels'])
+    G.add_nodes_from(graph_dict['row_labels'])
 
     # Add edges to list object according to names
     edges_to_add = []
-    for ri, row in enumerate(weight_mat['row_labels']):
-        for ci, col in enumerate(weight_mat['col_labels']):
-            if weight_mat['data'][ri, ci] > 0:
-                edges_to_add.append((row, col, weight_mat['data'][ri, ci]))
+    for ri, row in enumerate(graph_dict['row_labels']):
+        for ci, col in enumerate(graph_dict['col_labels']):
+            if graph_dict['data'][ri, ci] > 0:
+                edges_to_add.append((row, col, graph_dict['data'][ri, ci]))
 
     # Add list of edges to graph object
     G.add_weighted_edges_from(edges_to_add, weight='weight')
     #print G.edges()
 
     return G
+
+
+def quick_net(p_th=.01,w_th=0,dir_name='../friday-harbor/linear_model'):
+    """Quickly load and threshold the weight matrix."""
+
+    # Load weights & p-values
+    W,P,row_labels,col_labels = load_weights(dir_name)
+    # Threshold weights according to weights & p-values
+    W_net,mask = threshold(W,P,p_th=p_th,w_th=w_th)
+    # Set weights to zero if they don't satisfy threshold criteria
+    W_net[W_net==-1] = 0.
+    # Set diagonal weights to zero
+    np.fill_diagonal(W_net,0)
+
+    return W_net,row_labels,col_labels
 
 
 ## function becomes symmetric unintentionally by nature of nondirected graph
@@ -148,16 +229,8 @@ def import_weights_to_graph(weight_mat):
 
 
 if __name__ == '__main__':
-    dir_name = '../friday-harbor/linear_model'
 
-    # Load weights & p-value
-    W, P, row_labels, col_labels = load_weights(dir_name)
-    # Threshold weights according to weights & p-values
-    W_net, mask = threshold(W, P, p_th=.01)
-    # Set weights to zero if they don't satisfy threshold criteria
-    W_net[W_net == -1] = 0.
-    # Set diagonal weights to zero
-    np.fill_diagonal(W_net, 0)
+    W_net,row_labels,col_labels = quick_net()
 
     # Put everything in a dictionary
     W_net_dict = {'row_labels': row_labels, 'col_labels': col_labels,
