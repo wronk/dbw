@@ -30,13 +30,13 @@ dir_LM = '../friday-harbor/linear_model'
 
 calc_features = True
 show_example_plots = True
-show_area_stats = False
 show_whole_stats = True
+show_area_stats = False
 
 network_type = 'allen'
 ###################################
 ### Create network
-if network_type == 'allen':
+if network_type is 'allen':
     # Load weights & p-values
     W, P, row_labels, col_labels = network_gen.load_weights(dir_LM)
     # Threshold weights according to weights & p-values
@@ -58,10 +58,24 @@ if network_type == 'allen':
 
 elif network_type == 'powerlaw_cluster':
     n = 426
-    temp_names = [str(i) for i in range(n)]
-    G = nx.powerlaw_cluster_graph(n=n, m=5, p=0.5)
-    net_dict = {'row_labels': temp_names, 'col_labels': temp_names,
-                'data': nx.adjacency_matrix(G)}
+    row_labels = range(n)
+    col_labels = range(n)
+
+    # Create networkx graph
+    temp_G = nx.powerlaw_cluster_graph(n=n, m=20, p=.33)
+
+    # Set weights for all the egdes
+    wts = {}
+    for e in temp_G.edges():
+        wts[e] = 1.
+    nx.set_edge_attributes(temp_G, 'weight', wts)
+
+    W_net = nx.adjacency_matrix(temp_G, nodelist=row_labels).toarray()
+
+    # Put everything in a dictionary
+    net_dict = {'row_labels': row_labels, 'col_labels': col_labels,
+                'data': W_net}
+    G = network_gen.import_weights_to_graph(net_dict)
 
 '''
 elif network_type == 'small_world':
@@ -83,15 +97,15 @@ sorted_areas = collect_areas.collect_and_sort(G, W_net, labels=row_labels,
                                               print_out=False)
 
 ###################################
-### Lesion areas num_lesions = 1  # Set number of lesions
+### Lesion areas
+# Set number of lesions
 lesion_is_node = True  # Set if node or edge lesion
 
-# Find areas to lesion. node_btwn, ccoeff, degree, edge_btwn
-# out, in, in, out_in
-targeted_attack = True
-lesion_attr = 'ccoeff_labels'
+targeted_attack = False
+# Find areas to lesion. node_btwn, ccoeff, degree (append with _labels)
+lesion_attr = 'node_btwn_labels'
 bilateral = False
-num_lesions = 3
+num_lesions = 150
 
 ###################################
 
@@ -116,6 +130,8 @@ for i in range(num_lesions):
         else:
             targets = np.random.choice(sorted_areas[lesion_attr],
                                        size=(1 + bilateral), replace=False)
+            for t in targets:
+                sorted_areas[lesion_attr].remove(t)
 
         # Call lesion function, update weight mat
         W_lesion_dict = network_gen.lesion_node(net_dict_list[-1], targets)
@@ -146,8 +162,8 @@ for i in range(num_lesions):
         graph_list[-1].nodes(), graph_list[-1], net_dict_list[-1]['data'],
         net_dict_list[-1]['row_labels']))
     '''
-    graph_stats.append(network_compute.whole_graph_metrics(graph_list[-1]))
-
+    graph_stats.append(network_compute.whole_graph_metrics(graph_list[-1],
+                                                           weighted=False))
 
 if show_whole_stats:
 
