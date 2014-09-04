@@ -74,3 +74,16 @@ def get_feature_dicts(area_list,G,W,W_labels):
         area_dict[area] = feat_dict.copy()
 
     return area_dict
+
+def get_centroids(labels):
+    """Return N x 3 array of centroids for all labels."""
+    centroids = np.zeros((len(labels),3),dtype=float)
+    for a_idx,area in enumerate(labels):
+        s_id = ONTO.structure_by_acronym(area[:-2]).structure_id
+        if area[-1] == 'L':
+            mask = ONTO.get_mask_from_id_left_hemisphere_nonzero(s_id)
+        elif area[-1] == 'R':
+            mask = ONTO.get_mask_from_id_right_hemisphere_nonzero(s_id)
+        centroids[a_idx,:] = mask.centroid
+        
+    return centroids
