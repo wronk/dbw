@@ -14,7 +14,11 @@ import brain_optimality as bropt
 
 CALC_RANDS = False
 SHOW_WVD = False
-LOOP_OVER_NSWAPS = True
+LOOP_OVER_NSWAPS = False
+TEST_SPECIFIC_AREA_SETS = True
+area_sets = ['CTX','CTXpl','Isocortex','OLF','HPF','TH',['CTX','TH']]
+PLOT_SPECIFIC_AREA_SETS = True
+TEST_RANDOM_AREA_SETS = False
 ALL_PATHS_COST = False
 
 # Parameters
@@ -147,4 +151,73 @@ if ALL_PATHS_COST:
         ax.set_title('%d symmetric swaps, P = %.3f'%(n_swaps,p_value))
     else:
         ax.set_title('%d swaps, P = %.3f'%(n_swaps,p_value))
+    plt.draw()
+    
+if TEST_SPECIFIC_AREA_SETS:
+    # Run same analyses with specific area sets
+    p_per_set = [None for area_set in area_sets]
+    for area_set_idx,area_set in enumerate(area_sets):
+        print 'Getting areas from %s'%area_set
+        if area_set == 'Brain':
+            area_set = 'root'
+        # Get list of all areas in area set
+        area_subset = area_compute.get_area_subset(row_labels,area_set)
+        # Create weight and distance matrices for area subsets
+        area_mask = np.array([(area in area_subset) for area in row_labels])
+        centroids_subset = centroids[area_mask,:]
+        Wss = W[area_mask,:][:,area_mask]
+        Dss  = D[area_mask,:][:,area_mask]
+        n_swaps_vec = np.arange(1,11)
+        plot_idxs = np.array([])
+        p_values = np.ones((len(n_swaps_vec),))
+        
+        c0 = bropt.cost(Dss,Wss,cost_type=cost_type)
+        for ns_idx,n_swaps in enumerate(n_swaps_vec):
+            
+            print 'n_swaps = %.1f'%n_swaps
+            
+            # Iterate over random permutations of pairs of nodes (not symmetrically)
+            c = np.zeros((n_permutations,))
+            node_pairs = [None for p_idx in range(n_permutations)]
+            centroid_pairs = [None for p_idx in range(n_permutations)]
+            for p_idx in range(n_permutations):
+                if not (p_idx+1)%print_every:
+                    print 'Permutation #%d'%(p_idx+1)
+                D_swapped, node_pair, centroid_pair = \
+                    bropt.swap_nodes(Dss,area_subset,centroids_subset,n_swaps=n_swaps,sym=sym)
+                node_pairs[p_idx] = node_pair
+                centroid_pairs[p_idx] = centroid_pair
+                c[p_idx] = bropt.cost(D_swapped,Wss,cost_type=cost_type)
+            
+            p_value = ((c<=c0).sum()/float(n_permutations))
+            
+            if ns_idx in plot_idxs:
+                fig,ax = plt.subplots(1,1,facecolor='w')
+                ax.scatter(np.arange(n_permutations),c,c='r')
+                ax.plot(np.arange(n_permutations),c0*np.ones((n_permutations,)),c='b',lw=5)
+                ax.set_xlim(0,n_permutations)
+                ax.set_xlabel('Permutation #')
+                ax.set_ylabel('Cost')
+                if sym:
+                    ax.set_title('%s: %d symmetric swaps, P = %.3f'%(area_set,n_swaps,p_value))
+                else:
+                    ax.set_title('%s: %d swaps, P = %.3f'%(area_set,n_swaps,p_value))
+                for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
+                    ax.get_xticklabels() + ax.get_yticklabels()):
+                        item.set_fontsize(16)
+                plt.draw()
+            p_values[ns_idx] = p_value
+        
+        p_per_set[area_set_idx] = p_values
+
+if PLOT_SPECIFIC_AREA_SETS:
+    fig,ax = plt.subplots(1,1,facecolor='white')
+    for a_idx,p_values in enumerate(p_per_set):
+        ax.plot(n_swaps_vec, p_values, lw=3, label=area_sets[a_idx])
+    ax.set_xlabel('n_swaps')
+    ax.set_ylabel('P')
+    ax.legend(prop={'size':16})
+    for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
+        ax.get_xticklabels() + ax.get_yticklabels()):
+            item.set_fontsize(16)
     plt.draw()
