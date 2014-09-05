@@ -8,19 +8,22 @@ network_viz.py
 import numpy as np
 import matplotlib.pyplot as plt
 from os import path as op
+from mpl_toolkits.mplot3d import Axes3D
 
 
-def plot_3D_network(node_names, node_positions, node_label_set, edges,
+def plot_3D_network(ax, node_names, node_positions, node_label_set, edges,
                     edge_label_set, node_sizes=None, node_colors=None,
                     node_alpha=None, edge_sizes=None, edge_colors=None,
-                    edge_alpha=None, save_fpath=None):
+                    edge_alpha=None):
     '''
     Plot clustering coefficient probability density function
 
     Parameters
     ----------
+    ax : axis object with 3d projection
+        axis object to modify
     node_names : list
-        matrix of clustering coefficients
+        labels of nodes in graph
     node_positions : N x 3 array
         array of positions
     edges : list
@@ -39,24 +42,9 @@ def plot_3D_network(node_names, node_positions, node_label_set, edges,
         size of each edge's line
     edge_colors : list | None
         color of each edge's line
-    save_fpath : str | None
-        name of filepath to save images (if not None)
 
-    Returns
-    --------
-    fig : fig
-        figure object of distribution histogram for plotting
-    ax : ax
-        figure axis
     '''
 
-    # Png params
-    elev = 20.  # elevation angle for movie
-
-    # Initialize figure
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d', axisbg='black')
-    fig.set_facecolor('black')
     node_label_offset = 0.05
     edge_label_offset = 0.05
 
@@ -113,20 +101,14 @@ def plot_3D_network(node_names, node_positions, node_label_set, edges,
                     alpha=edge_alpha[ei], color=edge_colors[ei], ha='center')
 
     # Cleanup
-    ax.set_xlabel('A <-> P')
-    ax.set_ylabel('L <-> M <-> L')
+    #ax.set_xlabel('A <-> P')
+    #ax.set_ylabel('L <-> M <-> L')
     #ax.set_zlabel('S <-> I')
     ax.set_axis_off()
 
     ax.set_title('Top Clustering Coefficients')
 
-    if(save_fpath is not None):
-        for ai, ang in enumerate(np.arange(-270, 90, 3)):
-            ax.view_init(elev=elev, azim=ang)
-            plt.savefig(op.join(save_fpath, 'mov_%03i.png' % ai), ec='black',
-                        fc='black', bbox_inches='tight', pad_inches=0.)
-
-    return fig, ax
+    return ax
 
 if __name__ == '__main__':
 
@@ -134,6 +116,9 @@ if __name__ == '__main__':
 
     plt.close('all')
     plt.ion()
+
+    save_movie = True
+    save_fpath = './movie/images'
 
     # Set parameters
     p_th = .01  # P-value threshold
@@ -170,11 +155,25 @@ if __name__ == '__main__':
     edge_labels = [False] * len(edges)
     edge_alpha = list(np.arange(.1, 1., 1. / len(node_names)))
 
-    fig, ax = plot_3D_network(node_names, node_positions, node_labels, edges,
-                              edge_labels, node_sizes, node_colors, node_alpha,
-                              edge_sizes, edge_colors, edge_alpha, False)
-    fig, ax = plot_3D_network(node_names, node_positions, node_labels, edges,
-                              edge_labels)
+    # Initialize figure
+    fig = plt.figure()
+    ax = fig.add_subplot(121, projection='3d', axisbg='black')
+    ax2 = fig.add_subplot(122)
+    fig.set_facecolor('black')
+
+    plot_3D_network(ax, node_names, node_positions, node_labels, edges,
+                    edge_labels, node_sizes, node_colors, node_alpha,
+                    edge_sizes, edge_colors, edge_alpha)
+
+    if save_movie:
+        # Png params
+        elev = 20.  # elevation angle for movie
+        for ai, ang in enumerate(np.arange(-270, 90, 3)):
+            ax.view_init(elev=elev, azim=ang)
+            plt.savefig(op.join(save_fpath, 'mov_%03i.png' % ai), ec='black',
+                        fc='black', bbox_inches='tight', pad_inches=0.)
+    plot_3D_network(ax, node_names, node_positions, node_labels, edges,
+                    edge_labels)
 
     plt.draw()
     plt.show()
