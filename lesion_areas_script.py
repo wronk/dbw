@@ -20,6 +20,7 @@ import plot_net
 import network_compute
 from copy import deepcopy
 import networkx as nx
+import aux_random_graphs
 
 # Network generation parameters
 p_th = .01  # P-value threshold
@@ -31,9 +32,10 @@ dir_LM = '../friday-harbor/linear_model'
 calc_features = True
 show_example_plots = True
 show_whole_stats = True
+make_movie = True
 show_area_stats = False
 
-network_type = 'allen'
+network_type = 'biophysical'
 ###################################
 ### Create network
 if network_type is 'allen':
@@ -56,13 +58,25 @@ if network_type is 'allen':
     W_net = nx.adjacency_matrix(G, nodelist=row_labels).toarray()
     net_dict['data'] = W_net
 
-elif network_type == 'powerlaw_cluster':
+else:
     n = 426
     row_labels = range(n)
     col_labels = range(n)
 
     # Create networkx graph
-    temp_G = nx.powerlaw_cluster_graph(n=n, m=20, p=.33)
+    if network_type == 'powerlaw_cluster':
+        temp_G = nx.powerlaw_cluster_graph(n=n, m=19, p=1)
+    elif network_type == 'scale_free':
+        temp_G = nx.barabasi_albert_graph(n=n, m=19)
+    elif network_type == 'random':
+        temp_G = nx.erdos_renyi_graph(n, 0.123)
+    elif network_type == 'small_world':  # small_world
+        temp_G = nx.watts_strogatz_graph(n, 36, 0.159)
+    elif network_type == 'biophysical':
+         = aux_random_graphs.biophysical_graph(n, N_edges=7804,
+                                                     L=1, power=1.5, mode=0)
+    else:
+        print 'Network type not recognized'
 
     # Set weights for all the egdes
     wts = {}
@@ -72,38 +86,24 @@ elif network_type == 'powerlaw_cluster':
 
     W_net = nx.adjacency_matrix(temp_G, nodelist=row_labels).toarray()
 
-    # Put everything in a dictionary
+    # Put everything in a dictionary and convert back to graph
     net_dict = {'row_labels': row_labels, 'col_labels': col_labels,
                 'data': W_net}
     G = network_gen.import_weights_to_graph(net_dict)
-
-'''
-elif network_type == 'small_world':
-    # Load weights & p-values
-
-elif network_type == 'random':
-    # Load weights & p-values
-
-elif network_type == 'scale_free':
-    # Load weights & p-values
-
-
-'''
 
 ###################################
 
 # Collect & sort areas & edges according to various attributes
 sorted_areas = collect_areas.collect_and_sort(G, W_net, labels=row_labels,
                                               print_out=False)
-
 ###################################
 ### Lesion areas
 # Set number of lesions
 lesion_is_node = True  # Set if node or edge lesion
 
-targeted_attack = False
+targeted_attack = True
 # Find areas to lesion. node_btwn, ccoeff, degree (append with _labels)
-lesion_attr = 'node_btwn_labels'
+lesion_attr = 'degree_labels'
 bilateral = False
 num_lesions = 150
 
@@ -115,8 +115,11 @@ num_lesions = 150
 
 graph_list = [deepcopy(G)]
 net_dict_list = [deepcopy(net_dict)]
+lesion_list_labels = []
 graph_stats = [network_compute.whole_graph_metrics(G)]
 
+print 'Model: ' + network_type + '\n Targeted: ' + str(targeted_attack) + \
+    '\nby: ' + lesion_attr + ' x' + str(num_lesions)
 # Lesion areas
 for i in range(num_lesions):
     if lesion_is_node:
@@ -135,6 +138,7 @@ for i in range(num_lesions):
 
         # Call lesion function, update weight mat
         W_lesion_dict = network_gen.lesion_node(net_dict_list[-1], targets)
+        lesion_list_labels.extend(targets)
         print 'Removed ' + str(targets) + ', Weight matrix size: ' + \
             str(W_lesion_dict['data'].shape)
 
@@ -151,6 +155,7 @@ for i in range(num_lesions):
         W_lesion, cxns = network_gen.lesion_edge(net_dict_list[-1]['data'],
                                                  targets)
 
+        lesion_list_labels.extend(target_edges)
     # Convert to networkx graph object
     graph_list.append(network_gen.import_weights_to_graph(W_lesion_dict,
                                                           directed=False))
@@ -183,10 +188,48 @@ if show_whole_stats:
         axes[ai / 3, ai % 3].set_ylabel(stats_to_graph[ai])
         axes[ai / 3, ai % 3].set_xlim([0, num_lesions + 1])
         if(ai / 3 == 0 and ai % 3 == 1):
-            axes[ai / 3, ai % 3].set_title('Lesion by ' + lesion_attr)
+            axes[ai / 3, ai % 3].set_title('Graph: ' + network_type +
+                                           ' Lesion by ' + lesion_attr)
         if(ai / 3 == 1):
             axes[ai / 3, ai % 3].set_xlabel('Number of Lesions')
     plt.show()
+
+if make_movie:
+    target_node_inds = [range(0, 5), range(5, 10), range(10, 15),
+                        range(15, 20), range(20, 25)]
+    angles = [range(-270, -90), range(-90, 90)]
+
+    # Png params
+    elev = 20.  # elevation angle for movie
+
+    for ti, targets in enumerate(target_node_inds):
+        # Make stat graph on right hand side
+        fig = fig.subplot()
+        fig.set_facecolor('black')
+
+        ax1 = fig.add_subplot('121', projection='3d', axisbg='black')
+        ax2 = fig.add_subplot('122', axisbg='gray')
+
+        # Change annotation on right
+        ax1.annotate('text', xy=(), xycoords='data',
+                     xytext=(100, 100), textcoords='offset points',
+                     size=25, arrowprops=dict(arrowstyle='simple',
+                                              fc='1.0', ec='none',
+                                              connectionstyle='arc3,rad=0.3')
+
+        #Change animation on left
+        target_nodes =
+        targets_edges =
+        # Rotate through angle on left and save images
+        # flip between the two 180 deg angle sets for each set of targets
+        for ai, ang in enumerate(angles[ti % 2]):
+            ax.view_init(elev=elev, azim=ang)
+            plt.savefig(op.join(save_fpath, 'mov_%03i_%03i.png' % ti, ai),
+                        ec='black', fc='black', bbox_inches='tight',
+                        pad_inches=0.)
+
+            plot_3D_network(ax, node_names, node_positions, node_labels, edges,
+                        edge_labels)
 
 if show_area_stats:
     feats_lists = [[['degree', 'node_btwn'], ['degree', 'ccoeff']]]
