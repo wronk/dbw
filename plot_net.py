@@ -160,8 +160,8 @@ def plot_clustering_coeff_pdf(ax, G, bins=np.linspace(0., 0.25, 150)):
 
     # Plot coefficients according to bins
     ax.hist(ccoeffs, bins)
-    ax.set_title('Clustering Coefficient')
-    ax.set_xlabel('Clustering Coefficient')
+    ax.set_title('Clustering coefficient')
+    ax.set_xlabel('Clustering coefficient')
     ax.set_ylabel('Occurrences')
 
 
