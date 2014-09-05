@@ -41,11 +41,11 @@ if SHOW_WVD:
     D_vec_nz = D_vec[W_vec>0]
     fig, ax = plt.subplots(1,1,facecolor='white')
     ax.scatter(D_vec_nz,np.log(W_vec_nz))
-    ax.set_xlabel('Distance (100 um)')
+    ax.set_xlabel('Distance (dx = 100 um)')
     ax.set_ylabel('Log[Weight]')
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
         ax.get_xticklabels() + ax.get_yticklabels()):
-            item.set_fontsize(16)
+            item.set_fontsize(20)
     plt.draw()
 
 if CALC_RANDS:
@@ -101,7 +101,7 @@ if LOOP_OVER_NSWAPS:
                 ax.set_title('%d swaps, P = %.3f'%(n_swaps,p_value))
             for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
                 ax.get_xticklabels() + ax.get_yticklabels()):
-                    item.set_fontsize(16)
+                    item.set_fontsize(20)
             plt.draw()
         p_values[ns_idx] = p_value
          
@@ -111,7 +111,7 @@ if LOOP_OVER_NSWAPS:
     ax.set_ylabel('P')
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
         ax.get_xticklabels() + ax.get_yticklabels()):
-            item.set_fontsize(16)
+            item.set_fontsize(20)
     
     plt.draw()
 
@@ -216,8 +216,8 @@ if PLOT_SPECIFIC_AREA_SETS:
         ax.plot(n_swaps_vec, p_values, lw=3, label=area_sets[a_idx])
     ax.set_xlabel('n_swaps')
     ax.set_ylabel('P')
-    ax.legend(prop={'size':16})
+    ax.legend(prop={'size':20})
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
         ax.get_xticklabels() + ax.get_yticklabels()):
-            item.set_fontsize(16)
+            item.set_fontsize(20)
     plt.draw()
