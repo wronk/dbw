@@ -41,7 +41,11 @@ N = len(G.nodes())
 G_ER = nx.erdos_renyi_graph(N,0.085)
 G_BA = nx.barabasi_albert_graph(N,19)
 G_WS = nx.watts_strogatz_graph(N,36,0.159)
-G_BA_cc = aux_random_graphs.scale_free_cc_graph(n=N,m=25,k0=20,p=np.array([1]),fp=np.array([1]))
+# G_BA_cc = aux_random_graphs.scale_free_cc_graph(n=N,m=25,k0=20,p=np.array([1]),fp=np.array([1]))
+G_PWC = nx.powerlaw_cluster_graph(426,10,p=.9)
+# Biophysical graph
+print 'Generating biophysical graph...'
+G_BIO,A,D = aux_random_graphs.biophysical_graph(N=426,N_edges=7804,L=1.,power=1.5,mode=0)
 
 # Here you can specify which plotting function you want to run.
 #x   It needs to take a single graph as input!
@@ -60,14 +64,18 @@ y_BA = G_BA.degree().values()
 x_WS = MyX(G_WS).values()
 y_WS = G_WS.degree().values()
 
-x_BA_cc = MyX(G_BA_cc).values()
-y_BA_cc = G_BA_cc.degree().values()
+x_PWC = MyX(G_PWC).values()
+y_PWC = G_PWC.degree().values()
+
+x_BIO = MyX(G_BIO).values()
+y_BIO = G_BIO.degree().values()
 
 x = MyX(G).values()
 y = G.degree().values()
 
-Fig,axs = plt.subplots(nrows=3,ncols=2,sharex=False, sharey=False, facecolor='White')
-ax = axs[0,0]; ax_ER = axs[0,1]; ax_BA = axs[1,0]; ax_WS = axs[1,1]; ax_BA_cc = axs[2,0]
+Fig,axs = plt.subplots(nrows=2,ncols=3,sharex=False, sharey=False, facecolor='White')
+ax = axs[0,0]; ax_ER = axs[0,1]; ax_WS = axs[0,2]; 
+ax_BA = axs[1,0]; ax_PWC = axs[1,1]; ax_BIO = axs[1,2]
 
 ax.scatter(x,y)
 
@@ -77,7 +85,9 @@ ax_BA.scatter(x_BA,y_BA)
 
 ax_WS.scatter(x_WS,y_WS)
 
-ax_BA_cc.scatter(x_BA_cc,y_BA_cc)
+ax_PWC.scatter(x_PWC,y_PWC)
+
+ax_BIO.scatter(x_BIO,y_BIO)
 
 #Fig,ax = plotfunction(G,myrange)
 #Fig_ER,ax_ER = plotfunction(G_ER,myrange)
@@ -99,36 +109,47 @@ ax_BA_cc.scatter(x_BA_cc,y_BA_cc)
 #ax_WS.axis(MyLims)
 #ax_BA.axis(MyLims)
 
-for a in [ax,ax_ER,ax_BA,ax_WS,ax_BA_cc]:
+for a in [ax,ax_ER,ax_BA,ax_WS,ax_PWC,ax_BIO]:
     a.set_xlim(0,1)
     a.set_ylim(0,200)
 # For clustering
 XTicks = [0,0.25,0.5,0.75,1]
 YTicks = [0,50,100,150,200]
 
+ax.set_xticks(XTicks)
+ax_ER.set_xticks(XTicks)
 ax_BA.set_xticks(XTicks)
 ax_WS.set_xticks(XTicks)
+ax_PWC.set_xticks(XTicks)
+ax_BIO.set_xticks(XTicks)
 
 ax.set_yticks(YTicks)
+ax_ER.set_yticks(YTicks)
 ax_BA.set_yticks(YTicks)
+ax_WS.set_yticks(YTicks)
+ax_PWC.set_yticks(YTicks)
+ax_BIO.set_yticks(YTicks)
 
 
 ax_BA.tick_params(size=10,labelsize=16)
 ax_WS.tick_params(size=10,labelsize=16)
 ax.tick_params(size=10,labelsize=16)
 ax_ER.tick_params(size=10,labelsize=16)
+ax_PWC.tick_params(size=10,labelsize=16)
+ax_BIO.tick_params(size=10,labelsize=16)
 
 TitleFontSize = 22
 LabelFontSize = 20
-ax.set_title('Allen Mouse Brain Atlas (LM)', fontsize=TitleFontSize)
-ax_ER.set_title('Erdos-Renyi random network', fontsize=TitleFontSize)
-ax_BA.set_title('Barabasi-Albert scale-free network', fontsize=TitleFontSize)
-ax_WS.set_title('Watts-Strogatz small world network', fontsize=TitleFontSize)
-ax_BA_cc.set_title('Extended BA scale-free')
+ax.set_title('Allen Mouse Brain', fontsize=TitleFontSize)
+ax_ER.set_title('ER random', fontsize=TitleFontSize)
+ax_BA.set_title('BA scale-free', fontsize=TitleFontSize)
+ax_WS.set_title('WA small world network', fontsize=TitleFontSize)
+ax_PWC.set_title('Power-law clustering',fontsize=TitleFontSize)
+ax_BIO.set_title('Biophysical',fontsize=TitleFontSize)
 
-ax_BA.set_xlabel('Clustering coefficient', fontsize=LabelFontSize)
-ax_WS.set_xlabel('Clustering coefficient', fontsize=LabelFontSize)
+ax_BIO.set_xlabel('Clustering coefficient', fontsize=LabelFontSize)
 ax.set_ylabel('Degree', fontsize=LabelFontSize)
 ax_BA.set_ylabel('Degree', fontsize=LabelFontSize)
+ax_PWC.set_ylabel('Degree', fontsize=LabelFontSize)
 
 plt.draw()
