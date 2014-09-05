@@ -20,7 +20,7 @@ LogLogPlot = True
 PLOT_HISTS = True
 
 RGCs = {'Brain':'b','ER':'k','WS':'g','BA':'r','PWC':'c','BIO':'m'}
-FontSize = 20
+FontSize = 24
 
 # Set parameters
 p_th = .01 # P-value threshold
@@ -51,8 +51,8 @@ N = len(G.nodes())
 # These are the new params, derived from adjusting the proverbial knobs
 G_ER = nx.erdos_renyi_graph(N,0.5)
 G_WS = nx.watts_strogatz_graph(N,36,0.159)
-G_BA = standard_graphs.symmetric_BA_graph(N,20,0.52)
-#G_BA = nx.barabasi_albert_graph(N,20)
+#G_BA = standard_graphs.symmetric_BA_graph(N,20,0.52)
+G_BA = nx.barabasi_albert_graph(N,20)
 G_PWC = nx.powerlaw_cluster_graph(N,19,1)
 print 'Generating biophysical graph...'
 G_BIO,A,D = aux_random_graphs.biophysical_graph(N=426,N_edges=7804,L=1.,power=1.5,mode=0)
@@ -150,7 +150,7 @@ if LogLogPlot:
     ax.plot(np.log(G_BIO_bins[1][0:n_bins-1]),np.log(G_BIO_bins[0]),lw=3,c=RGCs['BIO'])
 
     ax.legend(('Mouse brain', 'BA scale-free',
-                'Power-law clustered','Biophysical'),prop={'size':16})
+                'Power-law clustered','Biophysical'),prop={'size':FontSize},loc=8)
 
     ax.set_xlabel('Log[Degree]')
     ax.set_ylabel('Log[Occurrences]')
@@ -170,7 +170,7 @@ if PLOT_HISTS:
     plot_net.line_hist(ax,G_PWC,'degree',bins=bins,c=RGCs['PWC'],lw=3)
     plot_net.line_hist(ax,G_BIO,'degree',bins=bins,c=RGCs['BIO'],lw=3)
     ax.legend(('BA scale-free','Power-law clustered','Biophysical',
-               'Mouse brain'),prop={'size':16})
+               'Mouse brain'),prop={'size':FontSize})
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
                 ax.get_xticklabels() + ax.get_yticklabels()):
                     item.set_fontsize(FontSize)
@@ -185,7 +185,7 @@ if PLOT_HISTS:
     plot_net.line_hist(ax,G_PWC,'ccoeff',bins=bins,c=RGCs['PWC'],lw=3)
     plot_net.line_hist(ax,G_BIO,'ccoeff',bins=bins,c=RGCs['BIO'],lw=3)
     ax.legend(('BA scale-free','Power-law clustered','Biophysical',
-               'Mouse brain'),prop={'size':16})
+               'Mouse brain'),prop={'size':FontSize})
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
                 ax.get_xticklabels() + ax.get_yticklabels()):
                     item.set_fontsize(FontSize)
@@ -199,7 +199,7 @@ if PLOT_HISTS:
     plot_net.line_hist(ax,G_PWC,'node_btwn',bins=bins,c=RGCs['PWC'],lw=3)
     plot_net.line_hist(ax,G_BIO,'node_btwn',bins=bins,c=RGCs['BIO'],lw=3)
     ax.legend(('BA scale-free','Power-law clustered','Biophysical',
-               'Mouse brain'),prop={'size':16})
+               'Mouse brain'),prop={'size':FontSize})
     ax.set_xlim(0,.02)
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
                 ax.get_xticklabels() + ax.get_yticklabels()):
