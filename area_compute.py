@@ -87,3 +87,15 @@ def get_centroids(labels):
         centroids[a_idx,:] = mask.centroid
         
     return centroids
+
+def get_area_subset(area_list,parent_acrs):
+    """Return a list of all elements of area_list that are descendents
+    of parent_acr."""
+    if not isinstance(parent_acrs,list):
+        parent_acrs = [parent_acrs]
+    # Get parent id
+    p_ids = set([ONTO.structure_by_acronym(acr).structure_id for acr in
+             parent_acrs])
+    area_subset = [a for a in area_list 
+                   if p_ids.intersection(ONTO.structure_by_acronym(a[:-2]).path_to_root)]
+    return area_subset
