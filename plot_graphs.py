@@ -19,7 +19,7 @@ plot_functions = False
 LogLogPlot = True
 PLOT_HISTS = True
 
-RGCs = {'Brain':'k','ER':'b','WS':'g','BA':'r','PWC':'c','BIO':'m'}
+RGCs = {'Brain':'b','ER':'k','WS':'g','BA':'r','PWC':'c','BIO':'m'}
 FontSize = 20
 
 # Set parameters
@@ -143,17 +143,17 @@ if LogLogPlot:
     fig,ax = plt.subplots(1,1,facecolor='white')
     
     ax.plot(np.log(G_bins[1][0:n_bins-1]),np.log(G_bins[0]),lw=3,c=RGCs['Brain'])
-    ax.plot(np.log(G_ER_bins[1][0:n_bins-1]),np.log(G_ER_bins[0]),lw=3,c=RGCs['ER'])
-    ax.plot(np.log(G_WS_bins[1][0:n_bins-1]),np.log(G_WS_bins[0]),lw=3,c=RGCs['WS'])
+#    ax.plot(np.log(G_ER_bins[1][0:n_bins-1]),np.log(G_ER_bins[0]),lw=3,c=RGCs['ER'])
+#    ax.plot(np.log(G_WS_bins[1][0:n_bins-1]),np.log(G_WS_bins[0]),lw=3,c=RGCs['WS'])
     ax.plot(np.log(G_BA_bins[1][0:n_bins-1]),np.log(G_BA_bins[0]),lw=3,c=RGCs['BA'])
     ax.plot(np.log(G_PWC_bins[1][0:n_bins-1]),np.log(G_PWC_bins[0]),lw=3,c=RGCs['PWC'])
     ax.plot(np.log(G_BIO_bins[1][0:n_bins-1]),np.log(G_BIO_bins[0]),lw=3,c=RGCs['BIO'])
 
-    ax.legend(('Mouse brain', 'ER random', 'WS small-world', 'BA scale-free',
+    ax.legend(('Mouse brain', 'BA scale-free',
                 'Power-law clustered','Biophysical'),prop={'size':16})
 
-    ax.set_xlabel('log[degree]')
-    ax.set_ylabel('log[occurrences]')
+    ax.set_xlabel('Log[Degree]')
+    ax.set_ylabel('Log[Occurrences]')
 
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
                 ax.get_xticklabels() + ax.get_yticklabels()):
@@ -164,11 +164,13 @@ if PLOT_HISTS:
     bins = np.linspace(0,140,50)
     fig,ax = plt.subplots(1,1,facecolor='w')
     plot_net.plot_degree_distribution(ax,G,bins=bins)
-    plot_net.line_hist(ax,G_ER,'degree',bins=bins,c=RGCs['ER'],lw=3)
-    plot_net.line_hist(ax,G_WS,'degree',bins=bins,c=RGCs['WS'],lw=3)
+#    plot_net.line_hist(ax,G_ER,'degree',bins=bins,c=RGCs['ER'],lw=3)
+#    plot_net.line_hist(ax,G_WS,'degree',bins=bins,c=RGCs['WS'],lw=3)
     plot_net.line_hist(ax,G_BA,'degree',bins=bins,c=RGCs['BA'],lw=3)
     plot_net.line_hist(ax,G_PWC,'degree',bins=bins,c=RGCs['PWC'],lw=3)
     plot_net.line_hist(ax,G_BIO,'degree',bins=bins,c=RGCs['BIO'],lw=3)
+    ax.legend(('BA scale-free','Power-law clustered','Biophysical',
+               'Mouse brain'),prop={'size':16})
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
                 ax.get_xticklabels() + ax.get_yticklabels()):
                     item.set_fontsize(FontSize)
@@ -177,11 +179,13 @@ if PLOT_HISTS:
     bins = np.linspace(0,1,50)
     fig,ax = plt.subplots(1,1,facecolor='w')
     plot_net.plot_clustering_coeff_pdf(ax,G,bins=bins)
-    plot_net.line_hist(ax,G_ER,'ccoeff',bins=bins,c=RGCs['ER'],lw=3)
-    plot_net.line_hist(ax,G_WS,'ccoeff',bins=bins,c=RGCs['WS'],lw=3)
+#    plot_net.line_hist(ax,G_ER,'ccoeff',bins=bins,c=RGCs['ER'],lw=3)
+#    plot_net.line_hist(ax,G_WS,'ccoeff',bins=bins,c=RGCs['WS'],lw=3)
     plot_net.line_hist(ax,G_BA,'ccoeff',bins=bins,c=RGCs['BA'],lw=3)
     plot_net.line_hist(ax,G_PWC,'ccoeff',bins=bins,c=RGCs['PWC'],lw=3)
     plot_net.line_hist(ax,G_BIO,'ccoeff',bins=bins,c=RGCs['BIO'],lw=3)
+    ax.legend(('BA scale-free','Power-law clustered','Biophysical',
+               'Mouse brain'),prop={'size':16})
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
                 ax.get_xticklabels() + ax.get_yticklabels()):
                     item.set_fontsize(FontSize)
@@ -189,11 +193,13 @@ if PLOT_HISTS:
     # Plot node-betweenness overlaid w/ random graph histograms
     bins = np.linspace(0,.02,50)
     fig,ax = plot_net.plot_node_btwn(G,bins=bins)
-    plot_net.line_hist(ax,G_ER,'node_btwn',bins=bins,c=RGCs['ER'],lw=3)
-    plot_net.line_hist(ax,G_WS,'node_btwn',bins=bins,c=RGCs['WS'],lw=3)
+#    plot_net.line_hist(ax,G_ER,'node_btwn',bins=bins,c=RGCs['ER'],lw=3)
+#    plot_net.line_hist(ax,G_WS,'node_btwn',bins=bins,c=RGCs['WS'],lw=3)
     plot_net.line_hist(ax,G_BA,'node_btwn',bins=bins,c=RGCs['BA'],lw=3)
     plot_net.line_hist(ax,G_PWC,'node_btwn',bins=bins,c=RGCs['PWC'],lw=3)
     plot_net.line_hist(ax,G_BIO,'node_btwn',bins=bins,c=RGCs['BIO'],lw=3)
+    ax.legend(('BA scale-free','Power-law clustered','Biophysical',
+               'Mouse brain'),prop={'size':16})
     ax.set_xlim(0,.02)
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
                 ax.get_xticklabels() + ax.get_yticklabels()):
