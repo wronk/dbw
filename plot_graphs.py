@@ -7,7 +7,7 @@ Created on Wed Sep  3 15:06:56 2014
 
 import networkx as nx
 import plot_net
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt; plt.close('all')
 import numpy as np
 import network_gen
 from networkx.generators.classic import empty_graph
@@ -15,10 +15,12 @@ import aux_random_graphs
 
 import standard_graphs
 
-plot_functions = 0
-LogLogPlot = 0
-PLOT_HISTS = 1
+plot_functions = False
+LogLogPlot = True
+PLOT_HISTS = True
 
+RGCs = {'Brain':'k','ER':'b','WS':'g','BA':'r','PWC':'c','BIO':'m'}
+FontSize = 20
 
 # Set parameters
 p_th = .01 # P-value threshold
@@ -26,8 +28,7 @@ w_th = 0 # Weight-value threshold
 
 # Set relative directory path
 dir_name = '../friday-harbor/linear_model'
-dir_name = '../Data/linear_model'
-
+#dir_name = '../Data/linear_model'
 
 # Load weights & p-values
 W,P,row_labels,col_labels = network_gen.load_weights(dir_name)
@@ -49,12 +50,13 @@ N = len(G.nodes())
 
 # These are the new params, derived from adjusting the proverbial knobs
 G_ER = nx.erdos_renyi_graph(N,0.5)
-G_BA_cc = nx.powerlaw_cluster_graph(N,19,1)
+G_WS = nx.watts_strogatz_graph(N,36,0.159)
 G_BA = standard_graphs.symmetric_BA_graph(N,20,0.52)
 #G_BA = nx.barabasi_albert_graph(N,20)
-G_WS = nx.watts_strogatz_graph(N,36,0.159)
+G_PWC = nx.powerlaw_cluster_graph(N,19,1)
+print 'Generating biophysical graph...'
+G_BIO,A,D = aux_random_graphs.biophysical_graph(N=426,N_edges=7804,L=1.,power=1.5,mode=0)
 
-    
 if plot_functions:
     
     # Here you can specify which plotting function you want to run.
@@ -64,7 +66,7 @@ if plot_functions:
     Fig, axs = plt.subplots(2,2, facecolor=[1,1,1])
     
     plotfunction(axs[0,0],G)
-    plotfunction(axs[0,1],G_BA_cc)
+    plotfunction(axs[0,1],G_PWC)
     plotfunction(axs[1,0],G_BA)
     plotfunction(axs[1,1],G_WS)
     
@@ -122,28 +124,42 @@ if plot_functions:
 
 if LogLogPlot:
     G_deg = G.degree()
-    G_C_deg = G_ER.degree()
+    G_ER_deg = G_ER.degree()
+    G_WS_deg = G_WS.degree()
     G_BA_deg = G_BA.degree()
+    G_PWC_deg = G_PWC.degree()
+    G_BIO_deg = G_BIO.degree()
     
     n_bins = 20
     Bins = np.linspace(0,150,n_bins)
     
     G_bins = np.histogram(G_deg.values(),Bins)
-    G_C_bins = np.histogram(G_C_deg.values(),Bins)
+    G_ER_bins = np.histogram(G_ER_deg.values(),Bins)
+    G_WS_bins = np.histogram(G_WS_deg.values(),Bins)
     G_BA_bins = np.histogram(G_BA_deg.values(),Bins)
+    G_PWC_bins = np.histogram(G_PWC_deg.values(),Bins)
+    G_BIO_bins = np.histogram(G_BIO_deg.values(),Bins)
     
-    plt.plot(np.log(G_bins[1][0:n_bins-1]),np.log(G_bins[0]), 'ko-')
-    plt.plot(np.log(G_C_bins[1][0:n_bins-1]),np.log(G_C_bins[0]), 'ro-')
-    plt.plot(np.log(G_BA_bins[1][0:n_bins-1]),np.log(G_BA_bins[0]), 'bo-')
+    fig,ax = plt.subplots(1,1,facecolor='white')
+    
+    ax.plot(np.log(G_bins[1][0:n_bins-1]),np.log(G_bins[0]),lw=3,c=RGCs['Brain'])
+    ax.plot(np.log(G_ER_bins[1][0:n_bins-1]),np.log(G_ER_bins[0]),lw=3,c=RGCs['ER'])
+    ax.plot(np.log(G_WS_bins[1][0:n_bins-1]),np.log(G_WS_bins[0]),lw=3,c=RGCs['WS'])
+    ax.plot(np.log(G_BA_bins[1][0:n_bins-1]),np.log(G_BA_bins[0]),lw=3,c=RGCs['BA'])
+    ax.plot(np.log(G_PWC_bins[1][0:n_bins-1]),np.log(G_PWC_bins[0]),lw=3,c=RGCs['PWC'])
+    ax.plot(np.log(G_BIO_bins[1][0:n_bins-1]),np.log(G_BIO_bins[0]),lw=3,c=RGCs['BIO'])
 
-    plt.legend(('Allen Mouse Atlas', 'Clustered BA network', 'Barabasi-Albert Network'))
+    ax.legend(('Mouse brain', 'ER random', 'WS small-world', 'BA scale-free',
+                'Power-law clustered','Biophysical'),prop={'size':16})
 
+    ax.set_xlabel('log[degree]')
+    ax.set_ylabel('log[occurrences]')
 
-# Random graph colors
-RGCs = {'ER':'k','WS':'g','BA':'r','BA_cc':[0.8,0.3,1]}
+    for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
+                ax.get_xticklabels() + ax.get_yticklabels()):
+                    item.set_fontsize(FontSize)
 
 if PLOT_HISTS:
-    FontSize = 20
     # Plot degree histogram overlaid w/ random graph degree histograms
     bins = np.linspace(0,140,50)
     fig,ax = plt.subplots(1,1,facecolor='w')
@@ -151,7 +167,8 @@ if PLOT_HISTS:
     plot_net.line_hist(ax,G_ER,'degree',bins=bins,c=RGCs['ER'],lw=3)
     plot_net.line_hist(ax,G_WS,'degree',bins=bins,c=RGCs['WS'],lw=3)
     plot_net.line_hist(ax,G_BA,'degree',bins=bins,c=RGCs['BA'],lw=3)
-    plot_net.line_hist(ax,G_BA_cc,'degree',bins=bins,c=RGCs['BA_cc'],lw=3)
+    plot_net.line_hist(ax,G_PWC,'degree',bins=bins,c=RGCs['PWC'],lw=3)
+    plot_net.line_hist(ax,G_BIO,'degree',bins=bins,c=RGCs['BIO'],lw=3)
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
                 ax.get_xticklabels() + ax.get_yticklabels()):
                     item.set_fontsize(FontSize)
@@ -163,7 +180,8 @@ if PLOT_HISTS:
     plot_net.line_hist(ax,G_ER,'ccoeff',bins=bins,c=RGCs['ER'],lw=3)
     plot_net.line_hist(ax,G_WS,'ccoeff',bins=bins,c=RGCs['WS'],lw=3)
     plot_net.line_hist(ax,G_BA,'ccoeff',bins=bins,c=RGCs['BA'],lw=3)
-    plot_net.line_hist(ax,G_BA_cc,'ccoeff',bins=bins,c=RGCs['BA_cc'],lw=3)
+    plot_net.line_hist(ax,G_PWC,'ccoeff',bins=bins,c=RGCs['PWC'],lw=3)
+    plot_net.line_hist(ax,G_BIO,'ccoeff',bins=bins,c=RGCs['BIO'],lw=3)
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
                 ax.get_xticklabels() + ax.get_yticklabels()):
                     item.set_fontsize(FontSize)
@@ -174,7 +192,8 @@ if PLOT_HISTS:
     plot_net.line_hist(ax,G_ER,'node_btwn',bins=bins,c=RGCs['ER'],lw=3)
     plot_net.line_hist(ax,G_WS,'node_btwn',bins=bins,c=RGCs['WS'],lw=3)
     plot_net.line_hist(ax,G_BA,'node_btwn',bins=bins,c=RGCs['BA'],lw=3)
-    plot_net.line_hist(ax,G_BA_cc,'node_btwn',bins=bins,c=RGCs['BA_cc'],lw=3)
+    plot_net.line_hist(ax,G_PWC,'node_btwn',bins=bins,c=RGCs['PWC'],lw=3)
+    plot_net.line_hist(ax,G_BIO,'node_btwn',bins=bins,c=RGCs['BIO'],lw=3)
     ax.set_xlim(0,.02)
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
                 ax.get_xticklabels() + ax.get_yticklabels()):
