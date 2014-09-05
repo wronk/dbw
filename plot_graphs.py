@@ -143,15 +143,18 @@ if LogLogPlot:
 RGCs = {'ER':'k','WS':'g','BA':'r','BA_cc':[0.8,0.3,1]}
 
 if PLOT_HISTS:
-    FontSize = 20
+    FontSize = 30
     # Plot degree histogram overlaid w/ random graph degree histograms
-    bins = np.linspace(0,140,50)
+    bins = np.linspace(0,150,50)
     fig,ax = plt.subplots(1,1,facecolor='w')
-    plot_net.plot_degree_distribution(ax,G,bins=bins)
+    #plot_net.plot_degree_distribution(ax,G,bins=bins)
     plot_net.line_hist(ax,G_ER,'degree',bins=bins,c=RGCs['ER'],lw=3)
-    plot_net.line_hist(ax,G_WS,'degree',bins=bins,c=RGCs['WS'],lw=3)
-    plot_net.line_hist(ax,G_BA,'degree',bins=bins,c=RGCs['BA'],lw=3)
-    plot_net.line_hist(ax,G_BA_cc,'degree',bins=bins,c=RGCs['BA_cc'],lw=3)
+    #plot_net.line_hist(ax,G_WS,'degree',bins=bins,c=RGCs['WS'],lw=3)
+    #plot_net.line_hist(ax,G_BA,'degree',bins=bins,c=RGCs['BA'],lw=3)
+    #plot_net.line_hist(ax,G_BA_cc,'degree',bins=bins,c=RGCs['BA_cc'],lw=3)
+    ax.set_xticks([0,50,100,150])
+    ax.set_ylim([0,10])
+    ax.set_yticks([0,50,100,150,200,250])
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
                 ax.get_xticklabels() + ax.get_yticklabels()):
                     item.set_fontsize(FontSize)
@@ -164,6 +167,7 @@ if PLOT_HISTS:
     plot_net.line_hist(ax,G_WS,'ccoeff',bins=bins,c=RGCs['WS'],lw=3)
     plot_net.line_hist(ax,G_BA,'ccoeff',bins=bins,c=RGCs['BA'],lw=3)
     plot_net.line_hist(ax,G_BA_cc,'ccoeff',bins=bins,c=RGCs['BA_cc'],lw=3)
+    ax.set_xticks([0,0.25,0.5,0.75,1])
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
                 ax.get_xticklabels() + ax.get_yticklabels()):
                     item.set_fontsize(FontSize)
@@ -173,7 +177,7 @@ if PLOT_HISTS:
     fig,ax = plot_net.plot_node_btwn(G,bins=bins)
     plot_net.line_hist(ax,G_ER,'node_btwn',bins=bins,c=RGCs['ER'],lw=3)
     plot_net.line_hist(ax,G_WS,'node_btwn',bins=bins,c=RGCs['WS'],lw=3)
-    plot_net.line_hist(ax,G_BA,'node_btwn',bins=bins,c=RGCs['BA'],lw=3)
+    #plot_net.line_hist(ax,G_BA,'node_btwn',bins=bins,c=RGCs['BA'],lw=3)
     plot_net.line_hist(ax,G_BA_cc,'node_btwn',bins=bins,c=RGCs['BA_cc'],lw=3)
     ax.set_xlim(0,.02)
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
