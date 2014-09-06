@@ -34,12 +34,12 @@ movie_save_path = './movie/images'
 stat_save_path = './cache'
 
 calc_features = True
-show_example_plots = True
-show_whole_stats = True
-make_movie = False
+show_example_plots = False
+show_whole_stats = False
+make_movie = True
 show_area_stats = False
 
-network_type = 'scale_free'
+network_type = 'allen'
 ###################################
 ### Create network
 if network_type is 'allen':
@@ -112,13 +112,13 @@ sorted_areas = collect_areas.collect_and_sort(G, W_net, labels=row_labels,
 # Set number of lesions
 lesion_is_node = True  # Set if node or edge lesion
 
-targeted_attack = False
+targeted_attack = True
 # Find areas to lesion. node_btwn, ccoeff, degree (append with _labels)
 lesion_attr = 'degree_labels'
 if not targeted_attack:
     lesion_attr = 'random'
 bilateral = False
-num_lesions = 150
+num_lesions = 15
 
 ###################################
 
@@ -223,33 +223,32 @@ if show_whole_stats:
 
 if make_movie:
 
-    target_node_inds = [range(0, 5), range(5, 10), range(10, 15),
-                        range(15, 20), range(20, 25)]
+    target_node_inds = [range(0, 5), range(5, 10), range(10, 15)]
+    #                    range(15, 20), range(20, 25)]
     angles = [range(-270, -90), range(-90, 90)]
 
     # Construct matrix out of stats
-    stat_mat = np.zeros((len(net_dict_list),))
+    stat_mat = np.zeros((len(net_dict_list)))
+    selected_stat = 'avg_ccoeff'
     for gi in range(len(graph_stats)):
-        for si, stat in enumerate(stats_to_graph):
-            stat_mat[gi, si] = graph_stats[gi][stats_to_graph[si]]
+        stat_mat[gi] = graph_stats[gi][selected_stat]
 
     # Png params
     elev = 20.  # elevation angle for movie
 
-    pdb.set_trace()
     for ti, targets in enumerate(target_node_inds):
+        print 'Targeting: ' + str(targets)
         # Make stat graph on right hand side
-        fig = fig.subplot()
-        fig.set_facecolor('black')
+        fig = plt.figure(figsize=(12, 6))
 
         ax1 = fig.add_subplot('121', projection='3d', axisbg='black')
-        ax2 = fig.add_subplot('122', axisbg='gray')
+        ax2 = fig.add_subplot('122')
 
         #
         #Change animation on right
         #
         ax2.scatter(range(len(graph_stats)), stat_mat[:])
-        ax2.vlines(targets[-1], colors='r')
+        ax2.vlines(targets[-1], 0, 1, colors='r')
         ax2.annotate('text', xy=(), xycoords='data',
                      xytext=(100, 100), textcoords='offset points',
                      size=25, arrowprops=None)
@@ -258,26 +257,33 @@ if make_movie:
         #Change animation on left
         #
         # Compute feature dictionary for all areas
-        G_to_plot = graph_list[ti[-1]]
-        G_dict_to_plot = net_dict_list[ti[-1]]
+        G_to_plot = graph_list[targets[0]]
+        G_dict_to_plot = net_dict_list[targets[0]]
         area_dict = area_compute.get_feature_dicts(G_to_plot.nodes(),
                                                    G_to_plot,
                                                    G_dict_to_plot['data'],
                                                    G_dict_to_plot['row_labels'])
 
-        pdb.set_trace()
         # Get pair of neighbors for each area
-        area0 = targets
-        neighbors0 = area_dict[area0]['neighbors']
+        area0 = [sorted_areas[lesion_attr][i] for i in targets]
+        neighbors0 = []
+        for l in [area_dict[a]['neighbors'] for a in area0]:
+            neighbors0.append(l)
+
+        edges0 = []
         # Get edges for each area
-        edges0 = [(area0, areaX) for areaX in neighbors0]
+        for ai, a1 in enumerate(area0):
+            temp_list = []
+            temp_list.append([(a1, areaX) for areaX in neighbors0[ai]])
+            edges0 = edges0 + temp_list
+
         # Put areas and neighbors together & remove duplicates
-        nodes = [area0] + neighbors0
-        edges = edges0
+        nodes = area0 + [item for sublist in neighbors0 for item in sublist]
+        edges = [item for sublist in edges0 for item in sublist]
         nodes = list(np.unique(nodes))
         edges = list(np.unique(edges))
         # Get remaining nodes
-        rem_nodes = [area for area in sorted_areas['degree_labels']
+        rem_nodes = [area for area in sorted_areas[lesion_attr]
                      if area not in nodes]
         # Make combined list
         all_nodes = nodes + rem_nodes
@@ -308,17 +314,12 @@ if make_movie:
         node_colors[area_idxs] = 'DodgerBlue'
         edge_colors = np.array(['#1565B2' for edge_idx in range(len(edges))])
 
-        node_alphas = .2 * np.ones((len(all_nodes),), dtype=float)
+        node_alphas = .5 * np.ones((len(all_nodes),), dtype=float)
         node_alphas[neighbor_idxs] = .3
         node_alphas[area_idxs] = .8
-        edge_alphas = .6 * np.ones((len(edges),), dtype=float)
+        edge_alphas = .2 * np.ones((len(edges),), dtype=float)
 
-        target_node_inds = [range(0, 5), range(5, 10), range(10, 15),
-                            range(15, 20), range(20, 25)]
-        angles = [range(-270, -90), range(-90, 90)]
-
-        # Call visualization
-        # Plot 3D nodes
+        # Call visualization to plot 3D nodes
         network_viz.plot_3D_network(ax1, node_names=nodes,
                                     node_positions=all_centroids,
                                     node_label_set=[False] * len(all_nodes),
@@ -329,14 +330,13 @@ if make_movie:
                                     edge_label_set=[False] * len(edges),
                                     edge_colors=edge_colors,
                                     edge_alpha=edge_alphas,
-                                    edge_sizes=edge_sizes,
-                                    save_movie='./movie/images/')
+                                    edge_sizes=edge_sizes)
 
         # Rotate through angle on left and save images
         # flip between the two 180 deg angle sets for each set of targets
         for ai, ang in enumerate(angles[ti % 2]):
             ax1.view_init(elev=elev, azim=ang)
-            plt.savefig(op.join(movie_save_path, 'mov_%03i_%03i.png' % ti, ai),
+            fig.savefig(op.join(movie_save_path, 'mov_%03i_%03i.png' % (ti, ai)),
                         ec='black', fc='black', bbox_inches='tight',
                         pad_inches=0.)
 

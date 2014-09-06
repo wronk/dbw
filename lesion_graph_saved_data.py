@@ -21,7 +21,7 @@ stats_to_graph = ['avg_shortest_path', 'avg_eccentricity', 'avg_ccoeff']
 stats_to_graph_label = ['Avg Shortest Path', 'Avg Eccentricity',
                         'Avg Clustering Coeff']
 lesion_attr = ['degree_labels', 'random']
-lesion_attr_title = ['Target High Degree Nodes', 'Target Randomly']
+lesion_attr_title = ['Target High Degree Nodes', 'Target Nodes Randomly']
 network_names = ['allen', 'biophysical', 'scale_free']
 num_lesions = 150
 
@@ -70,5 +70,6 @@ for si, stats in enumerate(stats_to_graph):
             axes[0, ai].set_title(lesion_attr_title[ai],
                                   fontsize=title_ft, va='bottom')
             axes[0, ai].tick_params(labelsize=tick_ft)
+            axes[0, ai].grid()
 
     plt.savefig(op.join(fig_save_path, stats_to_graph[si] + '.png'))
