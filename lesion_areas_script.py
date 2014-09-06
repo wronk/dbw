@@ -30,6 +30,7 @@ w_th = 0  # Weight-value threshold
 
 # Set relative directory path to linear model & ontology
 dir_LM = '../friday-harbor/linear_model'
+movie_save_path = './movie/images'
 stat_save_path = './cache'
 
 calc_features = True
@@ -38,7 +39,7 @@ show_whole_stats = True
 make_movie = False
 show_area_stats = False
 
-network_type = 'allen'
+network_type = 'scale_free'
 ###################################
 ### Create network
 if network_type is 'allen':
@@ -113,11 +114,11 @@ lesion_is_node = True  # Set if node or edge lesion
 
 targeted_attack = False
 # Find areas to lesion. node_btwn, ccoeff, degree (append with _labels)
-lesion_attr = 'node_btwn'
+lesion_attr = 'degree_labels'
 if not targeted_attack:
     lesion_attr = 'random'
 bilateral = False
-num_lesions = 5
+num_lesions = 150
 
 ###################################
 
@@ -247,13 +248,11 @@ if make_movie:
         #
         #Change animation on right
         #
-        pdb.set_trace()
-        ax1.scatter(range(len(graph_stats)), stat_mat[:])
-        ax1.annotate('text', xy=(), xycoords='data',
+        ax2.scatter(range(len(graph_stats)), stat_mat[:])
+        ax2.vlines(targets[-1], colors='r')
+        ax2.annotate('text', xy=(), xycoords='data',
                      xytext=(100, 100), textcoords='offset points',
-                     size=25, arrowprops=dict(arrowstyle='simple',
-                                              fc='1.0', ec='none',
-                                              connectionstyle='arc3,rad=0.3'))
+                     size=25, arrowprops=None)
 
         #
         #Change animation on left
@@ -261,7 +260,8 @@ if make_movie:
         # Compute feature dictionary for all areas
         G_to_plot = graph_list[ti[-1]]
         G_dict_to_plot = net_dict_list[ti[-1]]
-        area_dict = area_compute.get_feature_dicts(G_to_plot.nodes(), G_to_plot,
+        area_dict = area_compute.get_feature_dicts(G_to_plot.nodes(),
+                                                   G_to_plot,
                                                    G_dict_to_plot['data'],
                                                    G_dict_to_plot['row_labels'])
 
@@ -293,7 +293,7 @@ if make_movie:
         all_centroids[:, 2] *= -1
         # Get logical indices of area nodes
         neighbor_idxs = np.array([name in nodes for name in all_nodes])
-        area_idxs = np.array([name in [area0, area1] for name in all_nodes])
+        area_idxs = np.array([name in [area0] for name in all_nodes])
 
         # Compute feature dictionary for all areas
         area_dict = area_compute.get_feature_dicts(G.nodes(), G,
@@ -309,7 +309,7 @@ if make_movie:
         edge_colors = np.array(['#1565B2' for edge_idx in range(len(edges))])
 
         node_alphas = .2 * np.ones((len(all_nodes),), dtype=float)
-        node_alphas[neighbor_idxs] = .5
+        node_alphas[neighbor_idxs] = .3
         node_alphas[area_idxs] = .8
         edge_alphas = .6 * np.ones((len(edges),), dtype=float)
 
@@ -319,7 +319,7 @@ if make_movie:
 
         # Call visualization
         # Plot 3D nodes
-        network_viz.plot_3D_network(node_names=nodes,
+        network_viz.plot_3D_network(ax1, node_names=nodes,
                                     node_positions=all_centroids,
                                     node_label_set=[False] * len(all_nodes),
                                     node_sizes=node_sizes,
@@ -335,12 +335,13 @@ if make_movie:
         # Rotate through angle on left and save images
         # flip between the two 180 deg angle sets for each set of targets
         for ai, ang in enumerate(angles[ti % 2]):
-            ax.view_init(elev=elev, azim=ang)
-            plt.savefig(op.join(save_fpath, 'mov_%03i_%03i.png' % ti, ai),
+            ax1.view_init(elev=elev, azim=ang)
+            plt.savefig(op.join(movie_save_path, 'mov_%03i_%03i.png' % ti, ai),
                         ec='black', fc='black', bbox_inches='tight',
                         pad_inches=0.)
 
 
+'''
 if show_area_stats:
     feats_lists = [[['degree', 'node_btwn'], ['degree', 'ccoeff']]]
     #[['inj_volume', 'degree'], ['inj_volume', 'out_deg']]
@@ -356,6 +357,7 @@ if show_area_stats:
         plot_net.plot_degree_distribution(axs2[0], g)
         plot_net.plot_shortest_path_distribution(axs2[1], g)
         plot_net.plot_clustering_coeff_pdf(axs2[2], g, np.linspace(0, 2, 100))
+'''
 
 '''
 if show_example_plots:
