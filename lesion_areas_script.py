@@ -118,7 +118,7 @@ lesion_attr = 'degree_labels'
 if not targeted_attack:
     lesion_attr = 'random'
 bilateral = False
-num_lesions = 15
+num_lesions = 30
 
 ###################################
 
@@ -223,13 +223,13 @@ if show_whole_stats:
 
 if make_movie:
 
-    target_node_inds = [range(0, 5), range(5, 10), range(10, 15)]
-    #                    range(15, 20), range(20, 25)]
-    angles = [range(-270, -90), range(-90, 90)]
+    target_node_inds = [range(0, 5), range(5, 10), range(10, 15),
+                        range(15, 20), range(20, 25), range(25, 30)]
+    angles = [range(-270, -90, 3), range(-90, 90, 3)]
 
     # Construct matrix out of stats
     stat_mat = np.zeros((len(net_dict_list)))
-    selected_stat = 'avg_ccoeff'
+    selected_stat = 'avg_shortest_path'
     for gi in range(len(graph_stats)):
         stat_mat[gi] = graph_stats[gi][selected_stat]
 
@@ -239,7 +239,7 @@ if make_movie:
     for ti, targets in enumerate(target_node_inds):
         print 'Targeting: ' + str(targets)
         # Make stat graph on right hand side
-        fig = plt.figure(figsize=(12, 6))
+        fig = plt.figure(figsize=(16, 6))
 
         ax1 = fig.add_subplot('121', projection='3d', axisbg='black')
         ax2 = fig.add_subplot('122')
@@ -247,11 +247,23 @@ if make_movie:
         #
         #Change animation on right
         #
-        ax2.scatter(range(len(graph_stats)), stat_mat[:])
-        ax2.vlines(targets[-1], 0, 1, colors='r')
-        ax2.annotate('text', xy=(), xycoords='data',
-                     xytext=(100, 100), textcoords='offset points',
-                     size=25, arrowprops=None)
+        ax2.scatter(range(1, len(graph_stats) + 1), stat_mat[:], c='b', s=40)
+        midY = (np.max(stat_mat) + np.min(stat_mat)) / 2.
+        ax2.annotate('N = ' + str(1 + targets[-1]), xy=(targets[-1], midY),
+                     xycoords='data', xytext=(.66, .33),
+                     textcoords='axes fraction', size=25,
+                     color='DarkRed', arrowprops=None)
+        ax2.set_title('Target High Degree Nodes', fontsize=22)
+        ax2.set_xlabel('# Nodes Lesioned', fontsize=18)
+        ax2.set_ylabel('Avg Shortest Path', fontsize=18)
+        ax2.tick_params(labelsize=14)
+        ax2.grid()
+
+        _, ymax = ax2.get_ylim()
+        #ax2.set_ylim((0, ymax))
+        ymin, ymax = ax2.get_ylim()
+        ax2.vlines(targets[-1] + 1, ymin, ymax, colors='r', lw=2, linestyle='--')
+        ax2.set_xlim((0, ax2.get_xlim()[1]))
 
         #
         #Change animation on left
@@ -264,8 +276,13 @@ if make_movie:
                                                    G_dict_to_plot['data'],
                                                    G_dict_to_plot['row_labels'])
 
+        # Collect & sort areas & edges according to various attributes
+        sorted_areas_temp = \
+            collect_areas.collect_and_sort(G_to_plot, G_dict_to_plot['data'],
+                                           labels=G_dict_to_plot['row_labels'],
+                                           print_out=False)
         # Get pair of neighbors for each area
-        area0 = [sorted_areas[lesion_attr][i] for i in targets]
+        area0 = [sorted_areas_temp[lesion_attr][i] for i in targets]
         neighbors0 = []
         for l in [area_dict[a]['neighbors'] for a in area0]:
             neighbors0.append(l)
@@ -283,7 +300,7 @@ if make_movie:
         nodes = list(np.unique(nodes))
         edges = list(np.unique(edges))
         # Get remaining nodes
-        rem_nodes = [area for area in sorted_areas[lesion_attr]
+        rem_nodes = [area for area in sorted_areas_temp[lesion_attr]
                      if area not in nodes]
         # Make combined list
         all_nodes = nodes + rem_nodes
@@ -299,7 +316,7 @@ if make_movie:
         all_centroids[:, 2] *= -1
         # Get logical indices of area nodes
         neighbor_idxs = np.array([name in nodes for name in all_nodes])
-        area_idxs = np.array([name in [area0] for name in all_nodes])
+        area_idxs = np.array([name in area0 for name in all_nodes])
 
         # Compute feature dictionary for all areas
         area_dict = area_compute.get_feature_dicts(G.nodes(), G,
@@ -310,12 +327,12 @@ if make_movie:
 
         node_colors = np.array(['WhiteSmoke' for node_idx in
                                 range(len(all_nodes))])
-        node_colors[neighbor_idxs] = '#00B200'
-        node_colors[area_idxs] = 'DodgerBlue'
+        #node_colors[neighbor_idxs] = '#00B200'
+        node_colors[area_idxs] = 'Magenta'
         edge_colors = np.array(['#1565B2' for edge_idx in range(len(edges))])
 
-        node_alphas = .5 * np.ones((len(all_nodes),), dtype=float)
-        node_alphas[neighbor_idxs] = .3
+        node_alphas = .4 * np.ones((len(all_nodes),), dtype=float)
+        node_alphas[neighbor_idxs] = .4
         node_alphas[area_idxs] = .8
         edge_alphas = .2 * np.ones((len(edges),), dtype=float)
 
@@ -331,6 +348,9 @@ if make_movie:
                                     edge_colors=edge_colors,
                                     edge_alpha=edge_alphas,
                                     edge_sizes=edge_sizes)
+        ax1.set_xlim((25., 115.))
+        ax1.set_ylim((10., 110.))
+        ax1.set_zlim((-70., -10.))
 
         # Rotate through angle on left and save images
         # flip between the two 180 deg angle sets for each set of targets
