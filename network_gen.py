@@ -13,6 +13,7 @@ import numpy as np
 import scipy.io as sio
 import matplotlib.pyplot as plt
 from copy import deepcopy
+import aux_random_graphs
 
 
 def load_weights(dir_name):
@@ -227,6 +228,31 @@ def quick_net(p_th=.01, w_th=0, dir_name='../friday-harbor/linear_model'):
 #    return {'row_labels': node_labels, 'col_labels': node_labels,
 #            'data': weights}
 
+
+def Allen_graph(dir_name,p_th,w_th):
+    # Loads the Allen atlas into a graph.
+    
+    # Load weights & p-values
+    W,P,row_labels,col_labels = load_weights(dir_name)
+    # Threshold weights according to weights & p-values
+    W_net,mask = threshold(W,P,p_th=p_th,w_th=w_th)
+    # Set weights to zero if they don't satisfy threshold criteria
+    W_net[W_net==-1] = 0.
+    # Set diagonal weights to zero
+    np.fill_diagonal(W_net,0)
+
+    # Put everything in a dictionary
+    W_net_dict = {'row_labels':row_labels,'col_labels':col_labels,
+		'data':W_net}
+
+    # Convert to networkx graph object
+    coords = aux_random_graphs.get_coords()
+    keys = coords.keys()
+    G = import_weights_to_graph(W_net_dict)
+    for k in keys:
+	G.node[k] = coords[k]
+	
+    return G
 
 if __name__ == '__main__':
 
