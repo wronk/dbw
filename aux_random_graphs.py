@@ -124,8 +124,8 @@ def biophysical_graph(N=426,N_edges=7804,L=1.,power=1.5,dims=[10.,10,10],mode=0,
     
     # Calculate distance matrix
     D = dist_mat(centroids)
-    D_exp = np.exp(-D**2/(2*L**2)) # This is currently Gaussian
-    #D_exp = np.exp(-D/L)
+    #D_exp = np.exp(-D**2/(2*L**2)) # This is currently Gaussian
+    D_exp = np.exp(-D/L)
     np.fill_diagonal(D_exp,0)
     # Initialize diagonal adjacency matrix
     A = np.eye(N,dtype=float)

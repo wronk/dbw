@@ -4,20 +4,28 @@ import aux_random_graphs
 import scipy.stats
 import network_gen
 import aux_random_graphs
+import networkx as nx
 
 
 plot_lambda = 0 			# Plot length parameter
-run_degree_comparison = 0	# Compare the degree for the model
-run_average_distance = 1		# Compare average distance between edges
-run_node_dist = 0		# Plot a histogram of the distances between nodes in Allen
-compare_edge_distances = 0	# Plot histogram of edge distances between graphs
-compare_degree_distribution = 0
+run_degree_comparison = 0		# Compare the degree for the model
+run_average_distance = 0		# Compare average distance between edges
+run_node_dist = 0			# Plot a histogram of the distances between nodes in Allen
+compare_edge_distances = 0		# Plot histogram of edge distances between graphs
+compare_degree_distribution = 1
+compare_connectivity_patterns = 0 # Don't run this.
 
-#plt.close('all')
+plt.close('all')
 
+# Model parameters; L is the length parameter, pwr is the pref attachment parameter
+L = 10^12
 pwr = 1.4#1.5
+
+# Number of bins to plot in one of the histograms, and number of iterations to average over..
+# I forget which these are used in, actually.
 nbins = 30
 N_iter = 10
+
 
 # coords is a dictionary with coordinates
 coords = aux_random_graphs.get_coords()
@@ -42,8 +50,9 @@ x1 = np.linspace(0,max(x),500)
 y1 = a + b*x1
 
 # This is our estimate of lambda
-L = -1/b
-L = 13
+if L == -1:
+    L = -1/b
+
 ## So for the edge distribution:
 ## If I use small values of lambda (around 10-11 microns, I can replicate the 
 ## edge distance distribution of the Allen atlas... 
@@ -223,3 +232,22 @@ if compare_degree_distribution:
     axs7_2.hist(G_bio_deg.values(),nbins)
     
     plt.show(block=False)
+    
+# This will compute the adjacency matrix for a series of graphs and compare the connectivity pattern between them.
+# It will compute a false negative, false positive, hit and miss rate.
+# This isn't quite functional yet...
+if compare_connectivity_patterns:
+    A = nx.adjacency_matrix(G,weight=None)
+    A_bio = nx.adjacency_matrix(G_bio)
+    
+    A_diff = A-A_bio
+    
+    A_error = sum(A_diff**2)
+    
+    # This gives us a matrix where the entries are 1 for any connection that we missed with our model
+    miss_matrix = np.multiply(A,(np.multiply(A_diff,A_diff)))
+    miss = sum(miss_matrix)/sum(A)
+    hit = 1-miss
+    
+    FP_rate = np.sum(A_diff < 0,1)/sum(A_bio,1)
+    FN_rate = np.sum(A_diff > 0,1)/sum(A_bio,1)
