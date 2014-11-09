@@ -28,7 +28,7 @@ p_th = .01 # P-value threshold
 w_th = 0 # Weight-value threshold
 
 # Set relative directory path
-#dir_name = '../friday-harbor/linear_model'
+dir_name = 'friday-harbor/linear_model'
 #dir_name = '../Data/linear_model'
 
 # Load weights & p-values

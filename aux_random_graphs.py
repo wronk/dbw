@@ -102,28 +102,30 @@ def biophysical_graph(N=426,N_edges=7804,L=1.,power=1.5,dims=[10.,10,10],mode=0,
     # If we haven't specified centroids, just use some randomly chosen one.
     
     G = nx.Graph()
-    if type(centroids) == int:
-	centroids = np.random.uniform([0,0,0],dims,(N,3))
-	keys = np.arange(N)
-    elif type(centroids) == dict:
+    if type(centroids) == dict:
 	centroids_dict = centroids.copy()
 	keys = centroids.keys()
+	G.add_nodes_from(keys)
 	centroids = np.zeros([N,3])
+	# This is so that we can have the centroid coords in the graph structure
+	for k in range(N):
+	    centroids[k,:] = centroids_dict[keys[k]]
+	    G.node[keys[k]] = centroids_dict[keys[k]]
+    else:
+	centroids = np.random.uniform([0,0,0],dims,(N,3))
+	keys = np.arange(N)
+	G.add_nodes_from(keys)
+	for k in range(N):
+	    G.node[k] = centroids[k,:]
 	
-    G.add_nodes_from(keys)
-    # This is so that we can have the centroid coords in the graph structure
-    for k in range(N):
-	centroids[k,:]  = centroids_dict[keys[k]]
-	G.node[keys[k]] = centroids_dict[keys[k]]
-	    
 	    
 	
     
     
     # Calculate distance matrix
     D = dist_mat(centroids)
-    #D_exp = np.exp(-D**2/(2*L**2)) # This is currently Gaussian
-    D_exp = np.exp(-D/L)
+    D_exp = np.exp(-D**2/(2*L**2)) # This is currently Gaussian
+    #D_exp = np.exp(-D/L)
     np.fill_diagonal(D_exp,0)
     # Initialize diagonal adjacency matrix
     A = np.eye(N,dtype=float)
@@ -208,5 +210,15 @@ def get_edge_distances(G):
 	distances[edge] = d
 	
     return distances
+    
+def compute_average_distance(G):
+    distances = get_edge_distances(G)
+    avg_distance = {}
+    for node in G.nodes():
+	current_distances = [distances[edge] for edge in distances if node in edge]
+	avg_distance[node] = np.mean(current_distances)
+	
+    return avg_distance
+    
 if __name__ == '__main__':
     G = scale_free_cc_graph(n=426,m=12,k0=3,p=np.array([1]),fp=np.array([1]))
