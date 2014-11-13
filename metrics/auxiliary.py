@@ -15,15 +15,8 @@ def swap_nodes(D,idx0,idx1):
         swapped distance matrix, indices of swapped nodes"""
     D_swapped = D.copy()
     
-    # Choose random nodes to swap
-    pair = 
-    
-    # Store labels of swapped nodes
-    node_pairs += [(row_labels[p[0]],row_labels[p[1]])]
-    # Store centroids of swapped nodes
-    centroid_pairs += [(centroids[p[0],:],centroids[p[1],:])]
     # Swap rows & columns of distance matrix
-    D_swapped[[p[0],p[1]],:] = D_swapped[[p[1],p[0]],:]
-    D_swapped[:,[p[0],p[1]]] = D_swapped[:,[p[1],p[0]]]
+    D_swapped[[idx0,idx1],:] = D_swapped[[idx1,idx0],:]
+    D_swapped[:,[idx0,idx1]] = D_swapped[:,[idx1,idx0]]
         
-    return D_swapped,p[0],p[1]
+    return D_swapped

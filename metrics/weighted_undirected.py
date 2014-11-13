@@ -56,7 +56,7 @@ def axon_volume_cost(W, D):
     # Calculate cost by summing weights with distances
     return (W/2.*D).sum()
     
-def swapped_cost_dist(W, D, n_trials, percent_change=True):
+def swapped_cost_distr(W, D, n_trials=500, percent_change=True):
     """Calculate how much the axon volume cost changes for a random node swap.
     
     Args:
