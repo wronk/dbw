@@ -7,8 +7,9 @@ Graph-theory metrics for weighted undirected graphs.
 """
 
 import numpy as np
+import auxiliary as aux
 
-def weight_distr_dist_binned(W,D,d_bins=50):
+def weight_distr_dist_binned(W, D, d_bins=50):
     """Calculate weight distributions sorted by distance.
     
     Note: if W is not symmetrical, it is assumed to be directed and is made
@@ -41,3 +42,47 @@ def weight_distr_dist_binned(W,D,d_bins=50):
         weight_dists[bin_idx] = w[(d >= d_lower) * (d < d_upper)]
         
     return d_bins, weight_dists
+    
+def axon_volume_cost(W, D):
+    """Calculate axon volume cost of network.
+    
+    Args:
+        W: weight matrix
+        D: distance matrix
+    Returns:
+        axon volume cost"""
+    # Make sure self-weights are set to zero
+    np.fill_diagonal(W,0)
+    # Calculate cost by summing weights with distances
+    return (W/2.*D).sum()
+    
+def swapped_cost_dist(W, D, n_trials, percent_change=True):
+    """Calculate how much the axon volume cost changes for a random node swap.
+    
+    Args:
+        W: weight matrix
+        D: distance matrix
+        n_trials: how many times to make a random swap (starting from the 
+            original configuration)
+        percent_change: set to True to return percent changes in cost
+    Returns:
+        vector of cost changes for random swaps"""
+    # Calculate true cost
+    true_cost = axon_volume_cost(W, D)
+    # Allocate space for storing amount by which cost changes
+    cost_changes = np.zeros((n_trials,), dtype=float)
+    
+    # Perform random swaps
+    for trial in range(n_trials):
+        # Randomly select two nodes
+        idx0, idx1 = np.random.permutation(D.shape[0])[:2]
+        # Create new distance matrix
+        D_swapped = aux.swap_nodes(D, idx0, idx1)
+        # Calculate cost change for swapped-node graph
+        cost_changes[trial] = axon_volume_cost(W, D_swapped) - true_cost
+        
+    if percent_change:
+        cost_changes /= true_cost
+        cost_changes *= 100
+    
+    return cost_changes
