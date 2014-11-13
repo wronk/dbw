@@ -1,3 +1,4 @@
+import pdb
 """
 Created on Wed Nov 12 12:11:43 2014
 
@@ -26,7 +27,7 @@ def binary_undirected(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
     W[(W < w_th)] = 0.
     W[(P > p_th)] = 0.
     # Symmetrize W by summing reciprocal weights
-    W += W.T
+    W = W + W.T
     # Set self-weights to zero
     np.fill_diagonal(W,0.)
     # Create adjacency matrix
@@ -45,11 +46,13 @@ def weighted_undirected(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
         NetworkX graph, weight matrix, row labels & column labels"""
     # Load weights & p-values
     W, P, row_labels, col_labels = aux.load_W_and_P(data_dir=data_dir)
+
     # Threshold weights via weights & p-values
     W[(W < w_th)] = 0.
     W[(P > p_th)] = 0.
     # Symmetrize W by summing reciprocal weights
-    W += W.T
+    W = W + W.T
+    
     # Set self-weights to zero
     np.fill_diagonal(W,0.)
     
