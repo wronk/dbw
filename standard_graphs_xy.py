@@ -17,7 +17,8 @@ p_th = .01 # P-value threshold
 w_th = 0 # Weight-value threshold
 
 # Set relative directory path
-dir_name = '../friday-harbor/linear_model'
+#dir_name = '../friday-harbor/linear_model'
+dir_name = '../Data/linear_model'
 
 # Load weights & p-values
 W,P,row_labels,col_labels = network_gen.load_weights(dir_name)
@@ -41,6 +42,9 @@ N = len(G.nodes())
 G_ER = nx.erdos_renyi_graph(N,0.085)
 G_BA = nx.barabasi_albert_graph(N,19)
 G_WS = nx.watts_strogatz_graph(N,36,0.159)
+
+G_BA_cc = nx.powerlaw_cluster_graph(N,19,1)
+
 # G_BA_cc = aux_random_graphs.scale_free_cc_graph(n=N,m=25,k0=20,p=np.array([1]),fp=np.array([1]))
 G_PWC = nx.powerlaw_cluster_graph(426,10,p=.9)
 # Biophysical graph
@@ -53,16 +57,28 @@ plotfunction = plot_net.plot_edge_btwn
 
 myrange = np.linspace(0,0.002,20)
 
-MyX = nx.clustering
+MyX = nx.betweenness_centrality
 
 x_ER = MyX(G_ER).values()
-y_ER = G_ER.degree().values()
+y_ER = nx.clustering(G_ER).values()
+#y_ER = G_ER.degree().values()
 
 x_BA = MyX(G_BA).values()
-y_BA = G_BA.degree().values()
+#y_BA = G_BA.degree().values()
+y_BA = nx.clustering(G_BA).values()
 
 x_WS = MyX(G_WS).values()
-y_WS = G_WS.degree().values()
+#y_WS = G_WS.degree().values()
+y_WS = nx.clustering(G_WS).values()
+
+
+x_BA_cc = MyX(G_BA_cc).values()
+#y_BA_cc = G_BA_cc.degree().values()
+y_BA_cc = nx.clustering(G_BA_cc).values()
+
+x = MyX(G).values()
+#y = G.degree().values()
+y = nx.clustering(G).values()
 
 x_PWC = MyX(G_PWC).values()
 y_PWC = G_PWC.degree().values()
@@ -83,17 +99,20 @@ ax_ER.scatter(x_ER,y_ER)
 
 ax_BA.scatter(x_BA,y_BA)
 
-ax_WS.scatter(x_WS,y_WS)
+Fig,axs = plt.subplots(nrows=2,ncols=2,sharex=False, sharey=False, facecolor='White')
+
+
+axs[0,0].scatter(x,y)
 
 ax_PWC.scatter(x_PWC,y_PWC)
 
 ax_BIO.scatter(x_BIO,y_BIO)
 
-#Fig,ax = plotfunction(G,myrange)
-#Fig_ER,ax_ER = plotfunction(G_ER,myrange)
-#Fig_BA,ax_BA = plotfunction(G_BA,myrange)
-#Fig_WS,ax_WS = plotfunction(G_WS,myrange)
+axs[0,1].scatter(x_ER,y_ER)
 
+axs[1,0].scatter(x_BA,y_BA)
+
+axs[1,1].scatter(x_BA_cc,y_BA_cc)
 
 
 #xLims = [ax.get_xlim(), ax_ER.get_xlim(), ax_WS.get_xlim(), ax_BA.get_xlim()]
@@ -110,11 +129,36 @@ ax_BIO.scatter(x_BIO,y_BIO)
 #ax_BA.axis(MyLims)
 
 for a in [ax,ax_ER,ax_BA,ax_WS,ax_PWC,ax_BIO]:
-    a.set_xlim(0,1)
-    a.set_ylim(0,200)
+    pass
+    #a.set_xlim(0,1)
+    #a.set_ylim(0,200)
+    
 # For clustering
 XTicks = [0,0.25,0.5,0.75,1]
+XTicks = [0,0.0125,0.025,0.0375,0.05]
 YTicks = [0,50,100,150,200]
+
+
+for i in [0,1]:
+    for j in [0,1]:
+        #axs[i,j].set_xlim(-.01,0.05)
+        #axs[i,j].set_ylim(0,200)
+        axs[i,j].tick_params(labelsize=20)
+        #axs[i,j].set_xticks(XTicks)
+        #axs[i,j].set_yticks(YTicks)
+# For clustering
+        
+
+
+TitleFontSize = 22
+LabelFontSize = 20
+axs[0,0].set_title('Allen Mouse Brain Atlas (LM)', fontsize=TitleFontSize)
+axs[0,1].set_title('Watts-Strogatz small world network', fontsize=TitleFontSize)
+axs[1,0].set_title('Symmetric Barabasi-Albert scale-free network', fontsize=TitleFontSize)
+axs[1,1].set_title('Clustered scale-free network', fontsize=TitleFontSize)
+
+ax_BA.set_xlabel('Clustering coefficient', fontsize=LabelFontSize)
+ax_WS.set_xlabel('Clustering coefficient', fontsize=LabelFontSize)
 
 ax.set_xticks(XTicks)
 ax_ER.set_xticks(XTicks)

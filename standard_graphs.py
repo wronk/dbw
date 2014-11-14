@@ -191,4 +191,3 @@ def symmetric_BA_graph(n,m,p):
 #G = symmetric_BA_graph(426,19,0.52)
 #G = symmetric_BA_graph(12,5,0.5)
 #nx.draw(G)
-#=======
