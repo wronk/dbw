@@ -15,9 +15,10 @@ import aux_random_graphs
 
 import standard_graphs
 
-plot_functions = False
-LogLogPlot = True
-PLOT_HISTS = True
+plot_functions = True
+LogLogPlot = False
+PLOT_HISTS = False
+plot_twoplots = False
 
 RGCs = {'Brain':'b','ER':'k','WS':'g','BA':'r','PWC':'c','BIO':'m'}
 FontSize = 24
@@ -49,10 +50,14 @@ G = network_gen.import_weights_to_graph(W_net_dict)
 N = len(G.nodes())
 
 # These are the new params, derived from adjusting the proverbial knobs
-G_ER = nx.erdos_renyi_graph(N,0.5)
+G_ER = nx.erdos_renyi_graph(N,0.087)
 G_WS = nx.watts_strogatz_graph(N,36,0.159)
+
 #G_BA = standard_graphs.symmetric_BA_graph(N,20,0.52)
 G_BA = nx.barabasi_albert_graph(N,20)
+G_BA = standard_graphs.symmetric_BA_graph(N,20,0.52)
+#G_BA = nx.barabasi_albert_graph(N,19)
+
 G_PWC = nx.powerlaw_cluster_graph(N,19,1)
 print 'Generating biophysical graph...'
 G_BIO,A,D = aux_random_graphs.biophysical_graph(N=426,N_edges=7804,L=1.,power=1.5,mode=0)
@@ -66,15 +71,16 @@ if plot_functions:
     Fig, axs = plt.subplots(2,2, facecolor=[1,1,1])
     
     plotfunction(axs[0,0],G)
-    plotfunction(axs[0,1],G_PWC)
+    #plotfunction(axs[0,1],G_PWC)
+    plotfunction(axs[0,1],G_ER)
     plotfunction(axs[1,0],G_BA)
     plotfunction(axs[1,1],G_WS)
     
-    titlesize=28
-    labelsize=24
+    titlesize=35
+    labelsize=28
     ticksize=20
     axs[0,0].set_title('Allen Mouse Brain Atlas (LM)', fontsize=titlesize)
-    axs[0,1].set_title('Clustered scale-free graph', fontsize=titlesize)
+    axs[0,1].set_title('Erdos_Renyi', fontsize=titlesize)
     axs[1,0].set_title('Symmetric Barabasi-Albert', fontsize=titlesize)
     axs[1,1].set_title('Watts-Strogatz graph', fontsize=titlesize)
 
@@ -160,8 +166,9 @@ if LogLogPlot:
                     item.set_fontsize(FontSize)
 
 if PLOT_HISTS:
+    FontSize = 30
     # Plot degree histogram overlaid w/ random graph degree histograms
-    bins = np.linspace(0,140,50)
+    bins = np.linspace(0,150,50)
     fig,ax = plt.subplots(1,1,facecolor='w')
     plot_net.plot_degree_distribution(ax,G,bins=bins)
 #    plot_net.line_hist(ax,G_ER,'degree',bins=bins,c=RGCs['ER'],lw=3)
@@ -171,6 +178,22 @@ if PLOT_HISTS:
     plot_net.line_hist(ax,G_BIO,'degree',bins=bins,c=RGCs['BIO'],lw=3)
     ax.legend(('BA scale-free','Power-law clustered','Biophysical',
                'Mouse brain'),prop={'size':FontSize})
+#plot_net.plot_degree_distribution(ax,G,bins=bins)
+    plot_net.line_hist(ax,G_ER,'degree',bins=bins,c=RGCs['ER'],lw=3)
+
+    #plot_net.line_hist(ax,G_WS,'degree',bins=bins,c=RGCs['WS'],lw=3)
+    #plot_net.line_hist(ax,G_BA,'degree',bins=bins,c=RGCs['BA'],lw=3)
+    #plot_net.line_hist(ax,G_BA_cc,'degree',bins=bins,c=RGCs['BA_cc'],lw=3)
+    ax.set_xticks([0,50,100,150])
+    ax.set_ylim([0,10])
+    ax.set_yticks([0,50,100,150,200,250])
+
+    plot_net.line_hist(ax,G_WS,'degree',bins=bins,c=RGCs['WS'],lw=3)
+    plot_net.line_hist(ax,G_BA,'degree',bins=bins,c=RGCs['BA'],lw=3)
+    plot_net.line_hist(ax,G_PWC,'degree',bins=bins,c=RGCs['PWC'],lw=3)
+    plot_net.line_hist(ax,G_BIO,'degree',bins=bins,c=RGCs['BIO'],lw=3)
+
+
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
                 ax.get_xticklabels() + ax.get_yticklabels()):
                     item.set_fontsize(FontSize)
@@ -182,10 +205,17 @@ if PLOT_HISTS:
 #    plot_net.line_hist(ax,G_ER,'ccoeff',bins=bins,c=RGCs['ER'],lw=3)
 #    plot_net.line_hist(ax,G_WS,'ccoeff',bins=bins,c=RGCs['WS'],lw=3)
     plot_net.line_hist(ax,G_BA,'ccoeff',bins=bins,c=RGCs['BA'],lw=3)
+
+    plot_net.line_hist(ax,G_BA_cc,'ccoeff',bins=bins,c=RGCs['BA_cc'],lw=3)
+    ax.set_xticks([0,0.25,0.5,0.75,1])
+
     plot_net.line_hist(ax,G_PWC,'ccoeff',bins=bins,c=RGCs['PWC'],lw=3)
     plot_net.line_hist(ax,G_BIO,'ccoeff',bins=bins,c=RGCs['BIO'],lw=3)
+
     ax.legend(('BA scale-free','Power-law clustered','Biophysical',
                'Mouse brain'),prop={'size':FontSize})
+
+
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
                 ax.get_xticklabels() + ax.get_yticklabels()):
                     item.set_fontsize(FontSize)
@@ -193,6 +223,7 @@ if PLOT_HISTS:
     # Plot node-betweenness overlaid w/ random graph histograms
     bins = np.linspace(0,.02,50)
     fig,ax = plot_net.plot_node_btwn(G,bins=bins)
+
 #    plot_net.line_hist(ax,G_ER,'node_btwn',bins=bins,c=RGCs['ER'],lw=3)
 #    plot_net.line_hist(ax,G_WS,'node_btwn',bins=bins,c=RGCs['WS'],lw=3)
     plot_net.line_hist(ax,G_BA,'node_btwn',bins=bins,c=RGCs['BA'],lw=3)
@@ -200,7 +231,21 @@ if PLOT_HISTS:
     plot_net.line_hist(ax,G_BIO,'node_btwn',bins=bins,c=RGCs['BIO'],lw=3)
     ax.legend(('BA scale-free','Power-law clustered','Biophysical',
                'Mouse brain'),prop={'size':FontSize})
+
+    plot_net.line_hist(ax,G_ER,'node_btwn',bins=bins,c=RGCs['ER'],lw=3)
+    plot_net.line_hist(ax,G_WS,'node_btwn',bins=bins,c=RGCs['WS'],lw=3)
+
+    #plot_net.line_hist(ax,G_BA,'node_btwn',bins=bins,c=RGCs['BA'],lw=3)
+    plot_net.line_hist(ax,G_BA_cc,'node_btwn',bins=bins,c=RGCs['BA_cc'],lw=3)
+
+    plot_net.line_hist(ax,G_BA,'node_btwn',bins=bins,c=RGCs['BA'],lw=3)
+    plot_net.line_hist(ax,G_PWC,'node_btwn',bins=bins,c=RGCs['PWC'],lw=3)
+    plot_net.line_hist(ax,G_BIO,'node_btwn',bins=bins,c=RGCs['BIO'],lw=3)
+
     ax.set_xlim(0,.02)
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
                 ax.get_xticklabels() + ax.get_yticklabels()):
                     item.set_fontsize(FontSize)
+                    
+if plot_twoplots:
+    pass

@@ -137,7 +137,7 @@ def plot_out_in_ratios(W_net, labels=None, bins=20):
     return fig, axs
 
 
-def plot_clustering_coeff_pdf(ax, G, bins=np.linspace(0., 0.25, 150)):
+def plot_clustering_coeff_pdf(ax, G, bins=np.linspace(0., 1, 50)):
     '''
     Plot clustering coefficient probability density function
 
