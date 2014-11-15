@@ -13,7 +13,7 @@ DEGREE_BINS = 20
 CLUSTERING_BINS = 20
 
 # ANALYSIS PARAMETERS
-N_BIO_GRAPHS = 10
+N_BIO_GRAPHS = 1
 
 import numpy as np
 import networkx as nx

@@ -29,6 +29,7 @@ for bin_idx, weight_dist in enumerate(weight_dists):
     ax.hist(np.log(weight_dist),normed=True)
     ax.set_xlabel('Log(weight)')
     ax.set_ylabel('Probability')
-    ax.set_title('%.2f < d < %.2f; %d cxns'%(d_lower,d_upper,n_cxns))
+    ax.set_title('%.2f mm < d < %.2f mm; %d cxns'%(d_lower,d_upper,n_cxns))
     plt.draw()
     raw_input()
+    

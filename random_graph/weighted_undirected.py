@@ -35,7 +35,7 @@ def biophysical_sample_weights(N=426, N_edges=7804, L=1., gamma=1.5,
     # Create binary undirected graph
     G,A,D = binary_undirected.biophysical(N=N, N_edges=N_edges, L=L,
                                           gamma=gamma, brain_size=brain_size)
-
+    
     # Calculate distance-dependent weight distributions if necessary
     if use_brain_weights:
         # Load weight & distance matrices from mouse connectivity
@@ -44,7 +44,7 @@ def biophysical_sample_weights(N=426, N_edges=7804, L=1., gamma=1.5,
         # Calculate distributions
         d_bins, w_dists = \
         metrics.weighted_undirected.weight_distr_dist_binned(W_brain, 
-                                                             D_brain, d_bins=50)
+                                                             D_brain, d_bins=70)
     # Make sure d_bins includes everything so we don't skip any edges
     d_bins[0], d_bins[-1] = 0., np.inf
     # Assign weights to edges by sampling them according to distance

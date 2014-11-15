@@ -8,12 +8,12 @@ Auxiliary tools for handling graphs.
 
 import numpy as np
 
-def dist_mat(centroids,mm=True):
-    """Compute a distance matrix from 3D centroids.
+def dist_mat(centroids, in_100um=False):
+    """Compute a distance matrix (returned in mm) from 3D centroids.
     
     Args:
         centroids: 2D array of centroid coordinates.
-        mm: set to True to return in mm (otherwise returned in 100 micron units)
+        in_100um: set to True if centroids unit is 100 microns
     Returns:
         distance matrix between all centroids"""
     
@@ -22,6 +22,6 @@ def dist_mat(centroids,mm=True):
         for c_idx in range(D.shape[1]):
             d = np.sqrt(np.sum((centroids[r_idx,:] - centroids[c_idx])**2))
             D[r_idx,c_idx] = d
-    if mm:
+    if in_100um:
         D /= 10.
     return D

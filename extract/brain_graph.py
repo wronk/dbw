@@ -72,6 +72,6 @@ def distance_matrix(lm_dir=LINEAR_MODEL_DIRECTORY, cent_dir=CENTROID_DIRECTORY):
     # Load centroids
     centroids = aux.load_centroids(row_labels,data_dir=cent_dir)
     # Compute distance matrix
-    dist_mat = aux_tools.dist_mat(centroids)
+    dist_mat = aux_tools.dist_mat(centroids, in_100um=True)
     
     return dist_mat, centroids

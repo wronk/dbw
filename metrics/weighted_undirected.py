@@ -54,7 +54,7 @@ def axon_volume_cost(W, D):
     # Make sure self-weights are set to zero
     np.fill_diagonal(W,0)
     # Calculate cost by summing weights with distances
-    return (W/2.*D).sum()
+    return (np.triu(W)*D).sum()
     
 def swapped_cost_distr(W, D, n_trials=500, percent_change=True):
     """Calculate how much the axon volume cost changes for a random node swap.

@@ -10,9 +10,8 @@ NetworkX.
 import numpy as np
 import networkx as nx
 import graph_tools.auxiliary as aux_tools
-import aux_random_graphs
 
-def biophysical(N=426,N_edges=7804,L=.1,gamma=1.5,brain_size=[10.,10,10]):
+def biophysical(N=426, N_edges=7804, L=1., gamma=1.5, brain_size=[10.,10,10]):
     """Create a biophysically inspired graph. Connection probabilities depend
     on distance & degree.
     
@@ -28,7 +27,7 @@ def biophysical(N=426,N_edges=7804,L=.1,gamma=1.5,brain_size=[10.,10,10]):
     centroids = np.random.uniform([0,0,0],brain_size,(N,3))
     
     # Calculate distance matrix and distance decay matrix
-    D = aux_tools.dist_mat(centroids, mm=False)
+    D = aux_tools.dist_mat(centroids)
     D_decay = np.exp(-D/L)
     
     # Initialize diagonal adjacency matrix
