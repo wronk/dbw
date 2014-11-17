@@ -7,7 +7,41 @@ Graph-theory metrics for binary undirected graphs.
 """
 
 import numpy as np
+import scipy.stats as stats
+
 import auxiliary as aux
+
+
+def cxn_length_scale(A, D, bins=50, no_self_cxns=True):
+    """Calculate the length scale of a set of connections.
+    
+    Args:
+        A: adjacency matrix
+        D: distance matrix
+        bins: how many bins to use to calculate distance histogram
+        no_self_cxns: whether or not to include self connections
+    Returns:
+        Length scale of best fit exponential.
+    """
+    # Add/remove self-connections
+    A_temp = A.copy()
+    if no_self_cxns:
+        np.fill_diagonal(A_temp, 0)
+    else:
+        np.fill_diagonal(A_temp, 1)
+    # Get vector of connection distances
+    D_vec = D[np.triu(A)]
+    # Calculate histogram
+    prob, bins = np.histogram(D_vec, bins=bins, normed=True)
+    bin_centers = .5 * (bins[:-1] + bins[1:])
+    log_prob = np.log(prob)
+    # Remove -infs
+    bin_centers = bin_centers[~np.isinf(log_prob)]
+    log_prob = log_prob[~np.isinf(log_prob)]
+    # Fit line
+    L, b, r, p, stderr = stats.linregress(bin_centers, log_prob)
+    
+    return L, r
 
 def wiring_distance_cost(A, D):
     """Calculate wiring distance cost (sum of edge distances)
