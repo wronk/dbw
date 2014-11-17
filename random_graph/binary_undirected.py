@@ -78,4 +78,4 @@ def biophysical(N=426, N_edges=7804, L=1., gamma=1.5, brain_size=[10.,10,10]):
     # Set diagonals to zero
     np.fill_diagonal(A,0)
         
-    return G,A,D
+    return G, A, D
