@@ -40,8 +40,9 @@ def load_W_and_P(data_dir=LINEAR_MODEL_DIRECTORY):
 
     return W, P, row_labels_full, col_labels_full
     
-def load_centroids(labels,data_dir=CENTROID_DIRECTORY):
+def load_centroids(labels, data_dir=CENTROID_DIRECTORY, in_mm=True):
     """Load centroids."""
+    
     onto = Ontology(data_dir=data_dir)
     centroids = np.zeros((len(labels),3),dtype=float)
     for a_idx,area in enumerate(labels):
@@ -51,5 +52,7 @@ def load_centroids(labels,data_dir=CENTROID_DIRECTORY):
         elif area[-1] == 'R':
             mask = onto.get_mask_from_id_right_hemisphere_nonzero(s_id)
         centroids[a_idx,:] = mask.centroid
+    if in_mm:
+        centroids /= 10.
         
     return centroids

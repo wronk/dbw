@@ -62,16 +62,21 @@ def weighted_undirected(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
     return G, W, row_labels, col_labels
 
 
-def distance_matrix(lm_dir=LINEAR_MODEL_DIRECTORY, cent_dir=CENTROID_DIRECTORY):
+def distance_matrix(lm_dir=LINEAR_MODEL_DIRECTORY, cent_dir=CENTROID_DIRECTORY,
+                    in_mm=True):
     """Compute distance matrix from centroid data.
     
+    Args:
+        lm_dir: Directory containing linear model data
+        cent_dir: Directory containing centroid data
+        in_mm: Set to true to return dist matrix in mm instead of 100um units
     Returns:
         distance matrix, centroid matrix"""
     # Get labels
     _, _, row_labels, _ = aux.load_W_and_P(data_dir=lm_dir)
     # Load centroids
-    centroids = aux.load_centroids(row_labels,data_dir=cent_dir)
+    centroids = aux.load_centroids(row_labels, data_dir=cent_dir, in_mm=in_mm)
     # Compute distance matrix
-    dist_mat = aux_tools.dist_mat(centroids, in_100um=True)
+    dist_mat = aux_tools.dist_mat(centroids)
     
     return dist_mat, centroids
