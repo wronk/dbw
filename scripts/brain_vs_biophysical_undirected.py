@@ -14,6 +14,8 @@ CLUSTERING_BINS = 20
 
 # ANALYSIS PARAMETERS
 N_BIO_GRAPHS = 1
+L = 1. # Length scale parameter
+GAMMA = 1.5 # Preferential attachment parameter
 
 import numpy as np
 import networkx as nx
@@ -25,7 +27,6 @@ import random_graph.binary_undirected as rg
 G_brain, W_brain, _, _ = extract.brain_graph.binary_undirected()
 n_nodes = len(G_brain.nodes())
 n_edges = len(G_brain.edges())
-p_edge = float(n_edges) / ((n_nodes * (n_nodes - 1)) / 2)
 
 # Calculate degree & clustering coefficient distribution
 degree = nx.degree(G_brain).values()
@@ -38,7 +39,7 @@ BIO_degree_bins = DEGREE_BINS
 BIO_clustering_hist = np.zeros((N_BIO_GRAPHS, CLUSTERING_BINS))
 BIO_clustering_bins = CLUSTERING_BINS
 for graph_idx in range(N_BIO_GRAPHS):
-    G_BIO, A_BIO, D_BIO = rg.biophysical(n_nodes, n_edges, L=1., gamma=1.5)
+    G_BIO, A_BIO, D_BIO = rg.biophysical(n_nodes, n_edges, L=L, gamma=GAMMA)
     BIO_degree = nx.degree(G_BIO).values()
     BIO_degree_hist[graph_idx,:], BIO_degree_bins = \
     np.histogram(BIO_degree, BIO_degree_bins, normed=True)

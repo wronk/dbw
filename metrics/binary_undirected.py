@@ -30,7 +30,7 @@ def cxn_length_scale(A, D, bins=50, no_self_cxns=True):
     else:
         np.fill_diagonal(A_temp, 1)
     # Get vector of connection distances
-    D_vec = D[np.triu(A)]
+    D_vec = D[np.triu(A) > 0]
     # Calculate histogram
     prob, bins = np.histogram(D_vec, bins=bins, normed=True)
     bin_centers = .5 * (bins[:-1] + bins[1:])
@@ -39,9 +39,37 @@ def cxn_length_scale(A, D, bins=50, no_self_cxns=True):
     bin_centers = bin_centers[~np.isinf(log_prob)]
     log_prob = log_prob[~np.isinf(log_prob)]
     # Fit line
-    L, b, r, p, stderr = stats.linregress(bin_centers, log_prob)
+    slope, b, r, p, stderr = stats.linregress(bin_centers, log_prob)
     
-    return L, r
+    L = -1./slope
+    
+    return L, r, p
+
+
+def cxn_probability(A, D, bins=50):
+    """Calculate the probability of a connection between two nodes given their
+    distance
+    
+    Args:
+        A: adjacency matrix
+        D: distance matrix
+        bins: distance bins
+    Returns:
+        probabilities of cxns, distance bins
+    """
+    # Get vector of distances
+    D_vec = D[np.triu(np.ones(D.shape), k=1) == 1]
+    # Get distance counts & bins regardless of whether cxn present or not
+    dist_cts, dist_bins = np.histogram(D_vec, bins)
+    # Get vector of distances only when connections present
+    D_cxn_vec = D[np.triu(A, k=1) == 1]
+    # Get distance counts using the same bins, only when cxn present
+    dist_cxn_cts, dist_bins = np.histogram(D_cxn_vec, bins)
+    # Calculate probability of cxn given distance bin
+    cxn_prob = dist_cxn_cts/(dist_cts.astype(float))
+    
+    return cxn_prob, dist_bins
+
 
 def wiring_distance_cost(A, D):
     """Calculate wiring distance cost (sum of edge distances)
