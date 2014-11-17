@@ -57,13 +57,13 @@ def cxn_probability(A, D, bins=50):
     Returns:
         probabilities of cxns, distance bins
     """
-    # Get vector of distances
+    # Get vector of distances (without double counting)
     D_vec = D[np.triu(np.ones(D.shape), k=1) == 1]
     # Get distance counts & bins regardless of whether cxn present or not
     dist_cts, dist_bins = np.histogram(D_vec, bins)
     # Get vector of distances only when connections present
     D_cxn_vec = D[np.triu(A, k=1) == 1]
-    # Get distance counts using the same bins, only when cxn present
+    # Get distance counts using the same bins, but only when cxn present
     dist_cxn_cts, dist_bins = np.histogram(D_cxn_vec, bins)
     # Calculate probability of cxn given distance bin
     cxn_prob = dist_cxn_cts/(dist_cts.astype(float))
