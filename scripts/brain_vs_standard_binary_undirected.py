@@ -8,6 +8,7 @@ Compare mouse connectivity network to standard random graphs.
 
 # PLOTTING PARAMETERS
 FACECOLOR = 'white'
+FONTSIZE = 20
 ER_COLOR = 'r'
 WS_COLOR = 'g'
 BA_COLOR = 'k'
@@ -89,7 +90,6 @@ for graph_idx in range(N_ER_GRAPHS):
 BA_degree_hist = BA_degree_hist.mean(axis=0)
 BA_clustering_hist = BA_clustering_hist.mean(axis=0)
 
-
 # Plot mouse degree & clustering histograms, overlaid with averaged equivalent
 # ER & BA histograms
 fig_degree, ax_degree = plt.subplots(1, 1, facecolor=FACECOLOR)
@@ -111,11 +111,17 @@ ax_clustering.plot(WS_clustering_bins, WS_clustering_hist, color=WS_COLOR, lw=3)
 ax_clustering.plot(BA_clustering_bins, BA_clustering_hist, color=BA_COLOR, lw=3)
 
 # Set labels
-ax_degree.set_xlabel('Degree')
-ax_degree.set_ylabel('Probability')
+ax_degree.set_xlabel('Degree', fontsize=FONTSIZE)
+ax_degree.set_ylabel('Probability', fontsize=FONTSIZE)
 
-ax_clustering.set_xlabel('Clustering coefficient')
-ax_clustering.set_ylabel('Probability')
+plt.draw()
+plt.tight_layout()
+
+ax_clustering.set_xlabel('Clustering coefficient', fontsize=FONTSIZE)
+ax_clustering.set_ylabel('Probability', fontsize=FONTSIZE)
+
+plt.draw()
+plt.tight_layout()
 
 # Plot mouse degree vs. clustering & last ER & BA degree vs. clustering
 fig_degvcc, axs_degvcc = plt.subplots(2, 2, facecolor=FACECOLOR)
@@ -125,17 +131,25 @@ axs_degvcc[1,0].scatter(WS_clustering, WS_degree)
 axs_degvcc[1,1].scatter(BA_clustering, BA_degree)
 
 # Set axes
+for ax in [ax_degree, ax_clustering]:
+    for text in ax.get_xticklabels() + ax.get_yticklabels():
+        text.set_fontsize(FONTSIZE)
 for row_idx, ax_row in enumerate(axs_degvcc):
     for col_idx, ax in enumerate(ax_row):
         ax.set_xlim(0,1)
         ax.set_ylim(0,170)
         if col_idx == 0:
-            ax.set_ylabel('Degree')
+            ax.set_ylabel('Degree', fontsize=FONTSIZE)
         if row_idx == 1:
-            ax.set_xlabel('Clustering coefficient')
+            ax.set_xlabel('Clustering coefficient', fontsize=FONTSIZE)
+        for text in ax.get_xticklabels() + ax.get_yticklabels():
+            text.set_fontsize(FONTSIZE)
         
 # Set labels
-axs_degvcc[0,0].set_title('Mouse brain')
-axs_degvcc[0,1].set_title('Erdos Renyi')
-axs_degvcc[1,0].set_title('Watts Strogatz')
-axs_degvcc[1,1].set_title('Barabasi Albert')
+axs_degvcc[0,0].set_title('Mouse brain', fontsize=FONTSIZE)
+axs_degvcc[0,1].set_title('Erdos Renyi', fontsize=FONTSIZE)
+axs_degvcc[1,0].set_title('Watts Strogatz', fontsize=FONTSIZE)
+axs_degvcc[1,1].set_title('Barabasi Albert', fontsize=FONTSIZE)
+
+plt.draw()
+plt.tight_layout()

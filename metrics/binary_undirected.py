@@ -67,7 +67,6 @@ def cxn_probability(A, D, bins=50):
     dist_cxn_cts, dist_bins = np.histogram(D_cxn_vec, bins)
     # Calculate probability of cxn given distance bin
     cxn_prob = dist_cxn_cts/(dist_cts.astype(float))
-    
     return cxn_prob, dist_bins
 
 

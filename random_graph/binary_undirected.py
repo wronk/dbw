@@ -11,7 +11,13 @@ import numpy as np
 import networkx as nx
 import graph_tools.auxiliary as aux_tools
 
-def biophysical(N=426, N_edges=7804, L=1., gamma=1.5, brain_size=[10.,10,10]):
+def ER_distance(N=426, p=.1, brain_size=[9., 9, 9]):
+    """Create an Erdos-Renyi random graph in which each node is assigned a 
+    position in space, so that relative positions are represented by a distance
+    matrix."""
+    return True
+
+def biophysical(N=426, N_edges=7804, L=1.5, gamma=1.7, brain_size=[9., 9, 9]):
     """Create a biophysically inspired graph. Connection probabilities depend
     on distance & degree.
     
@@ -24,7 +30,7 @@ def biophysical(N=426, N_edges=7804, L=1., gamma=1.5, brain_size=[10.,10,10]):
     Returns:
         Networkx graph object, adjacency matrix, distance matrix"""
     # Pick node positions & calculate distance matrix
-    centroids = np.random.uniform([0,0,0],brain_size,(N,3))
+    centroids = np.random.uniform([0, 0, 0], brain_size, (N, 3))
     
     # Calculate distance matrix and distance decay matrix
     D = aux_tools.dist_mat(centroids)
@@ -48,7 +54,7 @@ def biophysical(N=426, N_edges=7804, L=1., gamma=1.5, brain_size=[10.,10,10]):
         from_idx = np.random.randint(low=0, high=N)
         
         # Skip this node if already fully connected
-        if degs[from_idx] == N-1:
+        if degs[from_idx] == N:
             continue
         
         # Find unavailable cxns and set their probability to zero

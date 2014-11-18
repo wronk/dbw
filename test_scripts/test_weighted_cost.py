@@ -21,17 +21,17 @@ G_brain, W_brain, _, _ = extract.brain_graph.weighted_undirected()
 D_brain, _ = extract.brain_graph.distance_matrix()
 N_brain = W_brain.shape[0]
 N_edges_brain = (W_brain > 0).sum()/2
-L = 1.
-gamma = 1.5
+L = 1.5
+GAMMA = 1.7
+BRAIN_SIZE = [9., 9, 9]
 
 # Calculate swapped-cost distribution for graph
 cost_changes = metrics.weighted_undirected.swapped_cost_distr(W_brain, D_brain)
 positive_cost_changes = float((cost_changes > 0).sum()) / len(cost_changes)
 
 # Create random biophysical graph with properly sampled weights
-brain_size = np.array([10.,10.,10.])
 G,W,D = rg.biophysical_sample_weights(N=N_brain, N_edges=N_edges_brain, L=L, 
-                                      gamma=gamma, brain_size=brain_size,
+                                      gamma=GAMMA, brain_size=BRAIN_SIZE,
                                       use_brain_weights=True)
                                       
 # Calculate swapped-cost distribution for graph
