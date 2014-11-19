@@ -12,7 +12,7 @@ FONTSIZE = 20
 BINS = 50
 
 # ANALYSIS PARAMETERS
-L = 2.5
+L = 2.3
 GAMMA = 1.
 CORTEX_SIZE = [7., 7, 7]
 
@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 
 # Load brain graph & get distance matrix
 G_cortex, A_cortex, _ = extract.brain_subgraph.cortex_binary_undirected()
-D_cortex, _ = extract.brain_graph.distance_matrix()
+D_cortex, _ = extract.brain_subgraph.cortex_distance_matrix()
 N_nodes = len(G_cortex.nodes())
 N_edges = len(G_cortex.edges())
 
