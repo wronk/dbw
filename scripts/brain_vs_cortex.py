@@ -8,6 +8,7 @@ Compare degree, clustering, & degree vs. clustering in either brain or cortex.
 
 # PLOT PARAMETERS
 FACECOLOR = 'white'
+FONTSIZE = 20
 
 import extract.brain_graph
 import extract.brain_subgraph
@@ -34,29 +35,45 @@ clustering_cortex = np.array(nx.clustering(G_cortex).values())
 # Plot edge distance distribution
 fig, ax = plt.subplots(1, 1, facecolor=FACECOLOR)
 ax.hist([edge_dist_brain, edge_dist_cortex], bins=20, normed=True)
-ax.set_xlabel('Edge distance')
-ax.set_ylabel('Probability')
+ax.set_xlabel('Edge distance', fontsize=FONTSIZE)
+ax.set_ylabel('Probability', fontsize=FONTSIZE)
+for text in ax.get_xticklabels() + ax.get_yticklabels():
+    text.set_fontsize(FONTSIZE)
+plt.draw()
+plt.tight_layout()
 
 # Plot degree distributions
 fig, ax = plt.subplots(1, 1, facecolor=FACECOLOR)
 ax.hist([degree_brain, degree_cortex], bins=20, normed=True)
-ax.set_xlabel('Degree')
-ax.set_ylabel('Probability')
+ax.set_xlabel('Degree', fontsize=FONTSIZE)
+ax.set_ylabel('Probability', fontsize=FONTSIZE)
+for text in ax.get_xticklabels() + ax.get_yticklabels():
+    text.set_fontsize(FONTSIZE)
+plt.draw()
+plt.tight_layout()
 
 # Plot clustering coefficients
 fig, ax = plt.subplots(1, 1, facecolor=FACECOLOR)
 ax.hist([clustering_brain, clustering_cortex], bins=20, normed=True)
-ax.set_xlabel('Clustering')
-ax.set_ylabel('Probability')
+ax.set_xlabel('Clustering', fontsize=FONTSIZE)
+ax.set_ylabel('Probability', fontsize=FONTSIZE)
+for text in ax.get_xticklabels() + ax.get_yticklabels():
+    text.set_fontsize(FONTSIZE)
+plt.draw()
+plt.tight_layout()
 
 # Plot degree vs. clustering
 fig, axs = plt.subplots(1, 2, facecolor=FACECOLOR)
 axs[0].scatter(degree_brain, clustering_brain)
-axs[0].set_title('Brain')
-axs[1].scatter(degree_cortex, clustering_cortex)
-axs[1].set_title('Cortex')
+axs[0].set_title('Brain', fontsize=FONTSIZE)
+axs[1].scatter(degree_cortex, clustering_cortex, c='g')
+axs[1].set_title('Cortex', fontsize=FONTSIZE)
 for ax in axs:
     ax.set_xlim(0,150)
     ax.set_ylim(0,1)
-    ax.set_xlabel('Degree')
-    ax.set_ylabel('Clustering')
+    ax.set_xlabel('Degree', fontsize=FONTSIZE)
+    ax.set_ylabel('Clustering', fontsize=FONTSIZE)
+    for text in ax.get_xticklabels() + ax.get_yticklabels():
+        text.set_fontsize(FONTSIZE)
+plt.draw()
+plt.tight_layout()
