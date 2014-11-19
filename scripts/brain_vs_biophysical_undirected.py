@@ -13,10 +13,10 @@ CLUSTERING_BINS = 20
 COLORS = ['k','r','g','c','m','b']
 
 # ANALYSIS PARAMETERS
-N_MODEL_GRAPHS = 10
-L = 1.3 # Length scale parameter
-GAMMAS = [1., 1.5, 1.7, 1.9, 2.0] # Preferential attachment parameter
-BRAIN_SIZE = [10., 10, 10] # Size of volume in which brain regions are distributed
+N_MODEL_GRAPHS = 1
+L = 2.2 # Length scale parameter
+GAMMAS = [1., 1.5, 1.6, 1.7, 1.8] # Preferential attachment parameter
+BRAIN_SIZE = [7., 7, 7] # Size of volume in which brain regions are distributed
 
 import numpy as np
 import networkx as nx
