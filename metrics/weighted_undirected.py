@@ -43,6 +43,10 @@ def weight_distr_dist_binned(W, D, d_bins=50):
         
     return d_bins, weight_dists
     
+def fit_log_weight_vs_dist(W, D, d_bins=50):
+    """Fit mean & std of log-weights to distance."""
+    return True
+    
 def axon_volume_cost(W, D):
     """Calculate axon volume cost of network.
     
