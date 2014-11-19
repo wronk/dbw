@@ -35,4 +35,4 @@ def cortex_binary_undirected(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
     # Create cortex-only graph
     G = nx.from_numpy_matrix(A)
     
-    return G, A, labels, labels
+    return G, A, labels

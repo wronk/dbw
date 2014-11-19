@@ -11,13 +11,20 @@ import numpy as np
 import networkx as nx
 import graph_tools.auxiliary as aux_tools
 
-def ER_distance(N=426, p=.1, brain_size=[9., 9, 9]):
+def ER_distance(N=426, p=.086, brain_size=[7., 7, 7]):
     """Create an Erdos-Renyi random graph in which each node is assigned a 
     position in space, so that relative positions are represented by a distance
     matrix."""
-    return True
+    # Make graph & get adjacency matrix
+    G = nx.erdos_renyi_graph(N, p)
+    A = nx.adjacency_matrix(G)
+    # Randomly distribute nodes in space & compute distance matrix
+    centroids = np.random.uniform([0, 0, 0], brain_size, (N, 3))
+    D = aux_tools.dist_mat(centroids)
+    
+    return G, A, D
 
-def biophysical(N=426, N_edges=7804, L=1.5, gamma=1.7, brain_size=[9., 9, 9]):
+def biophysical(N=426, N_edges=7804, L=2.2, gamma=1.7, brain_size=[7., 7, 7]):
     """Create a biophysically inspired graph. Connection probabilities depend
     on distance & degree.
     

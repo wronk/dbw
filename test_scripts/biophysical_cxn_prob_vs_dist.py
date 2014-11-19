@@ -8,7 +8,7 @@ Created on Mon Nov 17 11:30:45 2014
 N_BIO_GRAPHS = 1
 L = 1.3 # Length scale parameter
 GAMMA = 1.7 # Preferential attachment parameter
-BRAIN_SIZE = [10., 10, 10] # Size of volume in which brain regions are distributed
+BRAIN_SIZE = [8., 8, 8] # Size of volume in which brain regions are distributed
 
 import extract.brain_graph
 import metrics.binary_undirected

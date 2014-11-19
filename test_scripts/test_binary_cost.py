@@ -21,9 +21,9 @@ G_brain, A_brain, _ = extract.brain_graph.binary_undirected()
 D_brain, _ = extract.brain_graph.distance_matrix()
 N_brain = A_brain.shape[0]
 N_edges_brain = (A_brain > 0).sum()/2
-L = 1.5
-GAMMA = 1.7
-BRAIN_SIZE = [9., 9, 9]
+L = 2.2
+GAMMA = 1.6
+BRAIN_SIZE = [7., 7, 7]
 
 # Calculate swapped-cost distribution for graph
 cost_changes = metrics.binary_undirected.swapped_cost_distr(A_brain, D_brain)
@@ -43,13 +43,15 @@ axs[0].hist(cost_changes, bins=20, normed=True)
 axs[1].hist(cost_changes_random, bins=20, normed=True)
 
 for ax_idx, ax in enumerate(axs):
-    if ax_idx == 1:
-        ax.set_xlabel('Change in cost (per cent)')
-    ax.set_xlim(-1,10)
+    ax.set_xlabel('Change in cost (per cent)')
+    ax.set_xlim(-1,2)
     ax.set_ylabel('Probability')
     
 axs[0].set_title('Mouse brain')
 axs[1].set_title('Biophysical model')
+
+plt.draw()
+plt.tight_layout()
 
 print 'Real brain cost changes percent > 0: %.3f' % positive_cost_changes
 print 'Simulated cost changes percent > 0: %.3f' % positive_cost_changes_random

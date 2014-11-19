@@ -13,9 +13,9 @@ CLUSTERING_BINS = 20
 COLORS = ['k','r','g','c','m','b']
 
 # ANALYSIS PARAMETERS
-N_MODEL_GRAPHS = 1
+N_MODEL_GRAPHS = 10
 L = 2.2 # Length scale parameter
-GAMMAS = [1., 1.5, 1.6, 1.7, 1.8] # Preferential attachment parameter
+GAMMAS = [1., 1.5, 1.6, 1.7, 2.0] # Preferential attachment parameter
 BRAIN_SIZE = [7., 7, 7] # Size of volume in which brain regions are distributed
 
 import numpy as np
@@ -95,18 +95,20 @@ for gamma_idx, gamma in enumerate(GAMMAS):
     model_clustering_bins_gamma[1:])
     ax_clustering.plot(model_clustering_centers, model_clustering_hist, 
                        color=color, lw=3)
-    # Plot degree vs. clustering   
+    # Plot degree vs. clustering
     model_degree_example = model_degree_example_gammas[gamma_idx]
     model_clustering_example = model_clustering_example_gammas[gamma_idx]
     ax_degvcc_idx = np.unravel_index(gamma_idx + 1, (2,3))
     axs_degvcc[ax_degvcc_idx].scatter(model_degree_example,
                                       model_clustering_example, c=color)
+    axs_degvcc[ax_degvcc_idx].set_title('G = %.2f' % gamma)
 
 # Set labels
 ax_degree.set_xlabel('Degree')
 ax_degree.set_ylabel('Probability')
 ax_clustering.set_xlabel('Clustering coefficient')
 ax_clustering.set_ylabel('Probability')
+axs_degvcc[0,0].set_title('Mouse brain')
 
 # Set axes
 for row_idx, row in enumerate(axs_degvcc):
