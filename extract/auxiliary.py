@@ -39,6 +39,7 @@ def load_W_and_P(data_dir=LINEAR_MODEL_DIRECTORY):
 
     return W, P, labels
     
+    
 def load_centroids(labels, data_dir=STRUCTURE_DIRECTORY, in_mm=True):
     """Load centroids."""
     
@@ -55,6 +56,7 @@ def load_centroids(labels, data_dir=STRUCTURE_DIRECTORY, in_mm=True):
         centroids /= 10.
         
     return centroids
+    
     
 def mask_specific_structures(structure_list, parent_structures=['CTX'],
                              data_dir=STRUCTURE_DIRECTORY):
