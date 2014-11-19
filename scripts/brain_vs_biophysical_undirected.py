@@ -13,7 +13,7 @@ CLUSTERING_BINS = 20
 COLORS = ['k','r','g','c','m','b']
 
 # ANALYSIS PARAMETERS
-N_MODEL_GRAPHS = 1
+N_MODEL_GRAPHS = 10
 L = 1.3 # Length scale parameter
 GAMMAS = [1., 1.5, 1.7, 1.9, 2.0] # Preferential attachment parameter
 BRAIN_SIZE = [10., 10, 10] # Size of volume in which brain regions are distributed
@@ -25,7 +25,7 @@ import extract.brain_graph
 import random_graph.binary_undirected as rg
 
 # Load mouse connectivity graph
-G_brain, W_brain, _, _ = extract.brain_graph.binary_undirected()
+G_brain, W_brain, _ = extract.brain_graph.binary_undirected()
 n_nodes = len(G_brain.nodes())
 n_edges = len(G_brain.edges())
 

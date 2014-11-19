@@ -18,7 +18,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Load brain network
-G_brain, A_brain, _, _ = extract.brain_graph.binary_undirected()
+G_brain, A_brain, _ = extract.brain_graph.binary_undirected()
 D_brain, _ = extract.brain_graph.distance_matrix()
 n_nodes = D_brain.shape[0]
 n_edges = np.triu(A_brain, k=1).sum()

@@ -21,7 +21,7 @@ import metrics.binary_undirected
 import random_graph.binary_undirected as rg
 
 # Load brain
-G_brain, A_brain, _, _ = extract.brain_graph.binary_undirected()
+G_brain, A_brain, _ = extract.brain_graph.binary_undirected()
 D_brain, _ = extract.brain_graph.distance_matrix()
 n_nodes = len(G_brain.nodes())
 n_edges = len(G_brain.edges())

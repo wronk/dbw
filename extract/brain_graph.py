@@ -22,7 +22,7 @@ def binary_undirected(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
     Returns:
         NetworkX graph, adjacency matrix, row labels & column labels"""
     # Load weights & p-values
-    W, P, row_labels, col_labels = aux.load_W_and_P(data_dir)
+    W, P, labels = aux.load_W_and_P(data_dir)
     # Threshold weights via weights & p-values
     W[(W < w_th)] = 0.
     W[(P > p_th)] = 0.
@@ -36,7 +36,7 @@ def binary_undirected(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
     # Create graph from adjacency matrix
     G = nx.from_numpy_matrix(A)
     
-    return G, A, row_labels, col_labels
+    return G, A, labels
     
 
 def weighted_undirected(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
@@ -45,7 +45,7 @@ def weighted_undirected(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
     Returns:
         NetworkX graph, weight matrix, row labels & column labels"""
     # Load weights & p-values
-    W, P, row_labels, col_labels = aux.load_W_and_P(data_dir=data_dir)
+    W, P, labels = aux.load_W_and_P(data_dir=data_dir)
 
     # Threshold weights via weights & p-values
     W[(W < w_th)] = 0.
@@ -59,7 +59,7 @@ def weighted_undirected(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
     # Create graph from weight matrix
     G = nx.from_numpy_matrix(W)
     
-    return G, W, row_labels, col_labels
+    return G, W, labels
 
 
 def distance_matrix(lm_dir=LINEAR_MODEL_DIRECTORY, cent_dir=STRUCTURE_DIRECTORY,
@@ -73,9 +73,9 @@ def distance_matrix(lm_dir=LINEAR_MODEL_DIRECTORY, cent_dir=STRUCTURE_DIRECTORY,
     Returns:
         distance matrix, centroid matrix"""
     # Get labels
-    _, _, row_labels, _ = aux.load_W_and_P(data_dir=lm_dir)
+    _, _, labels = aux.load_W_and_P(data_dir=lm_dir)
     # Load centroids
-    centroids = aux.load_centroids(row_labels, data_dir=cent_dir, in_mm=in_mm)
+    centroids = aux.load_centroids(labels, data_dir=cent_dir, in_mm=in_mm)
     # Compute distance matrix
     dist_mat = aux_tools.dist_mat(centroids)
     

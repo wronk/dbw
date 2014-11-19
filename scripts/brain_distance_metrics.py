@@ -16,7 +16,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Load brain network
-G_brain, A_brain, _, _ = extract.brain_graph.binary_undirected()
+G_brain, A_brain, _ = extract.brain_graph.binary_undirected()
 D_brain, _ = extract.brain_graph.distance_matrix()
 # Calculate connection probability vs. distance
 cxn_prob, dist_bins = metrics.binary_undirected.cxn_probability(A_brain, 

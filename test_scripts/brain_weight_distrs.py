@@ -13,7 +13,7 @@ import metrics.weighted_undirected
 
 # Load graph & distance matrix
 kwargs = {'p_th':.01,'w_th':0}
-G, W, rows, cols = extract.brain_graph.weighted_undirected(p_th=.01, w_th=0)
+G, W, _ = extract.brain_graph.weighted_undirected(p_th=.01, w_th=0)
 D, _ = extract.brain_graph.distance_matrix()
 
 # Calculate distance-dependent weight distributions

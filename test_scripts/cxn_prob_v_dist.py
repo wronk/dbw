@@ -10,7 +10,7 @@ import metrics.binary_undirected
 import numpy as np
 import matplotlib.pyplot as plt
 
-G_brain, A_brain, _, _ = extract.brain_graph.binary_undirected()
+G_brain, A_brain, _ = extract.brain_graph.binary_undirected()
 D_brain, _ = extract.brain_graph.distance_matrix()
 
 cxn_prob, cxn_bins = metrics.binary_undirected.cxn_probability(A_brain, D_brain)

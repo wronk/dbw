@@ -17,7 +17,7 @@ import metrics.binary_undirected
 import random_graph.binary_undirected as rg
 
 # Get mouse connectivity graph & distance
-G_brain, A_brain, _, _ = extract.brain_graph.binary_undirected()
+G_brain, A_brain, _ = extract.brain_graph.binary_undirected()
 D_brain, _ = extract.brain_graph.distance_matrix()
 N_brain = A_brain.shape[0]
 N_edges_brain = (A_brain > 0).sum()/2

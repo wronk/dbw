@@ -11,7 +11,7 @@ import extract.brain_graph
 import random_graph.weighted_undirected as rg
 
 # Load weight matrix from mouse connectivity to get model parameters
-G_brain, W_brain, _, _ = extract.brain_graph.weighted_undirected()
+G_brain, W_brain, _ = extract.brain_graph.weighted_undirected()
 N_brain = W_brain.shape[0]
 N_edges_brain = (W_brain > 0).sum()/2
 L = 1.

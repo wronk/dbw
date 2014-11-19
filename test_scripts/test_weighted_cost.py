@@ -17,11 +17,11 @@ import metrics.weighted_undirected
 import random_graph.weighted_undirected as rg
 
 # Get mouse connectivity graph & distance
-G_brain, W_brain, _, _ = extract.brain_graph.weighted_undirected()
+G_brain, W_brain, _ = extract.brain_graph.weighted_undirected()
 D_brain, _ = extract.brain_graph.distance_matrix()
 N_brain = W_brain.shape[0]
 N_edges_brain = (W_brain > 0).sum()/2
-L = 1.5
+L = 1.3
 GAMMA = 1.7
 BRAIN_SIZE = [9., 9, 9]
 

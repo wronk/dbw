@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 import extract.brain_graph
 
 # Load mouse connectivity graph
-G_brain, W_brain, _, _ = extract.brain_graph.binary_undirected()
+G_brain, W_brain, _ = extract.brain_graph.binary_undirected()
 n_nodes = len(G_brain.nodes())
 n_edges = len(G_brain.edges())
 p_edge = float(n_edges) / ((n_nodes * (n_nodes - 1)) / 2)

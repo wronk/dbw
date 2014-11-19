@@ -21,7 +21,7 @@ def cortex_binary_undirected(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
     Returns:
         NetworkX graph, adjacency matrix, row labels, column labels"""
     # Load entire graph
-    G, A, labels, _ = brain_graph.binary_undirected(p_th, w_th, data_dir)
+    G, A, labels = brain_graph.binary_undirected(p_th, w_th, data_dir)
     
     # Get mask of areas in cortex
     mask = aux.mask_specific_structures(labels, ['CTX'])

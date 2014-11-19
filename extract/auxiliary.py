@@ -35,10 +35,9 @@ def load_W_and_P(data_dir=LINEAR_MODEL_DIRECTORY):
     # Add ipsi & contra to col_labels
     col_labels_L = [label.split(' ')[0] + '_L' for label in col_labels]
     col_labels_R = [label.split(' ')[0] + '_R' for label in col_labels]
-    col_labels_full = col_labels_L + col_labels_R
-    row_labels_full = col_labels_full[:]
+    labels = col_labels_L + col_labels_R
 
-    return W, P, row_labels_full, col_labels_full
+    return W, P, labels
     
 def load_centroids(labels, data_dir=STRUCTURE_DIRECTORY, in_mm=True):
     """Load centroids."""
