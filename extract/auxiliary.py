@@ -7,7 +7,7 @@ Functions to extract graphs from Allen mouse connectivity.
 """
 
 LINEAR_MODEL_DIRECTORY = '../../friday-harbor/linear_model'
-CENTROID_DIRECTORY = '../../mouse_connectivity_data'
+STRUCTURE_DIRECTORY = '../../mouse_connectivity_data'
 
 import numpy as np
 import scipy.io as sio
@@ -40,7 +40,7 @@ def load_W_and_P(data_dir=LINEAR_MODEL_DIRECTORY):
 
     return W, P, row_labels_full, col_labels_full
     
-def load_centroids(labels, data_dir=CENTROID_DIRECTORY, in_mm=True):
+def load_centroids(labels, data_dir=STRUCTURE_DIRECTORY, in_mm=True):
     """Load centroids."""
     
     onto = Ontology(data_dir=data_dir)
@@ -56,3 +56,35 @@ def load_centroids(labels, data_dir=CENTROID_DIRECTORY, in_mm=True):
         centroids /= 10.
         
     return centroids
+    
+def mask_specific_structures(structure_list, parent_structures=['CTX'],
+                             data_dir=STRUCTURE_DIRECTORY):
+    """Return mask for specific structures in super structure.
+    
+    Returns boolean mask where True values are structures in structure_list that
+    are substructures of parent_structure.
+    
+    Args:
+        structure_list: list of structure names (with _L or _R appended)
+        parent_structure: parent structure
+    Returns:
+        boolean mask of same length as structure_list"""
+    onto = Ontology(data_dir=data_dir)
+    
+    # Make sure parent_structures is list
+    if not isinstance(parent_structures,list):
+        parent_structures = [parent_structures]
+        
+    # Get ids of parent structures
+    parent_ids = [onto.structure_by_acronym(structure).structure_id \
+    for structure in parent_structures]
+        
+    # Get ancestors of each structure in structure_list
+    ancestors_list = [onto.structure_by_acronym(structure[:-2]).path_to_root \
+    for structure in structure_list]
+    
+    # Get boolean mask of which structures have ancestors in parent_ids
+    mask = [bool(set(parent_ids) & set(ancestors)) \
+    for ancestors in ancestors_list]
+    
+    return np.array(mask)
