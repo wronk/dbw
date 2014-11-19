@@ -8,7 +8,7 @@ Functions to extract graphs from Allen mouse connectivity.
 """
 
 LINEAR_MODEL_DIRECTORY = '../../friday-harbor/linear_model'
-CENTROID_DIRECTORY = '../../mouse_connectivity_data'
+STRUCTURE_DIRECTORY = '../../mouse_connectivity_data'
 
 import auxiliary as aux
 import graph_tools.auxiliary as aux_tools
@@ -62,7 +62,7 @@ def weighted_undirected(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
     return G, W, row_labels, col_labels
 
 
-def distance_matrix(lm_dir=LINEAR_MODEL_DIRECTORY, cent_dir=CENTROID_DIRECTORY,
+def distance_matrix(lm_dir=LINEAR_MODEL_DIRECTORY, cent_dir=STRUCTURE_DIRECTORY,
                     in_mm=True):
     """Compute distance matrix from centroid data.
     
