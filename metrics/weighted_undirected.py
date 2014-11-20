@@ -7,6 +7,9 @@ Graph-theory metrics for weighted undirected graphs.
 """
 
 import numpy as np
+import scipy.stats as stats
+import matplotlib.pyplot as plt
+
 import auxiliary as aux
 
 def weight_distr_dist_binned(W, D, d_bins=50):
@@ -43,9 +46,34 @@ def weight_distr_dist_binned(W, D, d_bins=50):
         
     return d_bins, weight_dists
     
-def fit_log_weight_vs_dist(W, D, d_bins=50):
+def fit_log_weight_vs_dist(W, D, d_bins=50, plot=False, ax_mu=None, ax_s=None):
     """Fit mean & std of log-weights to distance."""
-    return True
+    # Get weight distributions
+    d_bins, weight_dists = weight_distr_dist_binned(W, D, d_bins=d_bins)
+    d_bin_centers = .5 * (d_bins[:-1] + d_bins[1:])
+    # Calculate logarithms of weights
+    log_weight_dists = [np.log(weights) for weights in weight_dists]
+    # Get means & stds
+    mean_log_weights = [np.mean(log_weight) for log_weight in log_weight_dists]
+    std_log_weights = [np.std(log_weight) for log_weight in log_weight_dists]
+    # Fit means to distances
+    mu_vs_d, intcpt_mu, r, p, stderr = stats.linregress(d_bin_centers,
+                                                        mean_log_weights)
+    # Fit stds to distances
+    s_vs_d, intcpt_s, r, p, stderr = stats.linregress(d_bin_centers,
+                                                      std_log_weights)
+    # Plot if desired
+    if plot:
+        ax_mu.scatter(d_bin_centers, mean_log_weights)
+        ax_mu.plot(d_bins, mu_vs_d * d_bins + intcpt_mu, lw=3, color='r')
+        ax_mu.set_xlabel('Distance (mm)')
+        ax_mu.set_ylabel('Log[weight]')
+        ax_s.scatter(d_bin_centers, mean_log_weights)
+        ax_s.plot(d_bins, s_vs_d * d_bins + intcpt_s, lw=3, color='r')
+        ax_s.set_xlabel('Distance (mm)')
+        ax_s.set_ylabel('Log[weight]')
+    
+    return mu_vs_d, intcpt_mu, s_vs_d, intcpt_s
     
 def axon_volume_cost(W, D):
     """Calculate axon volume cost of network.
