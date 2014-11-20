@@ -1,1 +1,1 @@
-__all__ = ['binary_undirected', 'weighted_undirected']
+__all__ = ['lesions', 'binary_undirected', 'weighted_undirected']
