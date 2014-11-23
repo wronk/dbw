@@ -11,7 +11,7 @@ import numpy as np
 import networkx as nx
 import graph_tools.auxiliary as aux_tools
 
-def ER_distance(N=426, p=.086, brain_size=[7., 7, 7]):
+def ER_distance(N=426, p=.086, brain_size=[7., 7., 7.]):
     """Create an Erdos-Renyi random graph in which each node is assigned a 
     position in space, so that relative positions are represented by a distance
     matrix."""
