@@ -41,10 +41,10 @@ def biophysical(N=426, N_edges=7804, L=2.2, gamma=1.7, brain_size=[7., 7, 7]):
     
     # Calculate distance matrix and distance decay matrix
     D = aux_tools.dist_mat(centroids)
-    D_decay = np.exp(-D/L)
+    D_decay = np.exp(-D / L)
     
     # Initialize diagonal adjacency matrix
-    A = np.eye(N,dtype=float)
+    A = np.eye(N, dtype=float)
     
     # Make graph object
     G = nx.Graph()
@@ -66,12 +66,17 @@ def biophysical(N=426, N_edges=7804, L=2.2, gamma=1.7, brain_size=[7., 7, 7]):
         
         # Find unavailable cxns and set their probability to zero
         unavail_mask = A[from_idx,:] > 0
+        unavail_mask[degs == N] = True
         degs_prob[unavail_mask] = 0
         # Set self cxn probability to zero
         degs_prob[from_idx] = 0
         
         # Calculate cxn probabilities from degree & distance
-        P = (degs_prob**gamma)*D_decay[from_idx,:]
+        P = (degs_prob**gamma) * D_decay[from_idx,:]
+        # On the off changes that P == 0, skip
+        if P.sum() == 0:
+            continue
+        # Otherwise keep going on
         P /= float(P.sum()) # Normalize probabilities to sum to 1
             
         # Sample node from distribution
