@@ -7,7 +7,6 @@ Auxiliary functions used for graph theory metrics.
 """
 
 from copy import deepcopy
-import random
 
 import numpy as np
 import networkx as nx
@@ -43,20 +42,25 @@ def lesion_graph_randomly(graph, phi):
     """
 
     # Error checking
-    assert phi >= 0. and phi < 1.0, 'phi must be 0.0 <= phi < 1.0'
+    assert phi > 0. and phi <= 1.0, 'phi must be 0.0 <= phi < 1.0'
     assert graph.order > 0, 'Graph is empty'
 
     # Get list of nodes and probabilty (uniform random) of executing each one
     node_list = graph.nodes()
-    execute_prob = random.random(size=(len(node_list),))
+    execute_prob = np.random.random((len(node_list),))
 
     # Identify random nodes to cut
     cut_nodes = [node_list[i] for i in range(len(node_list))
                  if execute_prob[i] > phi]
 
-    G = deepcopy(graph).remove_nodes_from(cut_nodes)
+    G = deepcopy(graph)
+    G.remove_nodes_from(cut_nodes)
 
-    return G, nx.adjaceny_matrix(G)
+    if G.order() > 0:
+        return G, nx.adjacency_matrix(G)
+    else:
+        print 'Graph completely lesioned.'
+        return None, None
 
 
 def lesion_graph_degree(graph, num):
@@ -78,4 +82,4 @@ def lesion_graph_degree(graph, num):
         nodes'
 
 
-    #return G, nx.adjaceny_matrix(G)
+    #return G, nx.adjacency_matrix(G)

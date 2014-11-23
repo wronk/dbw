@@ -9,7 +9,7 @@ Metrics for randomly lesioned graphs
 import numpy as np
 import networkx as nx
 
-import perc_auxiliary as perc_aux
+import auxiliary as aux
 
 
 def percolate_random(graph, phi_list, repeats=1):
@@ -38,10 +38,10 @@ def percolate_random(graph, phi_list, repeats=1):
     # Loop over each phi
     for pi, phi in enumerate(phi_list):
         # Loop over each repeat
-        for ri, in range(repeats):
-            temp_G, _ = perc_aux.lesion_graph_randomly(graph, phi)
-            largest_component = len(sorted(nx.connected_components(temp_G)[0],
-                                           key=len, reverse=True))
+        for ri in range(repeats):
+            temp_G, A = aux.lesion_graph_randomly(graph, phi)
+            largest_component = len(sorted(nx.connected_components(temp_G),
+                                           key=len, reverse=True)[0])
             S[pi, ri] = largest_component / float(n)
 
     # Average over repeats
@@ -49,10 +49,14 @@ def percolate_random(graph, phi_list, repeats=1):
 
 
 if __name__ == '__main__':
-    import binary_undirected as bu
+    import matplotlib.pyplot as plt
+    from random_graph import binary_undirected as bu
 
-    biophys = bu.biophysical()
-    phi_list = np.arange(0., 1., 0.1)
+    biophys, A, D = bu.biophysical()
+    phi_list = np.arange(0.05, 1, 0.05)
+    #phi_list = np.arange(0.1, 1., 0.1)
 
-    S = percolate_random(biophys, phi_list, 5)
+    S = percolate_random(biophys, phi_list, 10)
+    plt.plot(phi_list, S)
+
     print S
