@@ -26,14 +26,13 @@ def swap_nodes(D, idx0, idx1):
     return D_swapped
 
 
-def lesion_graph_randomly(graph, phi):
+def lesion_graph_randomly(graph, prop):
     """
-    Randomly remove vertices from a graph according to occupation probability,
-    phi.
+    Randomly remove vertices from a graph according to probability of removal.
 
     Args:
         graph: NetworkX graph to be lesioned.
-        phi: Occupation probability (probability of node remaining intact)
+        prop: Occupation probability (probability of node being pruned)
 
     Returns:
         G: NetworkX graph
@@ -41,11 +40,11 @@ def lesion_graph_randomly(graph, phi):
 
     """
     G = deepcopy(graph)
-    if phi == 1.:
+    if prop == 0.:
         return G, nx.adjacency_matrix(G)
 
     # Error checking
-    assert phi > 0. and phi <= 1.0, 'phi must be 0.0 <= phi < 1.0'
+    assert prop >= 0. and prop <= 1.0, 'prop must be 0.0 <= prop <= 1.0'
     assert graph.order > 0, 'Graph is empty'
 
     # Get list of nodes and probabilty (uniform random) of executing each one
@@ -54,15 +53,15 @@ def lesion_graph_randomly(graph, phi):
 
     # Identify random nodes to cut
     cut_nodes = [node_list[i] for i in range(len(node_list))
-                 if execute_prob[i] > phi]
+                 if execute_prob[i] <= prop]
 
     G.remove_nodes_from(cut_nodes)
 
     if G.order() > 0:
         return G, nx.adjacency_matrix(G)
     else:
-        print 'Graph completely lesioned.'
-        return None, None
+        #print 'Graph completely lesioned.'
+        return G, None
 
 
 def lesion_graph_degree(graph, num_lesions):
@@ -91,13 +90,10 @@ def lesion_graph_degree(graph, num_lesions):
         node_i, node_d = max(G.degree().items(),
                              key=lambda degree: degree[1])
         G.remove_node(node_i)
-        print (node_i, node_d)
+        #print (node_i, node_d)
 
     if G.order() > 0:
         return G, nx.adjacency_matrix(G)
     else:
         print 'Graph completely lesioned.'
         return None, None
-
-
-    #return G, nx.adjacency_matrix(G)
