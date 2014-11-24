@@ -10,9 +10,9 @@ import networkx as nx
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-import network_gen as ng
+from extract import brain_graph
+#import network_gen as ng
 from metrics import percolation as perc
-from metrics import auxiliary as aux
 from random_graph import binary_undirected as bu
 
 repeats = 100  # Number of times to repeat random percolation
@@ -28,31 +28,40 @@ graph_names = []
 graph_col = ['k', 'r', 'g', 'b', 'c']
 
 # Construct Allen brain graph
-W_net, row_labels, col_labels = ng.quick_net(dir_name=linear_model_path)
-W_net_dict = {'row_labels': row_labels, 'col_labels': col_labels,
-              'data': W_net}
-graph_list.append(ng.import_weights_to_graph(W_net_dict))
+G_AL, _, _ = brain_graph.binary_undirected()
+graph_list.append(G_AL)
 graph_names.append('Mouse')
 print 'Added graph: ' + graph_names[-1]
 
+# Calculate degree & clustering coefficient distribution
+n_nodes = G_AL.order()
+n_edges = float(len(G_AL.edges()))
+p_edge = n_edges / ((n_nodes * (n_nodes - 1)) / 2.)
+
+brain_degree = nx.degree(G_AL).values()
+brain_clustering = nx.clustering(G_AL).values()
+brain_degree_mean = np.mean(brain_degree)
+
 # Construct Random (ER) graph
-G_ER, A, D = bu.ER_distance()
-graph_list.append(G_ER)
+graph_list.append(nx.erdos_renyi_graph(n_nodes, p_edge))
 graph_names.append('Erdos-Renyi')
 print 'Added graph: ' + graph_names[-1]
 
 # Construct WS graph
-graph_list.append(nx.watts_strogatz_graph(node_order, 36, 0.159))
+graph_list.append(nx.watts_strogatz_graph(n_nodes,
+                                          int(round(brain_degree_mean)),
+                                          0.159))
 graph_names.append('Small-World')
 print 'Added graph: ' + graph_names[-1]
 
 # Construct BA graph
-graph_list.append(nx.barabasi_albert_graph(node_order, 20))
+graph_list.append(nx.barabasi_albert_graph(n_nodes,
+                                           int(round(brain_degree_mean / 2.))))
 graph_names.append('Scale-Free')
 print 'Added graph: ' + graph_names[-1]
 
 # Construct biophysical graph
-G_BIO, A, D = bu.biophysical()
+G_BIO, A, D = bu.biophysical(N=n_nodes, N_edges=n_edges, L=2.2, gamma=1.67)
 graph_list.append(G_BIO)
 graph_names.append('Biophysical')
 print 'Added graph: ' + graph_names[-1]
@@ -78,12 +87,13 @@ S_rand_std = [np.std(s, axis=1) for s in S_rand]
 ##############################################################################
 ### Plot results
 # Set font type for compatability with adobe if doing editting later
+plt.close('all')
 mpl.rcParams['ps.fonttype'] = 42
 mpl.rcParams['pdf.fonttype'] = 42
 plt.ion()
 
-FONTSIZE = 18
-FIGSIZE = (18, 8)
+FONTSIZE = 14
+FIGSIZE = (12, 5)
 
 fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2, sharey=True, figsize=FIGSIZE)
 
@@ -94,16 +104,17 @@ for si, trace in enumerate(S_target):
 
 # Set title and labels
 ax1.set_title('Random Attack', fontsize=FONTSIZE)
-ax1.set_xlabel('Proportion Removed', fontsize=FONTSIZE)
-ax1.set_ylabel('Size of largest cluster', fontsize=FONTSIZE)
+ax1.set_xlabel('Proportion Nodes Removed', fontsize=FONTSIZE)
+ax1.set_ylabel('Normalized Cluster Size', fontsize=FONTSIZE)
 
 ax2.set_title('Targeted Attack (by Degree)', fontsize=FONTSIZE)
-ax2.set_xlabel('# Nodes Removed', fontsize=FONTSIZE)
-ax2.set_ylabel('Size of largest cluster', fontsize=FONTSIZE)
+ax2.set_xlabel('Number Nodes Removed', fontsize=FONTSIZE)
+ax2.set_ylabel('Normalized Cluster Size', fontsize=FONTSIZE)
 ax2.legend()
 
 for ax in [ax1, ax2]:
-    for text in ax.get_ticklabels() + ax.get_yticklabels():
+    for text in ax.get_xticklabels() + ax.get_yticklabels():
         text.set_fontsize(FONTSIZE)
 
+fig.tight_layout()
 plt.show()
