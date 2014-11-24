@@ -40,6 +40,9 @@ def lesion_graph_randomly(graph, phi):
         A: Adjacency matrix for graph
 
     """
+    G = deepcopy(graph)
+    if phi == 1.:
+        return G, nx.adjacency_matrix(G)
 
     # Error checking
     assert phi > 0. and phi <= 1.0, 'phi must be 0.0 <= phi < 1.0'
@@ -53,7 +56,6 @@ def lesion_graph_randomly(graph, phi):
     cut_nodes = [node_list[i] for i in range(len(node_list))
                  if execute_prob[i] > phi]
 
-    G = deepcopy(graph)
     G.remove_nodes_from(cut_nodes)
 
     if G.order() > 0:
@@ -63,23 +65,39 @@ def lesion_graph_randomly(graph, phi):
         return None, None
 
 
-def lesion_graph_degree(graph, num):
+def lesion_graph_degree(graph, num_lesions):
     """
     Remove vertices from a graph according to degree.
 
     Args:
         graph: NetworkX graph to be lesioned.
-        num: Number of top degree nodes to remove.
+        num_lesions: Number of top degree nodes to remove.
 
     Returns:
         G: NetworkX graph
         A: Adjacency matrix for graph
 
     """
-
     # Error checking
-    assert num >= 0 and num < graph.order, 'Attempting to remove too many/few\
-        nodes'
+    G = deepcopy(graph)
+    if num_lesions == 0:
+        return G, nx.adjacency_matrix(G)
+
+    assert num_lesions >= 0 and num_lesions < graph.order, 'Attempting to\
+        remove too many/few nodes'
+
+    for l in range(num_lesions):
+        # Identify node to cut
+        node_i, node_d = max(G.degree().items(),
+                             key=lambda degree: degree[1])
+        G.remove_node(node_i)
+        print (node_i, node_d)
+
+    if G.order() > 0:
+        return G, nx.adjacency_matrix(G)
+    else:
+        print 'Graph completely lesioned.'
+        return None, None
 
 
     #return G, nx.adjacency_matrix(G)
