@@ -13,7 +13,7 @@ import auxiliary as aux
 reload(aux)
 
 
-def percolate_random(graph, phi_list, repeats=1):
+def percolate_random(graph, prop_removed, repeats=1):
     """ Get size avg of largest cluster after randomly removing some proportion
     of nodes.
 
@@ -21,10 +21,10 @@ def percolate_random(graph, phi_list, repeats=1):
     ----------
     graph : networkx graph
         Graph to perform the percolation on
-    phi_list: list
+    prop_removed: list
         Occupation probabilities to measure.
     repeats: int
-        Number of repetitions to average over for each phi.
+        Number of repetitions to average over for each proportion removed.
 
     Returns
     -------
@@ -33,20 +33,24 @@ def percolate_random(graph, phi_list, repeats=1):
     """
 
     # Instantiate matrix to hold calculated graph size
-    S = np.zeros((len(phi_list), repeats))
+    S = np.zeros((len(prop_removed), repeats))
     n = graph.order()
 
-    # Loop over each phi
-    for pi, phi in enumerate(phi_list):
+    # Loop over each proportion
+    for pi, prop in enumerate(prop_removed):
         # Loop over each repeat
         for ri in range(repeats):
-            temp_G, A = aux.lesion_graph_randomly(graph, phi)
-            largest_component = len(sorted(nx.connected_components(temp_G),
-                                           key=len, reverse=True)[0])
+            temp_G, A = aux.lesion_graph_randomly(graph, prop)
+            components = sorted(nx.connected_components(temp_G), key=len,
+                                reverse=True)
+            if len(components) > 0:
+                largest_component = len(components[0])
+            else:
+                largest_component = 0.
             S[pi, ri] = largest_component / float(n)
 
     # Average over repeats
-    return np.mean(S, axis=1)
+    return S
 
 
 def percolate_degree(graph, num_lesions):
@@ -70,13 +74,13 @@ def percolate_degree(graph, num_lesions):
     S = np.zeros(len(num_lesions))
     n = graph.order()
 
-    # Loop over each phi
+    # Loop over each lesion
     for li, l in enumerate(num_lesions):
         temp_G, A = aux.lesion_graph_degree(graph, l)
 
         components = list(nx.connected_components(temp_G))
         sizes = [len(c) for c in components]
-        print sizes
+        #print sizes
 
         largest_component = max(sizes)
         #print sorted(nx.connected_components(temp_G), key=len, reverse=True)
@@ -94,10 +98,10 @@ if __name__ == '__main__':
     biophys, A, D = bu.biophysical()
     ER, A, D = bu.ER_distance()
 
-    phi_list = np.arange(0.05, 1, 0.1)
-    S_bio = percolate_random(biophys, phi_list, 3)
-    S_ER = percolate_random(ER, phi_list, 3)
-    plt.plot(phi_list, S_bio, phi_list, S_ER)
+    prop_removed = np.arange(0.05, 1, 0.1)
+    S_bio = percolate_random(biophys, prop_removed, 3)
+    S_ER = percolate_random(ER, prop_removed, 3)
+    plt.plot(prop_removed, S_bio, prop_removed, S_ER)
 
     '''
     lesion_list = np.arange(0, 400, 10)
