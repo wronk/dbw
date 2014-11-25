@@ -3,7 +3,7 @@ Created on Sat Nov 22 15:06:24 2014
 
 @author wronk
 
-Metrics for randomly lesioned graphs
+Metrics for lesioning graphs
 """
 
 import numpy as np
@@ -13,7 +13,7 @@ import auxiliary as aux
 reload(aux)
 
 
-def percolate_random(graph, prop_removed, repeats=1):
+def percolate_random(graph, prop_removed, func_list):
     """ Get size avg of largest cluster after randomly removing some proportion
     of nodes.
 
@@ -33,27 +33,48 @@ def percolate_random(graph, prop_removed, repeats=1):
     """
 
     # Instantiate matrix to hold calculated graph size
-    S = np.zeros((len(prop_removed), repeats))
+    #S = np.zeros((len(prop_removed)))
+    #asp = np.zeros((len(prop_removed)))
+    metrics = np.zeros((len(func_list), len(prop_removed)))
     n = graph.order()
+    kwargs = {'orig_order': n}
 
-    # Loop over each proportion
-    for pi, prop in enumerate(prop_removed):
-        # Loop over each repeat
-        for ri in range(repeats):
-            temp_G, A = aux.lesion_graph_randomly(graph, prop)
+    # Loop over each function
+    for fi, func in enumerate(func_list):
+        # Loop over each proportion
+        for pi, prop in enumerate(prop_removed):
+            temp_G, _ = aux.lesion_graph_randomly(graph, prop)
+
+            #S[pi] = func_list[0](temp_G, **kwargs)
+
+            if pi > 0 and metrics[fi, pi - 1] == np.nan:
+                metrics[fi, pi] = np.nan
+            else:
+                metrics[fi, pi] = func_list[fi](temp_G, **kwargs)
+            #metrics[fi, pi] = func(temp_G, **kwargs)
+
+            '''
+            # largest component
             components = sorted(nx.connected_components(temp_G), key=len,
                                 reverse=True)
             if len(components) > 0:
                 largest_component = len(components[0])
             else:
                 largest_component = 0.
-            S[pi, ri] = largest_component / float(n)
+            S[pi] = largest_component / float(n)
 
-    # Average over repeats
-    return S
+            # Avg shortest path
+            try:
+                asp[pi] = nx.average_shortest_path_length(temp_G)
+            except (nx.exception.NetworkXError,
+                    nx.exception.NetworkXPointlessConcept):
+                asp[pi:] = np.nan
+            '''
+
+    return metrics
 
 
-def percolate_degree(graph, num_lesions):
+def percolate_degree(graph, num_lesions, func_list):
     """ Get size avg of largest cluster after removing some number of nodes
         based on degree.
 
@@ -71,25 +92,57 @@ def percolate_degree(graph, num_lesions):
     """
 
     # Instantiate matrix to hold calculated graph size
-    S = np.zeros(len(num_lesions))
+    #S = np.zeros(len(num_lesions))
+    #asp = np.zeros(len(num_lesions))
+
+    metrics = np.zeros((len(func_list), len(num_lesions)))
     n = graph.order()
+    kwargs = {'orig_order': n}
 
+    # Loop over each function
+    for fi, func in enumerate(func_list):
     # Loop over each lesion
-    for li, l in enumerate(num_lesions):
-        temp_G, A = aux.lesion_graph_degree(graph, l)
+        for li, l in enumerate(num_lesions):
+            temp_G, _ = aux.lesion_graph_degree(graph, l)
 
-        components = list(nx.connected_components(temp_G))
-        sizes = [len(c) for c in components]
-        #print sizes
+            if li > 0 and metrics[fi, li - 1] == np.nan:
+                metrics[fi, li] = np.nan
+            else:
+                metrics[fi, li] = func_list[fi](temp_G, **kwargs)
 
-        largest_component = max(sizes)
-        #print sorted(nx.connected_components(temp_G), key=len, reverse=True)
-        #print nx.connected_components(temp_G)
+    return metrics
 
-        S[li] = largest_component / float(n)
 
-    # Average over repeats
-    return S
+def lesion_met_largest_component(G, **kwargs):
+    # compute largest component
+    components = sorted(nx.connected_components(G), key=len, reverse=True)
+    if len(components) > 0:
+        largest_component = len(components[0])
+    else:
+        largest_component = 0.
+
+    return largest_component / float(kwargs['orig_order'])
+
+
+def lesion_met_avg_shortest_path(G, **kwargs):
+    # Avg shortest path
+    try:
+        asp = nx.average_shortest_path_length(G)
+    except (nx.exception.NetworkXError, nx.exception.NetworkXPointlessConcept):
+        asp = np.nan
+
+    return asp
+
+
+def lesion_met_diameter(G, **kwargs):
+    # Diameter
+    try:
+        d = nx.diameter(G)
+    except (nx.exception.NetworkXError, nx.exception.NetworkXPointlessConcept):
+        d = np.nan
+
+    return d
+
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
