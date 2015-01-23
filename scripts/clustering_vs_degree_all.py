@@ -7,6 +7,12 @@ Plot the clustering vs. degree for mouse connectome, standard random graphs,
 and binary undirected biophysical model at multiple gammas.
 """
 
+import numpy as np
+import networkx as nx
+import matplotlib.pyplot as plt
+import extract.brain_graph
+import random_graph.binary_undirected as rg
+
 # PLOTTING PARAMETERS
 FACECOLOR = 'white'
 FONTSIZE = 24
@@ -32,11 +38,6 @@ LS = [2.2, 2.2, 2.2, 1.7]  # Length scale parameter
 GAMMAS = [1., 1.333, 1.667, 2.0]  # Preferential attachment parameters
 BRAIN_SIZE = [7., 7., 7.]  # Size brain region volume to distribute nodes
 
-import numpy as np
-import networkx as nx
-import matplotlib.pyplot as plt
-import extract.brain_graph
-import random_graph.binary_undirected as rg
 
 # Load mouse connectivity graph
 G_brain, W_brain, _ = extract.brain_graph.binary_undirected()
