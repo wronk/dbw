@@ -12,8 +12,8 @@ FONTSIZE = 20
 BINS = 50
 
 # ANALYSIS PARAMETERS
-L = 2.2
-GAMMA = 1.
+L = 1.7
+GAMMA = 2.0
 BRAIN_SIZE = [7., 7., 7.]
 
 import extract.brain_graph

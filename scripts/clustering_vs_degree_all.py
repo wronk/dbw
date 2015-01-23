@@ -38,7 +38,6 @@ LS = [2.2, 2.2, 2.2, 1.7]  # Length scale parameter
 GAMMAS = [1., 1.333, 1.667, 2.0]  # Preferential attachment parameters
 BRAIN_SIZE = [7., 7., 7.]  # Size brain region volume to distribute nodes
 
-
 # Load mouse connectivity graph
 G_brain, W_brain, _ = extract.brain_graph.binary_undirected()
 n_nodes = len(G_brain.nodes())
