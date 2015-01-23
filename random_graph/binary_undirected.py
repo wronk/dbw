@@ -66,7 +66,6 @@ def biophysical(N=426, N_edges=7804, L=2.2, gamma=1.7, brain_size=[7., 7, 7]):
         
         # Find unavailable cxns and set their probability to zero
         unavail_mask = A[from_idx,:] > 0
-        unavail_mask[degs == N] = True
         degs_prob[unavail_mask] = 0
         # Set self cxn probability to zero
         degs_prob[from_idx] = 0
