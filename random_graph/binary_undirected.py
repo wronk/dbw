@@ -46,10 +46,6 @@ def biophysical(N=426, N_edges=7804, L=2.2, gamma=1.7, brain_size=[7., 7, 7]):
     # Initialize diagonal adjacency matrix
     A = np.eye(N, dtype=float)
     
-    # Make graph object
-    G = nx.Graph()
-    G.add_nodes_from(np.arange(N))
-    
     # Randomly add edges
     edge_ctr = 0
     while edge_ctr < N_edges:
@@ -81,10 +77,6 @@ def biophysical(N=426, N_edges=7804, L=2.2, gamma=1.7, brain_size=[7., 7, 7]):
         # Sample node from distribution
         to_idx = np.random.choice(np.arange(N),p=P)
         
-        # Add edge to graph
-        if A[from_idx,to_idx] == 0:
-            G.add_edge(from_idx,to_idx,{'d':D[from_idx,to_idx]})
-            
         # Add edge to adjacency matrix
         A[from_idx,to_idx] += 1
         A[to_idx,from_idx] += 1
@@ -95,4 +87,6 @@ def biophysical(N=426, N_edges=7804, L=2.2, gamma=1.7, brain_size=[7., 7, 7]):
     # Set diagonals to zero
     np.fill_diagonal(A,0)
         
+    G = nx.from_numpy_matrix(A)
+    
     return G, A, D
