@@ -7,7 +7,7 @@ Created on Wed Nov 12 12:11:43 2014
 Functions to extract graphs from Allen mouse connectivity.
 """
 
-LINEAR_MODEL_DIRECTORY = '../../friday-harbor/linear_model'
+LINEAR_MODEL_DIRECTORY = '../../mouse_connectivity_data/linear_model'
 STRUCTURE_DIRECTORY = '../../mouse_connectivity_data'
 
 import auxiliary as aux
@@ -38,7 +38,30 @@ def binary_undirected(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
     
     return G, A, labels
     
+    
+def binary_directed(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
+    """Load brain as binary directed graph.
+    
+    Returns:
+        NetworkX graph, adjacency matrix, row labels & column labels"""
+    # Load weights & p-values
+    W, P, labels = aux.load_W_and_P(data_dir)
+    # Threshold weights via weights & p-values
+    W[(W < w_th)] = 0.
+    W[(P > p_th)] = 0.
 
+    # Set self-weights to zero
+    np.fill_diagonal(W,0.)
+    
+    # Create adjacency matrix
+    A = (W > 0).astype(int)
+    
+    # Create graph from adjacency matrix
+    G = nx.from_numpy_matrix(A, create_using=nx.DiGraph())
+    
+    return G, A, labels
+    
+    
 def weighted_undirected(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
     """Load brain as binary undirected graph.
     
