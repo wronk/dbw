@@ -33,15 +33,17 @@ BA_POS = (1, 1)
 MODEL_POS = [(0, 2), (0, 3), (1, 2), (1, 3)]
 
 # ANALYSIS PARAMETERS
-N_MODEL_GRAPHS = 10
+N_MODEL_GRAPHS = 1
 LS = [2.2, 2.2, 2.2, 1.7]  # Length scale parameter
-GAMMAS = [1., 1.333, 1.667, 2.0]  # Preferential attachment parameters
+LS = 4*[np.inf]
+GAMMAS = [1., 1.1, 1.2, 1.3]  # Preferential attachment parameters
 BRAIN_SIZE = [7., 7., 7.]  # Size brain region volume to distribute nodes
 
 # Load mouse connectivity graph
 G_brain, W_brain, _ = extract.brain_graph.binary_undirected()
 n_nodes = len(G_brain.nodes())
 n_edges = len(G_brain.edges())
+n_directed_edges = 8820
 p_edge = float(n_edges) / ((n_nodes * (n_nodes - 1)) / 2.)
 
 # Calculate degree & clustering coefficient distribution
@@ -73,7 +75,7 @@ model_clusterings = [None for gamma in GAMMAS]
 for gamma_idx, gamma in enumerate(GAMMAS):
     L = LS[gamma_idx]
     print 'Generating model graph for gamma = %.2f' % gamma
-    G_model, A_model, D_model = rg.biophysical(n_nodes, n_edges, L, gamma,
+    G_model, A_model, D_model = rg.undirected_biophysical_reverse_outdegree(n_nodes, n_directed_edges, L, gamma,
                                                BRAIN_SIZE)
     model_degree = nx.degree(G_model).values()
     model_clustering = nx.clustering(G_model).values()
