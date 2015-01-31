@@ -21,10 +21,10 @@ FONTSIZE = 14
 NBINS = 15
 
 # load brain graph, adjacency matrix, and labels
-G, A, labels = biophysical_model(N=num_brain_nodes,
-                                 N_edges=num_brain_edges_directed,
-                                 L=np.inf,
-                                 gamma=1.)
+G, A, D = biophysical_model(N=num_brain_nodes,
+                            N_edges=num_brain_edges_directed,
+                            L=np.inf,
+                            gamma=1.)
 
 # get in & out degree
 indeg = np.array([G.in_degree()[node] for node in G])
