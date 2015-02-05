@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numpy import concatenate as cc
 
-from random_graph.binary_directed import biophysical_reverse_outdegree as biophysical_model
+from random_graph.binary_directed import biophysical_reverse_outdegree_nonspatial as biophysical_model
 from network_plot.change_settings import set_all_text_fontsizes as set_fontsize
 
 from brain_constants import *
@@ -20,11 +20,10 @@ FACECOLOR = 'white'
 FONTSIZE = 14
 NBINS = 15
 
-# load brain graph, adjacency matrix, and labels
-G, A, D = biophysical_model(N=num_brain_nodes,
-                            N_edges=num_brain_edges_directed,
-                            L=np.inf,
-                            gamma=1.)
+# create model graph
+G = biophysical_model(N=num_brain_nodes,
+                      N_edges=num_brain_edges_directed,
+                      gamma=1.)
 
 # get in & out degree
 indeg = np.array([G.in_degree()[node] for node in G])
