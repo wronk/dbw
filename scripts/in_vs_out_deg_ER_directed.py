@@ -17,10 +17,10 @@ from brain_constants import *
 
 # PLOT PARAMETERS
 FACECOLOR = 'white'
-FONTSIZE = 20
+FONTSIZE = 14
 NBINS = 15
 
-# load brain graph, adjacency matrix, and labels
+# generate erdos-renyi graph
 G = nx.erdos_renyi_graph(num_brain_nodes, p_brain_edge_directed, directed=True)
 
 # get in & out degree

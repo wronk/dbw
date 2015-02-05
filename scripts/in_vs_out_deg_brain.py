@@ -16,7 +16,7 @@ from network_plot.change_settings import set_all_text_fontsizes as set_fontsize
 
 # PLOT PARAMETERS
 FACECOLOR = 'white'
-FONTSIZE = 20
+FONTSIZE = 14
 NBINS = 15
 
 # load brain graph, adjacency matrix, and labels
