@@ -22,4 +22,4 @@ def reciprocity(G):
     Nundirected = len(G.to_undirected().edges())
     
     # return reciprocity
-    return (Ndirected - Nundirected) / Nundirected
+    return (Ndirected - Nundirected) / float(Nundirected)
