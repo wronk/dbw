@@ -308,3 +308,71 @@ def biophysical_reverse_outdegree_nonspatial(N=426, N_edges=8820, gamma=1.):
     np.fill_diagonal(A,0)
         
     return G
+    
+def biophysical_reverse_outdegree_reciprocal(N=426, N_edges=8820, gamma=1.,
+                                             reciprocity=10.):
+    """Create a biophysically inspired graph. Source probability depends on 
+    outdegree. Target probability depends on whether reciprocal connections
+    are present.
+    
+    Args:
+        N: how many nodes
+        N_edges: how many edges
+        gamma: power to raise outdegree to
+        reciprocity: probability ratio of connecting to already connected vs. unconnected targets
+    Returns:
+        Networkx graph object"""
+    
+    # Initialize diagonal adjacency matrix
+    A = np.eye(N, dtype=float)
+    
+    # Make graph object
+    G = nx.DiGraph()
+    G.add_nodes_from(np.arange(N))
+    
+    # Randomly add edges
+    edge_ctr = 0
+    while edge_ctr < N_edges:
+        # Update degree list & degree-related probability vector
+        outdegs = A.sum(1).astype(float)
+        outdegs_prob = outdegs.copy()
+        
+        # Pick source node
+        ## Set cxn prob of fully out-connected src nodes to zero
+        outdegs_prob[outdegs == N] = 0
+        
+        ## Calculate src node probabilities from degree & distance
+        psrc = outdegs_prob**gamma
+        ## Normalize psrc
+        psrc /= float(psrc.sum()) 
+            
+        ## Sample source node from distribution
+        from_idx = np.random.choice(np.arange(N), p=psrc)
+        
+        # Pick target node
+        ## Initialize uniform probability array
+        ptarg = np.ones((N,), dtype=float)
+        ## Get mask of nodes that already have edges from source to target
+        ptarg[A[from_idx,:] > 0] = 0
+        ## Augment probability of connecting to nodes with edges from target to source
+        ptarg[A[:,from_idx] > 0] *= reciprocity
+        ## Normalize ptarg
+        ptarg /= float(ptarg.sum())
+        
+        ## Sample target node from distribution
+        to_idx = np.random.choice(np.arange(N), p=ptarg)
+
+        # Add edge to graph
+        if A[from_idx,to_idx] == 0:
+            G.add_edge(from_idx,to_idx)
+            
+        # Add edge to adjacency matrix
+        A[from_idx,to_idx] += 1
+        
+        # Increment edge counter
+        edge_ctr += 1
+    
+    # Set diagonals to zero
+    np.fill_diagonal(A, 0)
+        
+    return G
