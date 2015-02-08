@@ -36,7 +36,7 @@ MODEL_POS = [(0, 2), (0, 3), (1, 2), (1, 3)]
 
 # ANALYSIS PARAMETERS
 N_MODEL_GRAPHS = 10
-LS = [.7, .7, .7, .7]  # Length scale parameter
+LS = [.75, .75, .75, .75]  # Length scale parameter
 GAMMAS = [1., 1., 1., 1.]  # Preferential attachment parameters
 BRAIN_SIZE = [7., 7., 7.]  # Size brain region volume to distribute nodes
 

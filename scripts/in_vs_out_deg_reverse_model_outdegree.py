@@ -23,7 +23,7 @@ NBINS = 15
 # create model graph
 G, _, _ = biophysical_model(N=num_brain_nodes,
                       N_edges=num_brain_edges_directed,
-                      gamma=1.,L=.7)
+                      gamma=1.,L=.75)
 
 # get in & out degree
 indeg = np.array([G.in_degree()[node] for node in G])
