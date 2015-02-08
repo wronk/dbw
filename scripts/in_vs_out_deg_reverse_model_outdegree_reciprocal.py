@@ -8,11 +8,11 @@ Plot the in- vs. outdegree distribution for the Allen Brain mouse connectome.
 
 import numpy as np
 import matplotlib.pyplot as plt
-import networkx as nx
-
 from numpy import concatenate as cc
 
+from random_graph.binary_directed import biophysical_reverse_outdegree_reciprocal as biophysical_model
 from network_plot.change_settings import set_all_text_fontsizes as set_fontsize
+
 from brain_constants import *
 
 # PLOT PARAMETERS
@@ -20,8 +20,10 @@ FACECOLOR = 'white'
 FONTSIZE = 14
 NBINS = 15
 
-# generate erdos-renyi graph
-G = nx.erdos_renyi_graph(num_brain_nodes, p_brain_edge_directed, directed=True)
+# create model graph
+G = biophysical_model(N=num_brain_nodes,
+                      N_edges=num_brain_edges_directed,
+                      gamma=1., reciprocity=7.)
 
 # get in & out degree
 indeg = np.array([G.in_degree()[node] for node in G])

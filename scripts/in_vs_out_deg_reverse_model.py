@@ -17,7 +17,7 @@ from brain_constants import *
 
 # PLOT PARAMETERS
 FACECOLOR = 'white'
-FONTSIZE = 20
+FONTSIZE = 14
 NBINS = 15
 
 # load brain graph, adjacency matrix, and labels

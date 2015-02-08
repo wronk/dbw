@@ -11,6 +11,8 @@ import numpy as np
 import networkx as nx
 import graph_tools.auxiliary as aux_tools
 
+from binary_directed import biophysical_reverse_outdegree
+
 def ER_distance(N=426, p=.086, brain_size=[7., 7., 7.]):
     """Create an Erdos-Renyi random graph in which each node is assigned a 
     position in space, so that relative positions are represented by a distance
@@ -95,4 +97,18 @@ def biophysical(N=426, N_edges=7804, L=2.2, gamma=1.7, brain_size=[7., 7, 7]):
     # Set diagonals to zero
     np.fill_diagonal(A,0)
         
+    return G, A, D
+
+def undirected_biophysical_reverse_outdegree(N=426, N_directed_edges=8820, L=np.inf, gamma=1.7, brain_size=[7., 7, 7]):
+    """Identical to the biophysical reverse outdegree model, except that 
+    adjacency matrix is symmetrized so that reciprocal edges merge into one."""
+    
+    # create
+    G, A, D = biophysical_reverse_outdegree(N=N, N_edges=N_directed_edges, L=L, gamma=gamma, brain_size=brain_size)
+    
+    # symmetrize graph
+    A = ((A + A.T) > 0).astype(int)
+    
+    G = nx.from_numpy_matrix(A)
+    
     return G, A, D
