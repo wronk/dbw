@@ -178,7 +178,7 @@ def make_movie:
     plt.show()
 
 
-def plot_scatter_marginal(ax, k_in, k_out, bin_width, color):
+def plot_scatterAndMarginal(ax, k_in, k_out, bin_width, color):
     """
     Function to create a scatter plot with marginal histogram distributions.
 
@@ -193,10 +193,6 @@ def plot_scatter_marginal(ax, k_in, k_out, bin_width, color):
         Desired width of histogram bins.
     color : str
         Color of scatter points and histogram.
-
-    Returns
-    =======
-    ax
 
     """
 
@@ -225,8 +221,6 @@ def plot_scatter_marginal(ax, k_in, k_out, bin_width, color):
     ax_histTop.hist(k_in, bins=bins, orientation='vertical', c=color)
     ax_histRight.hist(k_out, bins=bins, orientation='horizontal', c=color)
 
-    return ax
-
 
 if __name__ == '__main__':
     #make_movie()
@@ -241,6 +235,7 @@ if __name__ == '__main__':
     FACECOLOR = 'black'
     FONTSIZE = 16
     NBINS = 15
+    COLOR = 'cyan'
 
     # load brain graph, adjacency matrix, and labels
     G, A, labels = brain_graph()
@@ -251,55 +246,28 @@ if __name__ == '__main__':
     deg = indeg + outdeg
     deg_diff = outdeg - indeg
 
-    # calculate percent in & percent out degree
+    # Calculate proportion in degree
     percent_indeg = indeg / deg.astype(float)
-    percent_outdeg = outdeg / deg.astype(float)
 
-    # open figure
+    # Create figure
     fig = plt.figure(facecolor=FACECOLOR, tight_layout=True)
 
-    ax00 = fig.add_subplot(2, 3, 1)
-    ax10 = fig.add_subplot(2, 3, 4, sharex=ax00)
-    ax01 = fig.add_subplot(2, 3, 2, sharey=ax00)
+    ax0 = fig.add_subplot(1, 2, 1)
+    ax1 = fig.add_subplot(1, 2, 2)
+
+    plot_scatterAndMarginal(ax0, indeg, outdeg, 5., COLOR)
 
     # plot out vs. in-degree scatter
-    ax00.scatter(indeg, outdeg, lw=0)
-    ax00.set_xlabel('indegree')
-    ax00.set_ylabel('outdegree')
+    ax0.set_xlabel('In-degree')
+    ax0.set_ylabel('Out-degree')
 
-    # plot out & in-degree distributions
-    ax01.hist(outdeg, bins=NBINS, orientation='horizontal')
-    ax01.set_ylabel('outdegree')
-    ax01.set_xlabel('# nodes')
-    ax01.set_xticks(np.arange(0, 161, 40))
-
-    ax10.hist(indeg, bins=NBINS)
-    ax10.set_xlabel('indegree')
-    ax10.set_ylabel('# nodes')
-
-    '''
-# plot percent_indeg & percent_outdeg distributions
-    ax11.hist(percent_indeg, bins=NBINS)
-    ax11.set_xlabel('% indegree')
-    ax11.set_ylabel('# nodes')
-    ax11.set_xticks(np.arange(0, 1.1, .2))
-
-# plot scatter
-    ax02.scatter(deg, deg_diff, lw=0)
-    ax02.set_xlabel('outdegree + indegree')
-    ax02.set_ylabel('outdegree - indegree')
-    ax02.set_xticks(np.arange(0, 161, 40))
-
-# plot percent_indeg vs. degree
-    ax12.scatter(deg, percent_indeg, lw=0)
-    ax12.set_xlabel('outdegree + indegree')
-    ax12.set_ylabel('% indegree')
-    ax12.set_xticks(np.arange(0, 161, 40))
-    ax12.set_yticks(np.arange(0, 1.1, .2))
-    '''
+    # Plot percent_indeg vs. degree
+    ax1.scatter(deg, percent_indeg, lw=0)
+    ax1.set_xlabel('Total degree (in + out)')
+    ax1.set_ylabel('Proportion in-degree')
+    ax1.set_xticks(np.arange(0, 161, 40))
+    ax1.set_yticks(np.arange(0, 1.1, .2))
 
     for ax in [ax00, ax01, ax10]:
         set_all_text_fontsizes(ax, FONTSIZE)
         set_all_colors(ax, 'white')
-
-
