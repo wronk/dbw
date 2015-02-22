@@ -110,7 +110,8 @@ def plot_3D_network(ax, node_names, node_positions, node_label_set, edges,
 
     return ax
 
-def make_movie:
+
+def make_movie():
     import network_gen
 
     plt.close('all')
@@ -178,69 +179,108 @@ def make_movie:
     plt.show()
 
 
-def plot_scatterAndMarginal(ax, k_in, k_out, bin_width, color):
+def plot_scatterAndMarginal(ax_scat, ax_histTop, ax_histRight, k_in, k_out,
+                            bin_width, marker_size, marker_color):
     """
     Function to create a scatter plot with marginal histogram distributions.
 
     Parameters
     ==========
-    ax : axes object
+    ax_scat : axes object
+        Axes object to plot scatter points on
+    ax_histTop : axes object
+        Axes object to plot histogram of points collapsed onto x axis
+    ax_histRight : axes object
+        Axes object to plot histogram of points collapsed onto y axis
     k_in : array or list
-        In degree.
+        In degree data (or scatter x coordinates)
     k_out : array or list
-        Out degree
-    bin_width : float
-        Desired width of histogram bins.
-    color : str
-        Color of scatter points and histogram.
-
+        Out degree data (or scatter y coordinates)
+    bin_width : int or float
+        Desired width of histogram bins
+    marker_size : float
+        Size of scatter points in scatter plot
+    marker_color : str
+        Color of scatter points and histogram
     """
 
-    from mpl_toolkits.axes_grid1 import make_axes_locatable
+    # Params
+    lw = 0  # Line width around markers
     bin_width = float(bin_width)
 
-    # Create scatter plot
-    ax.scatter(k_in, k_out, c=color)
+    ############################
+    # Scatter Plot
+    ############################
+    ax_scat.scatter(k_in, k_out, s=marker_size, lw=lw, c=marker_color)
+    ax_scat.xaxis.set_major_locator(plt.MaxNLocator(5))
+    ax_scat.yaxis.set_major_locator(plt.MaxNLocator(5))
+    ax_scat.set_aspect(1.)
+    #ax_scat.set_xticklabels([int(t) for t in ax_scat.get_xticks()], rotation=45., va='top')
+    #ax_scat.set_yticklabels([int(t) for t in ax_scat.get_yticks()], rotation=45., ha='right')
 
-    # Add new histogram axes objects
-    divider = make_axes_locatable(ax)
-    ax_histTop = divider.append_axes('top', 1.2, pad=0.05, sharex=ax)
-    ax_histRight = divider.append_axes('right', 1.2, pad=0.05, sharey=ax)
+    #Round up to nearest 10
+    x_lim, y_lim = ax_scat.get_xlim(), ax_scat.get_ylim()
+    max_lim = np.max((x_lim[1], y_lim[1]))
+    ax_scat.set_xlim([-5, max_lim])
+    ax_scat.set_ylim([-5, max_lim])
+    #ax_scat.set_xlim([-5, round(x_lim[1] + 5.)])
+    #ax_scat.set_ylim([-5, round(y_lim[1] + 5.)])
 
-    # Remove tick labels
+    ############################
+    # Plot marginal histograms
+    ############################
+
+    # Remove tick labels below top hist and left of right hist
     plt.setp(ax_histTop.get_xticklabels() + ax_histRight.get_yticklabels(),
              visible=False)
 
+    # Create identical bins for histograms
     xymax = np.max([np.max(np.fabs(k_in)), np.max(np.fabs(k_out))])
     lim = (int(xymax / bin_width) + 1) * bin_width
-
-    # Create bin edges
     bins = np.arange(-lim, lim + bin_width, bin_width)
 
-    # Plot histograms
-    ax_histTop.hist(k_in, bins=bins, orientation='vertical', c=color)
-    ax_histRight.hist(k_out, bins=bins, orientation='horizontal', c=color)
+    # Plot histograms and limit number of ticks
+    ax_histTop.hist(k_in, bins=bins, orientation='vertical', fc=marker_color)
+    ax_histTop.yaxis.set_major_locator(plt.MaxNLocator(3))
+    #ax_histTop.set_yticks(y_histTics)
+    #ax_histTop.set_yticklabels([str(l) for l in y_histTics], rotation=0)
+
+    ax_histRight.hist(k_out, bins=bins, orientation='horizontal',
+                      fc=marker_color)
+    ax_histRight.xaxis.set_major_locator(plt.MaxNLocator(3))
+    plt.setp(ax_histRight.xaxis.get_majorticklabels(), rotation=-45, va='top')
+    #ax_histRight.set_xticks(x_histTics)
+    #ax_histRight.set_xticklabels([str(l) for l in x_histTics], rotation=0)
 
 
 if __name__ == '__main__':
     #make_movie()
 
-    import numpy as np
-    import matplotlib.pyplot as plt
+    from random_graph.binary_directed import biophysical_reverse_outdegree as biophysical_model
+    from network_plot.change_settings import (set_all_text_fontsizes,
+                                              set_all_colors)
+    import brain_constants as bc
+    from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-    from extract.brain_graph import binary_directed as brain_graph
-    from network_plot.change_settings import set_all_text_fontsizes, set_all_colors
+    plt.close('all')
+    plt.ion()
 
     # PLOT PARAMETERS
+    FIGSIZE = (16, 8)
+    FONTSIZE = 20
+    MARKERSIZE = 25
+    BINWIDTH = 4
+    MARKERCOLOR = 'cyan'
     FACECOLOR = 'black'
-    FONTSIZE = 16
-    NBINS = 15
-    COLOR = 'cyan'
+    LABELCOLOR = 'white'
+    TICKSIZE = 2.
 
     # load brain graph, adjacency matrix, and labels
-    G, A, labels = brain_graph()
+    G, A, D = biophysical_model(N=bc.num_brain_nodes,
+                                N_edges=bc.num_brain_edges_directed, L=.75,
+                                gamma=1.)
 
-    # get in & out degree
+    # Get in & out degree
     indeg = np.array([G.in_degree()[node] for node in G])
     outdeg = np.array([G.out_degree()[node] for node in G])
     deg = indeg + outdeg
@@ -250,24 +290,43 @@ if __name__ == '__main__':
     percent_indeg = indeg / deg.astype(float)
 
     # Create figure
-    fig = plt.figure(facecolor=FACECOLOR, tight_layout=True)
-
+    fig = plt.figure(figsize=FIGSIZE, facecolor=FACECOLOR, tight_layout=True)
     ax0 = fig.add_subplot(1, 2, 1)
     ax1 = fig.add_subplot(1, 2, 2)
 
-    plot_scatterAndMarginal(ax0, indeg, outdeg, 5., COLOR)
+    # Add new axes for histograms in margins
+    divider = make_axes_locatable(ax0)
+    ax0_histTop = divider.append_axes('top', 1.2, pad=0.3, sharex=ax0)
+    ax0_histRight = divider.append_axes('right', 1.2, pad=0.3, sharey=ax0)
 
-    # plot out vs. in-degree scatter
+    ##########################################################################
+    # Call plotting function for scatter/marginal histograms (LEFT SIDE)
+    plot_scatterAndMarginal(ax0, ax0_histTop, ax0_histRight, indeg, outdeg,
+                            bin_width=BINWIDTH, marker_size=MARKERSIZE,
+                            marker_color=MARKERCOLOR)
+
     ax0.set_xlabel('In-degree')
     ax0.set_ylabel('Out-degree')
-
-    # Plot percent_indeg vs. degree
-    ax1.scatter(deg, percent_indeg, lw=0)
+    ax0_histTop.set_title('In- vs. Out-degree', fontsize=FONTSIZE + 2,
+                          va='bottom')
+    ##########################################################################
+    # Plot percent_indeg vs. degree (RIGHT SIDE)
+    ax1.scatter(deg, percent_indeg, s=MARKERSIZE, lw=0, c=MARKERCOLOR)
     ax1.set_xlabel('Total degree (in + out)')
     ax1.set_ylabel('Proportion in-degree')
-    ax1.set_xticks(np.arange(0, 161, 40))
+    ax1.xaxis.set_major_locator(plt.MaxNLocator(4))
     ax1.set_yticks(np.arange(0, 1.1, .2))
+    ax1.set_title('Proportion of Edges that are Incoming\nby Degree',
+                  fontsize=FONTSIZE + 2, va='bottom')
+    ax1.set_ylim([0., 1.05])
 
-    for ax in [ax00, ax01, ax10]:
-        set_all_text_fontsizes(ax, FONTSIZE)
-        set_all_colors(ax, 'white')
+    ##########################################################################
+    # Set background color and text size for all spines/ticks
+    for temp_ax in [ax0, ax0_histRight, ax0_histTop, ax1]:
+        set_all_text_fontsizes(temp_ax, FONTSIZE)
+        set_all_colors(temp_ax, LABELCOLOR)
+        #temp_ax.patch.set_facecolor(FACECOLOR)  # Set color of plot area
+        temp_ax.tick_params(width=TICKSIZE)
+
+    #fig.savefig('/home/wronk/Builds/fig_save.png')
+    plt.show()
