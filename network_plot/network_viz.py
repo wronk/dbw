@@ -328,5 +328,5 @@ if __name__ == '__main__':
         #temp_ax.patch.set_facecolor(FACECOLOR)  # Set color of plot area
         temp_ax.tick_params(width=TICKSIZE)
 
-    #fig.savefig('/home/wronk/Builds/fig_save.png')
+    #fig.savefig('/home/wronk/Builds/fig_save.png', transparent=True)
     plt.show()
