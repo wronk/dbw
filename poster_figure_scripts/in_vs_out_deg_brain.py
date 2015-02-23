@@ -8,9 +8,23 @@ Plot the in- vs. outdegree distribution for the Allen Brain mouse connectome.
 
 import numpy as np
 import matplotlib.pyplot as plt
+import networkx as nx
 
 from extract.brain_graph import binary_directed as brain_graph
+
 from network_plot.change_settings import set_all_text_fontsizes, set_all_colors
+from brain_constants import *
+
+import brain_constants as bc
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+from network_plot.network_viz import plot_scatterAndMarginal
+
+# IMPORT PLOT PARAMETERS
+import in_out_plot_config as cf
+
+#plt.close('all')
+plt.ion()
 
 # PLOT PARAMETERS
 FACECOLOR = 'black'
@@ -20,60 +34,61 @@ NBINS = 15
 # load brain graph, adjacency matrix, and labels
 G, A, labels = brain_graph()
 
-# get in & out degree
+# Get in & out degree
 indeg = np.array([G.in_degree()[node] for node in G])
 outdeg = np.array([G.out_degree()[node] for node in G])
 deg = indeg + outdeg
-deg_diff = outdeg - indeg
 
-# calculate percent in & percent out degree
-percent_indeg = indeg/deg.astype(float)
-percent_outdeg = outdeg/deg.astype(float)
+# Calculate proportion in degree
+percent_indeg = indeg / deg.astype(float)
 
-# open figure
-fig = plt.figure(facecolor=FACECOLOR, tight_layout=True)
+# Create figure
+fig = plt.figure(figsize=cf.FIGSIZE, facecolor=cf.FACECOLOR, tight_layout=True)
+ax0 = plt.subplot2grid(cf.SUBPLOT_DIVISIONS, cf.AX0_LOCATION,
+                       colspan=cf.AX0_COLSPAN)
+ax1 = plt.subplot2grid(cf.SUBPLOT_DIVISIONS, cf.AX1_LOCATION,
+                       colspan=cf.AX1_COLSPAN)
 
-ax00 = fig.add_subplot(2,3,1)
-ax10 = fig.add_subplot(2,3,4, sharex=ax00)
-ax01 = fig.add_subplot(2,3,2, sharey=ax00)
-ax11 = fig.add_subplot(2,3,5, sharey=ax10)
-ax02 = fig.add_subplot(2,3,3)
-ax12 = fig.add_subplot(2,3,6)
+# Add new axes for histograms in margins
+divider = make_axes_locatable(ax0)
 
-# plot out vs. in-degree scatter
-ax00.scatter(indeg, outdeg, lw=0)
-ax00.set_xlabel('indegree')
-ax00.set_ylabel('outdegree')
+ax0_histTop = divider.append_axes('top', 1.0, pad=0.3, sharex=ax0)
+ax0_histRight = divider.append_axes('right', 2.0, pad=0.3, sharey=ax0)
 
-# plot out & in-degree distributions
-ax01.hist(outdeg, bins=NBINS, orientation='horizontal')
-ax01.set_ylabel('outdegree')
-ax01.set_xlabel('# nodes')
-ax01.set_xticks(np.arange(0, 161, 40))
 
-ax10.hist(indeg, bins=NBINS)
-ax10.set_xlabel('indegree')
-ax10.set_ylabel('# nodes')
+##########################################################################
+# Call plotting function for scatter/marginal histograms (LEFT SIDE)
+plot_scatterAndMarginal(ax0, ax0_histTop, ax0_histRight, indeg, outdeg,
+                        bin_width=BINWIDTH, marker_size=MARKERSIZE,
+                        marker_color='m', indegree_bins=cf.INDEGREE_BINS,
+                        outdegree_bins=cf.OUTDEGREE_BINS)
 
-# plot percent_indeg & percent_outdeg distributions
-ax11.hist(percent_indeg, bins=NBINS)
-ax11.set_xlabel('% indegree')
-ax11.set_ylabel('# nodes')
-ax11.set_xticks(np.arange(0, 1.1, .2))
+ax0.set_xlabel('Indegree')
+ax0.set_ylabel('Outdegree')
+ax0_histTop.set_title('In- vs. Outdegree', fontsize=FONTSIZE + 2,
+                      va='bottom')
+ax0.set_xlim(*cf.IN_OUT_SCATTER_XLIM)
+ax0.set_ylim(*cf.IN_OUT_SCATTER_YLIM)
+ax0.set_aspect('auto')
 
-# plot scatter
-ax02.scatter(deg, deg_diff, lw=0)
-ax02.set_xlabel('outdegree + indegree')
-ax02.set_ylabel('outdegree - indegree')
-ax02.set_xticks(np.arange(0, 161, 40))
+##########################################################################
+# Plot percent_indeg vs. degree (RIGHT SIDE)
+ax1.scatter(deg, percent_indeg, s=MARKERSIZE, lw=0, c='m')
+ax1.set_xlabel('Total degree (in + out)')
+ax1.set_ylabel('Proportion in-degree')
+ax1.xaxis.set_major_locator(plt.MaxNLocator(4))
+ax1.set_yticks(np.arange(0, 1.1, .2))
+ax1.set_title('Proportion of Edges that are Incoming\nvs. Degree',
+              fontsize=cf.FONTSIZE + 2, va='bottom')
+ax1.set_ylim([0., 1.05])
 
-# plot percent_indeg vs. degree
-ax12.scatter(deg, percent_indeg, lw=0)
-ax12.set_xlabel('outdegree + indegree')
-ax12.set_ylabel('% indegree')
-ax12.set_xticks(np.arange(0, 161, 40))
-ax12.set_yticks(np.arange(0, 1.1, .2))
+##########################################################################
+# Set background color and text size for all spines/ticks
+for temp_ax in [ax0, ax0_histRight, ax0_histTop, ax1]:
+    set_all_text_fontsizes(temp_ax, FONTSIZE)
+    set_all_colors(temp_ax, LABELCOLOR)
+    #temp_ax.patch.set_facecolor(FACECOLOR)  # Set color of plot area
+    temp_ax.tick_params(width=TICKSIZE)
 
-for ax in [ax00, ax01, ax10, ax11, ax02, ax12]:
-    set_all_text_fontsizes(ax, FONTSIZE)
-    set_all_colors(ax, 'white')
+#fig.savefig('/home/wronk/Builds/fig_save.png', transparent=True)
+plt.show()
