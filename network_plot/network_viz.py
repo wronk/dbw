@@ -180,7 +180,8 @@ def make_movie():
 
 
 def plot_scatterAndMarginal(ax_scat, ax_histTop, ax_histRight, k_in, k_out,
-                            bin_width, marker_size, marker_color):
+                            bin_width, marker_size, marker_color, 
+                            indegree_bins=None, outdegree_bins=None):
     """
     Function to create a scatter plot with marginal histogram distributions.
 
@@ -238,14 +239,19 @@ def plot_scatterAndMarginal(ax_scat, ax_histTop, ax_histRight, k_in, k_out,
     xymax = np.max([np.max(np.fabs(k_in)), np.max(np.fabs(k_out))])
     lim = (int(xymax / bin_width) + 1) * bin_width
     bins = np.arange(-lim, lim + bin_width, bin_width)
-
+    
+    if indegree_bins is None:
+        indegree_bins = bins
+    if outdegree_bins is None:
+        outdegree_bins = bins
+        
     # Plot histograms and limit number of ticks
-    ax_histTop.hist(k_in, bins=bins, orientation='vertical', fc=marker_color)
+    ax_histTop.hist(k_in, bins=indegree_bins, orientation='vertical', fc=marker_color)
     ax_histTop.yaxis.set_major_locator(plt.MaxNLocator(3))
     #ax_histTop.set_yticks(y_histTics)
     #ax_histTop.set_yticklabels([str(l) for l in y_histTics], rotation=0)
 
-    ax_histRight.hist(k_out, bins=bins, orientation='horizontal',
+    ax_histRight.hist(k_out, bins=outdegree_bins, orientation='horizontal',
                       fc=marker_color)
     ax_histRight.xaxis.set_major_locator(plt.MaxNLocator(3))
     plt.setp(ax_histRight.xaxis.get_majorticklabels(), rotation=-45, va='top')
