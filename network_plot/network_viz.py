@@ -6,6 +6,7 @@ Created on Tue Aug 27 2014
 network_viz.py
 '''
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 from os import path as op
 from mpl_toolkits.mplot3d import Axes3D
@@ -180,7 +181,7 @@ def make_movie():
 
 
 def plot_scatterAndMarginal(ax_scat, ax_histTop, ax_histRight, k_in, k_out,
-                            bin_width, marker_size, marker_color, 
+                            bin_width, marker_size, marker_color,
                             indegree_bins=None, outdegree_bins=None):
     """
     Function to create a scatter plot with marginal histogram distributions.
@@ -204,6 +205,9 @@ def plot_scatterAndMarginal(ax_scat, ax_histTop, ax_histRight, k_in, k_out,
     marker_color : str
         Color of scatter points and histogram
     """
+    # Set font type for compatability with adobe if editting later
+    mpl.rcparams['ps.fonttype'] = 42
+    mpl.rcparams['pdf.fonttype'] = 42
 
     # Params
     lw = 0  # Line width around markers
@@ -239,14 +243,15 @@ def plot_scatterAndMarginal(ax_scat, ax_histTop, ax_histRight, k_in, k_out,
     xymax = np.max([np.max(np.fabs(k_in)), np.max(np.fabs(k_out))])
     lim = (int(xymax / bin_width) + 1) * bin_width
     bins = np.arange(-lim, lim + bin_width, bin_width)
-    
+
     if indegree_bins is None:
         indegree_bins = bins
     if outdegree_bins is None:
         outdegree_bins = bins
-        
+
     # Plot histograms and limit number of ticks
-    ax_histTop.hist(k_in, bins=indegree_bins, orientation='vertical', fc=marker_color)
+    ax_histTop.hist(k_in, bins=indegree_bins, orientation='vertical',
+                    fc=marker_color)
     ax_histTop.yaxis.set_major_locator(plt.MaxNLocator(3))
     #ax_histTop.set_yticks(y_histTics)
     #ax_histTop.set_yticklabels([str(l) for l in y_histTics], rotation=0)
