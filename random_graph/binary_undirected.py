@@ -109,6 +109,6 @@ def undirected_biophysical_reverse_outdegree(N=426, N_directed_edges=8820, L=np.
     # symmetrize graph
     A = ((A + A.T) > 0).astype(int)
     
-    G = nx.from_numpy_matrix(A)
+    G = nx.from_numpy_matrix(A).to_undirected()
     
     return G, A, D
