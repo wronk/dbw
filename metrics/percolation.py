@@ -273,6 +273,70 @@ def lesion_met_diameter(G, **kwargs):
     return d
 
 
+def lesion_met_largest_strong_component(G, orig_order=None):
+    """
+    Get largest strong component size of a graph.
+
+    Parameters
+    ----------
+    G : directed networkx graph
+        Graph to compute largest component for
+    orig_order : int
+        Define orig_order if you'd like the largest component proportion
+
+    Returns
+    -------
+    largest strong component size : int
+        Proportion of largest remaning component size if orig_order
+        is defined. Otherwise, return number of nodes in largest component.
+    """
+
+    components = sorted(nx.strongly_connected_components(G), key=len,
+                        reverse=True)
+    if len(components) > 0:
+        largest_component = len(components[0])
+    else:
+        largest_component = 0.
+
+    # Check if original component size is defined
+    if orig_order is not None:
+        return largest_component / float(orig_order)
+    else:
+        return largest_component
+
+
+def lesion_met_largest_weak_component(G, orig_order=None):
+    """
+    Get largest weak component size of a graph.
+
+    Parameters
+    ----------
+    G : directed networkx graph
+        Graph to compute largest component for
+    orig_order : int
+        Define orig_order if you'd like the largest component proportion
+
+    Returns
+    -------
+    largest weak component size : int
+        Proportion of largest remaning component size if orig_order
+        is defined. Otherwise, return number of nodes in largest component.
+    """
+
+    components = sorted(nx.weakly_connected_components(G), key=len,
+                        reverse=True)
+    if len(components) > 0:
+        largest_component = len(components[0])
+    else:
+        largest_component = 0.
+
+    # Check if original component size is defined
+    if orig_order is not None:
+        return largest_component / float(orig_order)
+    else:
+        return largest_component
+
+
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
     from random_graph import binary_undirected as bu
