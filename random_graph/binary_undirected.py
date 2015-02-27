@@ -106,9 +106,7 @@ def undirected_biophysical_reverse_outdegree(N=426, N_directed_edges=8820, L=np.
     # create
     G, A, D = biophysical_reverse_outdegree(N=N, N_edges=N_directed_edges, L=L, gamma=gamma, brain_size=brain_size)
     
-    # symmetrize graph
-    A = ((A + A.T) > 0).astype(int)
-    
-    G = nx.from_numpy_matrix(A)
+    # symmetrize graph    
+    G = G.to_undirected()
     
     return G, A, D
