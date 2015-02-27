@@ -30,7 +30,7 @@ linear_model_path = op.join('home', os.environ['USER'],
                             'Builds/friday-harbor/linear_model')
 save_dir = op.join('/home', os.environ['USER'], 'Builds/dbw/cache')
 save_files = True
-gen_directed = False
+gen_directed = True
 ##############################################################################
 
 
@@ -133,10 +133,10 @@ def construct_graph_list_dir(graphs_to_const):
 ##############################################################################
 ### Construct graphs
 if gen_directed:
+    graph_names = ['Mouse', 'Random', 'Biophysical']
+else:
     graph_names = ['Mouse', 'Random', 'Small-World', 'Scale-Free',
                    'Biophysical']
-else:
-    graph_names = ['Mouse', 'Random', 'Biophysical']
 
 # Directed
 if gen_directed:
