@@ -41,28 +41,26 @@ for g_name in graph_names_und:
     load_fname = op.join(load_dir, g_name + '_undirected.pkl')
     open_file = open(load_fname, 'rb')
     graph_metrics_und.append(pickle.load(open_file))
+    open_file.close()
 
 # Load directed graph metrics
 for g_name in graph_names_dir:
     load_fname = op.join(load_dir, g_name + '_directed.pkl')
     open_file = open(load_fname, 'rb')
     graph_metrics_dir.append(pickle.load(open_file))
+    open_file.close()
 
 # Calculate mean and std dev across repeats
 for g_dict in graph_metrics_und:
     g_dict['data_rand_avg'] = np.nanmean(g_dict['data_rand'], axis=-1)
     g_dict['data_rand_std'] = np.nanstd(g_dict['data_rand'], axis=-1)
-    g_dict['data_targ_avg'] = np.nanmean(g_dict['data_target'], axis=-1)
-    g_dict['data_targ_std'] = np.nanstd(g_dict['data_target'], axis=-1)
-    g_dict['removed_rand'] = prop_rm  # Temporary hack
-    g_dict['removed_targ'] = lesion_list  # Temporary hack
+    g_dict['data_targ_avg'] = np.nanmean(g_dict['data_targ'], axis=-1)
+    g_dict['data_targ_std'] = np.nanstd(g_dict['data_targ'], axis=-1)
 for g_dict in graph_metrics_dir:
     g_dict['data_rand_avg'] = np.nanmean(g_dict['data_rand'], axis=-1)
     g_dict['data_rand_std'] = np.nanstd(g_dict['data_rand'], axis=-1)
-    g_dict['data_targ_avg'] = np.nanmean(g_dict['data_target'], axis=-1)
-    g_dict['data_targ_std'] = np.nanstd(g_dict['data_target'], axis=-1)
-    g_dict['removed_rand'] = prop_rm  # Temporary hack
-    g_dict['removed_targ'] = lesion_list  # Temporary hack
+    g_dict['data_targ_avg'] = np.nanmean(g_dict['data_targ'], axis=-1)
+    g_dict['data_targ_std'] = np.nanstd(g_dict['data_targ'], axis=-1)
 ##############################################################################
 ### Plot results
 # Set font type for compatability with adobe if doing editing later
@@ -78,19 +76,24 @@ FIGSIZE = (11, 5.5)
 
 #######################################
 ### Random attack (undirected) with subplot for each metric
+# construct figure
 fig1, ax_list1 = plt.subplots(nrows=1,
                               ncols=len(graph_metrics_und[0]['metrics_list']),
                               figsize=FIGSIZE)
 
+# Loop over each metric and then each graph
 for fi, func in enumerate(graph_metrics_und[0]['metrics_list']):
     for gi, g_dict in enumerate(graph_metrics_und):
+        # Compute x axis vals, y vals, and std devs
         x = g_dict['removed_rand']
-        avg = g_dict['data_targ_avg'][fi, :]  # TODO Reverse after fix
-        fill_upper = avg + g_dict['data_targ_std'][fi, :]
-        fill_lower = avg - g_dict['data_targ_std'][fi, :]
+        avg = g_dict['data_rand_avg'][fi, :]
+        fill_upper = avg + g_dict['data_rand_std'][fi, :]
+        fill_lower = avg - g_dict['data_rand_std'][fi, :]
 
+        # Plot traces
         ax_list1[fi].plot(x, avg, lw=LW, label=g_dict['graph_name'],
                           color=graph_col[gi])
+        # Plot std deviation range
         ax_list1[fi].fill_between(x, fill_upper, fill_lower, lw=0,
                                   facecolor=graph_col[gi], interpolate=True,
                                   alpha=.3)
@@ -108,12 +111,94 @@ for ax in ax_list1:
 
 #######################################
 ### Random attack (directed) with subplot for each metric
+fig2, ax_list2 = plt.subplots(nrows=1,
+                              ncols=len(graph_metrics_dir[0]['metrics_list']),
+                              figsize=FIGSIZE)
+
+for fi, func in enumerate(graph_metrics_dir[0]['metrics_list']):
+    for gi, g_dict in enumerate(graph_metrics_dir):
+        x = g_dict['removed_rand']
+        avg = g_dict['data_rand_avg'][fi, :]
+        fill_upper = avg + g_dict['data_rand_std'][fi, :]
+        fill_lower = avg - g_dict['data_rand_std'][fi, :]
+
+        ax_list2[fi].plot(x, avg, lw=LW, label=g_dict['graph_name'],
+                          color=graph_col[gi])
+        ax_list2[fi].fill_between(x, fill_upper, fill_lower, lw=0,
+                                  facecolor=graph_col[gi], interpolate=True,
+                                  alpha=.3)
+    ax_list2[fi].set_title('Random Attack', fontsize=FONTSIZE)
+    ax_list2[fi].set_xlabel('Proportion Nodes Removed', fontsize=FONTSIZE)
+    ax_list2[fi].set_ylabel(['Largest Strong Component',
+                             'Largest Weak Component'][fi],
+                            fontsize=FONTSIZE)
+
+ax_list2[1].legend(loc=0)
+
+for ax in ax_list2:
+    for text in ax.get_xticklabels() + ax.get_yticklabels():
+        text.set_fontsize(FONTSIZE)
 
 #######################################
 ### Targeted attack (undirected) with subplot for each metric
+fig3, ax_list3 = plt.subplots(nrows=1,
+                              ncols=len(graph_metrics_und[0]['metrics_list']),
+                              figsize=FIGSIZE)
+
+for fi, func in enumerate(graph_metrics_und[0]['metrics_list']):
+    for gi, g_dict in enumerate(graph_metrics_und):
+        x = g_dict['removed_targ']
+        avg = g_dict['data_targ_avg'][fi, :]
+        fill_upper = avg + g_dict['data_targ_std'][fi, :]
+        fill_lower = avg - g_dict['data_targ_std'][fi, :]
+
+        ax_list3[fi].plot(x, avg, lw=LW, label=g_dict['graph_name'],
+                          color=graph_col[gi])
+        ax_list3[fi].fill_between(x, fill_upper, fill_lower, lw=0,
+                                  facecolor=graph_col[gi], interpolate=True,
+                                  alpha=.3)
+    ax_list3[fi].set_title('Targeted Attack', fontsize=FONTSIZE)
+    ax_list3[fi].set_xlabel('Number of Nodes Removed', fontsize=FONTSIZE)
+    ax_list3[fi].set_ylabel(['Largest Component Size',
+                             'Average Shortest Path'][fi],
+                            fontsize=FONTSIZE)
+
+ax_list3[1].legend(loc=0)
+
+for ax in ax_list3:
+    for text in ax.get_xticklabels() + ax.get_yticklabels():
+        text.set_fontsize(FONTSIZE)
 
 #######################################
 ### Targeted attack (directed) with subplot for each metric
+fig4, ax_list4 = plt.subplots(nrows=1,
+                              ncols=len(graph_metrics_dir[0]['metrics_list']),
+                              figsize=FIGSIZE)
+
+for fi, func in enumerate(graph_metrics_dir[0]['metrics_list']):
+    for gi, g_dict in enumerate(graph_metrics_dir):
+        x = g_dict['removed_targ']
+        avg = g_dict['data_targ_avg'][fi, :]
+        fill_upper = avg + g_dict['data_targ_std'][fi, :]
+        fill_lower = avg - g_dict['data_targ_std'][fi, :]
+
+        ax_list4[fi].plot(x, avg, lw=LW, label=g_dict['graph_name'],
+                          color=graph_col[gi])
+        ax_list4[fi].fill_between(x, fill_upper, fill_lower, lw=0,
+                                  facecolor=graph_col[gi], interpolate=True,
+                                  alpha=.3)
+    ax_list4[fi].set_title('Targeted Attack', fontsize=FONTSIZE)
+    ax_list4[fi].set_xlabel('Number of Nodes Removed', fontsize=FONTSIZE)
+    ax_list4[fi].set_ylabel(['Largest Strong Component',
+                             'Largest Weak Component'][fi],
+                            fontsize=FONTSIZE)
+
+ax_list4[1].legend(loc=0)
+
+for ax in ax_list4:
+    for text in ax.get_xticklabels() + ax.get_yticklabels():
+        text.set_fontsize(FONTSIZE)
+
 '''
 #######################################
 ### Combined plot hack

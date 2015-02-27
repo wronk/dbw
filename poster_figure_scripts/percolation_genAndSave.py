@@ -19,6 +19,7 @@ reload(perc)
 import brain_constants as bc
 from random_graph.binary_undirected import undirected_biophysical_reverse_outdegree as bp_und
 from random_graph.binary_directed import biophysical_reverse_outdegree as bp_dir
+import in_out_plot_config as cf
 
 repeats = 100  # Number of times to repeat percolation
 prop_rm = np.arange(0., 1.00, 0.05)
@@ -28,7 +29,8 @@ node_order = 426
 linear_model_path = op.join('home', os.environ['USER'],
                             'Builds/friday-harbor/linear_model')
 save_dir = op.join('/home', os.environ['USER'], 'Builds/dbw/cache')
-
+save_files = True
+gen_directed = True
 ##############################################################################
 
 
@@ -69,8 +71,8 @@ def construct_graph_list_und(graphs_to_const):
     # Construct biophysical graph
     if graph_check[3] in graphs_to_const:
 
-        G_BIO, _, _ = bp_und()
-
+        G_BIO, _, _ = bp_und(bc.num_brain_nodes, bc.num_brain_edges_undirected,
+                             L=0.75, gamma=1.)
         graph_list.append(G_BIO)
 
     # Error check that we created correct number of graphs
@@ -130,25 +132,27 @@ def construct_graph_list_dir(graphs_to_const):
 
 ##############################################################################
 ### Construct graphs
-gen_undirected = False
-
 graph_names = ['Mouse', 'Random', 'Small-World', 'Scale-Free',
                'Biophysical']
 graph_names = ['Mouse', 'Random', 'Biophysical']
-
-# Undirected
-if gen_undirected:
-    func_list = [perc.lesion_met_largest_component,
-                 perc.lesion_met_avg_shortest_path]
+graph_names = ['Mouse', 'Biophysical']
 
 # Directed
-else:
+if gen_directed:
     func_list = [perc.lesion_met_largest_strong_component,
                  perc.lesion_met_largest_weak_component]
 
+# Undirected
+else:
+    func_list = [perc.lesion_met_largest_component,
+                 perc.lesion_met_avg_shortest_path]
+
 ##############################################################################
 ### Do percolation
-# Matrices for undirected random and targetted attacks
+print 'Percolating...'
+print 'Graphs: ' + str(graph_names)
+print 'Directed: ' + str(gen_directed) + '\n'
+# Matrices for random and targetted attacks
 rand = np.zeros((len(graph_names), len(func_list), len(prop_rm), repeats))
 targ = np.zeros((len(graph_names), len(func_list), len(lesion_list), repeats))
 
@@ -156,10 +160,10 @@ targ = np.zeros((len(graph_names), len(func_list), len(lesion_list), repeats))
 for ri in np.arange(repeats):
     print 'Lesion graphs, repeat ' + str(ri + 1) + ' of ' + str(repeats)
     # Construct undirected or directed graphs
-    if gen_undirected:
-        graph_list = construct_graph_list_und(graph_names)
-    else:
+    if gen_directed:
         graph_list = construct_graph_list_dir(graph_names)
+    else:
+        graph_list = construct_graph_list_und(graph_names)
 
     # Cycle over graphs and metric functions
     for gi, G in enumerate(graph_list):
@@ -171,22 +175,24 @@ for ri in np.arange(repeats):
 
 ##############################################################################
 ### Save results
-print 'Saving data for: '
-for gi, G in enumerate(graph_list):
-    print '\tLesioning: ' + graph_names[gi]
+if save_files:
+    print 'Saving data for: '
+    for gi, G in enumerate(graph_list):
+        print '\tLesioning: ' + graph_names[gi]
 
-    if gen_undirected:
-        save_fname = op.join(save_dir, graph_names[gi] + '_undirected.pkl')
-    else:
-        save_fname = op.join(save_dir, graph_names[gi] + '_directed.pkl')
+        if gen_directed:
+            save_fname = op.join(save_dir, graph_names[gi] + '_directed.pkl')
+        else:
+            save_fname = op.join(save_dir, graph_names[gi] + '_undirected.pkl')
 
-    outfile = open(save_fname, 'wb')
-    pickle.dump({'graph_name': graph_names[gi], 'metrics_list':
-                 [f.func_name for f in func_list], 'repeats': repeats,
-                 'data_rand': rand[gi, :, :, :],
-                 'data_targ': targ[gi, :, :, :],
-                 'removed_rand': prop_rm,
-                 'removed_targ': lesion_list}, outfile)
+        outfile = open(save_fname, 'wb')
+        pickle.dump({'graph_name': graph_names[gi], 'metrics_list':
+                    [f.func_name for f in func_list], 'repeats': repeats,
+                    'data_rand': rand[gi, :, :, :],
+                    'data_targ': targ[gi, :, :, :],
+                    'removed_rand': prop_rm,
+                    'removed_targ': lesion_list}, outfile)
+        outfile.close()
 
-    print ' ... Done'
-    #f.close()
+        print ' ... Done'
+        #f.close()
