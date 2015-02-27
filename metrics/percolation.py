@@ -13,8 +13,8 @@ import auxiliary as aux
 reload(aux)
 
 
-def percolate_random(graph, prop_removed, func_list):
-    """ Get size avg of largest cluster after randomly removing some proportion
+def percolate_random(graph, prop_removed, func, func_kwargs=dict()):
+    """ Get some metrics after randomly removing some proportion
     of nodes.
 
     Parameters
@@ -23,19 +23,61 @@ def percolate_random(graph, prop_removed, func_list):
         Graph to perform the percolation on
     prop_removed: list
         Occupation probabilities to measure.
+    func_list : list of function
+        Metric functions to calculate and return.
     repeats: int
         Number of repetitions to average over for each proportion removed.
+    **kwargs: list of dict
+        Additional arguements for functions
 
     Returns
     -------
-    S : list
-        Size of largest cluster in each lesion
+    metrics : array
+        All metrics evaluated. Size (func x lesions x repeats)
     """
 
     # Instantiate matrix to hold calculated graph size
-    #S = np.zeros((len(prop_removed)))
-    #asp = np.zeros((len(prop_removed)))
-    metrics = np.zeros((len(func_list), len(prop_removed)))
+    metrics = np.zeros((len(prop_removed)))
+    #n = graph.order()
+    #func_kwargs = {'orig_order': n}
+
+    # Loop over each proportion
+    for pi, prop in enumerate(prop_removed):
+        temp_G, _ = aux.lesion_graph_randomly(graph, prop)
+
+        if pi > 0 and metrics[pi - 1] == np.nan:
+            metrics[pi] = np.nan
+        else:
+            metrics[pi] = func(temp_G, **func_kwargs)
+
+    return metrics
+
+'''
+def percolate_random(graph, prop_removed, func_list, repeats=1, **kwargs):
+    """ Get some metrics after randomly removing some proportion
+    of nodes.
+
+    Parameters
+    ----------
+    graph : networkx graph
+        Graph to perform the percolation on
+    prop_removed: list
+        Occupation probabilities to measure.
+    func_list : list of function
+        Metric functions to calculate and return.
+    repeats: int
+        Number of repetitions to average over for each proportion removed.
+    **kwargs: list of dict
+        Additional arguements for functions
+
+    Returns
+    -------
+    metrics : array
+        All metrics evaluated. Size (func x lesions x repeats)
+    """
+
+    # Instantiate matrix to hold calculated graph size
+    metrics = np.zeros((len(func_list), len(prop_removed), repeats))
     n = graph.order()
     kwargs = {'orig_order': n}
 
@@ -43,40 +85,40 @@ def percolate_random(graph, prop_removed, func_list):
     for fi, func in enumerate(func_list):
         # Loop over each proportion
         for pi, prop in enumerate(prop_removed):
-            temp_G, _ = aux.lesion_graph_randomly(graph, prop)
+            for ri in np.arange(repeats):
+                temp_G, _ = aux.lesion_graph_randomly(graph, prop)
 
-            #S[pi] = func_list[0](temp_G, **kwargs)
+                #S[pi] = func_list[0](temp_G, **kwargs)
 
-            if pi > 0 and metrics[fi, pi - 1] == np.nan:
-                metrics[fi, pi] = np.nan
-            else:
-                metrics[fi, pi] = func_list[fi](temp_G, **kwargs)
-            #metrics[fi, pi] = func(temp_G, **kwargs)
+                if pi > 0 and metrics[fi, pi - 1] == np.nan:
+                    metrics[fi, pi, ri] = np.nan
+                else:
+                    metrics[fi, pi, ri] = func(temp_G, **kwargs[fi])
 
-            '''
-            # largest component
-            components = sorted(nx.connected_components(temp_G), key=len,
-                                reverse=True)
-            if len(components) > 0:
-                largest_component = len(components[0])
-            else:
-                largest_component = 0.
-            S[pi] = largest_component / float(n)
+                """
+                # largest component
+                components = sorted(nx.connected_components(temp_G), key=len,
+                                    reverse=True)
+                if len(components) > 0:
+                    largest_component = len(components[0])
+                else:
+                    largest_component = 0.
+                S[pi] = largest_component / float(n)
 
-            # Avg shortest path
-            try:
-                asp[pi] = nx.average_shortest_path_length(temp_G)
-            except (nx.exception.NetworkXError,
-                    nx.exception.NetworkXPointlessConcept):
-                asp[pi:] = np.nan
-            '''
+                # Avg shortest path
+                try:
+                    asp[pi] = nx.average_shortest_path_length(temp_G)
+                except (nx.exception.NetworkXError,
+                        nx.exception.NetworkXPointlessConcept):
+                    asp[pi:] = np.nan
+                """
 
     return metrics
+'''
 
 
-def percolate_degree(graph, num_lesions, func_list):
-    """ Get size avg of largest cluster after removing some number of nodes
-        based on degree.
+def percolate_degree(graph, num_lesions, func, func_kwargs=dict()):
+    """ Get some metrics after removing some number of nodes based on degree.
 
     Parameters
     ----------
@@ -84,12 +126,61 @@ def percolate_degree(graph, num_lesions, func_list):
         Graph to perform the percolation on
     num_lesions: list
         Number of lesions on network.
+    func_list : list of function
+        Metric functions to calculate and return.
+    repeats: int
+        Number of repetitions to average over for each proportion removed.
+    kwargs_list: list of dict
+        Additional arguements for functions
 
     Returns
     -------
-    S : list
-        Size of largest cluster in each lesion step.
+    metrics : array
+        All metrics evaluated. Size (func x lesions x repeats)
     """
+
+    # Instantiate matrix to hold calculated graph size
+    #S = np.zeros(len(num_lesions))
+    #asp = np.zeros(len(num_lesions))
+
+    metrics = np.zeros(len(num_lesions))
+
+    # Loop over each lesion
+    for li, l in enumerate(num_lesions):
+        # Loop over each repeat
+        temp_G, _ = aux.lesion_graph_degree(graph, l)
+
+        # Check that previous perc gave a meaningful result
+        if li > 0 and metrics[li - 1] == np.nan:
+            metrics[li] = np.nan
+        else:
+            metrics[li] = func(temp_G, **func_kwargs)
+
+    return metrics
+'''
+def percolate_degree(graph, num_lesions, func_list, kwargs_list=None):
+    """ Get some metrics after removing some number of nodes based on degree.
+
+    Parameters
+    ----------
+    graph : networkx graph
+        Graph to perform the percolation on
+    num_lesions: list
+        Number of lesions on network.
+    func_list : list of function
+        Metric functions to calculate and return.
+    repeats: int
+        Number of repetitions to average over for each proportion removed.
+    kwargs_list: list of dict
+        Additional arguements for functions
+
+    Returns
+    -------
+    metrics : array
+        All metrics evaluated. Size (func x lesions x repeats)
+    """
+    if kwargs_list is None:
+        kwargs_list = [dict() for i in range(len(func_list))]
 
     # Instantiate matrix to hold calculated graph size
     #S = np.zeros(len(num_lesions))
@@ -97,34 +188,72 @@ def percolate_degree(graph, num_lesions, func_list):
 
     metrics = np.zeros((len(func_list), len(num_lesions)))
     n = graph.order()
-    kwargs = {'orig_order': n}
 
     # Loop over each function
     for fi, func in enumerate(func_list):
-    # Loop over each lesion
+        # Loop over each lesion
+        temp_kwargs = kwargs_list[fi]
+        temp_kwargs['orig_order'] = n
+
         for li, l in enumerate(num_lesions):
+            # Loop over each repeat
             temp_G, _ = aux.lesion_graph_degree(graph, l)
 
             if li > 0 and metrics[fi, li - 1] == np.nan:
                 metrics[fi, li] = np.nan
             else:
-                metrics[fi, li] = func_list[fi](temp_G, **kwargs)
+                metrics[fi, li] = func_list[fi](temp_G, **temp_kwargs)
 
     return metrics
+'''
 
 
-def lesion_met_largest_component(G, **kwargs):
-    # compute largest component
+def lesion_met_largest_component(G, orig_order=None):
+    """
+    Get largest component size of a graph.
+
+    Parameters
+    ----------
+    G : networkx graph
+        Graph to compute largest component for
+    orig_order : int
+        Define orig_order if you'd like the largest component proportion
+
+    Returns
+    -------
+    largest component size : int
+        Proportion of largest remaning component size if orig_order
+        is defined. Otherwise, return number of nodes in largest component.
+    """
     components = sorted(nx.connected_components(G), key=len, reverse=True)
     if len(components) > 0:
         largest_component = len(components[0])
     else:
         largest_component = 0.
 
-    return largest_component / float(kwargs['orig_order'])
+    # Check if original component size is defined
+    if orig_order is not None:
+        return largest_component / float(orig_order)
+    else:
+        return largest_component
 
 
 def lesion_met_avg_shortest_path(G, **kwargs):
+    """
+    Get average geodesic (shortest path) distance between all nodes in
+    a graph.
+
+    Parameters
+    ----------
+    G : networkx graph
+        Graph to compute average geodesic for
+
+    Returns
+    -------
+    average geodesic : float
+        Average geodesic distance of a graph.
+    """
+
     # Avg shortest path
     try:
         asp = nx.average_shortest_path_length(G)
@@ -142,6 +271,70 @@ def lesion_met_diameter(G, **kwargs):
         d = np.nan
 
     return d
+
+
+def lesion_met_largest_strong_component(G, orig_order=None):
+    """
+    Get largest strong component size of a graph.
+
+    Parameters
+    ----------
+    G : directed networkx graph
+        Graph to compute largest component for
+    orig_order : int
+        Define orig_order if you'd like the largest component proportion
+
+    Returns
+    -------
+    largest strong component size : int
+        Proportion of largest remaning component size if orig_order
+        is defined. Otherwise, return number of nodes in largest component.
+    """
+
+    components = sorted(nx.strongly_connected_components(G), key=len,
+                        reverse=True)
+    if len(components) > 0:
+        largest_component = len(components[0])
+    else:
+        largest_component = 0.
+
+    # Check if original component size is defined
+    if orig_order is not None:
+        return largest_component / float(orig_order)
+    else:
+        return largest_component
+
+
+def lesion_met_largest_weak_component(G, orig_order=None):
+    """
+    Get largest weak component size of a graph.
+
+    Parameters
+    ----------
+    G : directed networkx graph
+        Graph to compute largest component for
+    orig_order : int
+        Define orig_order if you'd like the largest component proportion
+
+    Returns
+    -------
+    largest weak component size : int
+        Proportion of largest remaning component size if orig_order
+        is defined. Otherwise, return number of nodes in largest component.
+    """
+
+    components = sorted(nx.weakly_connected_components(G), key=len,
+                        reverse=True)
+    if len(components) > 0:
+        largest_component = len(components[0])
+    else:
+        largest_component = 0.
+
+    # Check if original component size is defined
+    if orig_order is not None:
+        return largest_component / float(orig_order)
+    else:
+        return largest_component
 
 
 if __name__ == '__main__':
