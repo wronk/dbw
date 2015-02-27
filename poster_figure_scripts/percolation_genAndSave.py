@@ -183,8 +183,10 @@ for gi, G in enumerate(graph_list):
     outfile = open(save_fname, 'wb')
     pickle.dump({'graph_name': graph_names[gi], 'metrics_list':
                  [f.func_name for f in func_list], 'repeats': repeats,
-                 'data_target': rand[gi, :, :, :],
-                 'data_rand': targ[gi, :, :, :]}, outfile)
+                 'data_rand': rand[gi, :, :, :],
+                 'data_targ': targ[gi, :, :, :],
+                 'removed_rand': prop_rm,
+                 'removed_targ': lesion_list}, outfile)
 
     print ' ... Done'
     #f.close()
