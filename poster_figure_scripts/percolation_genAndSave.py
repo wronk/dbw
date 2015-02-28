@@ -52,8 +52,7 @@ def construct_graph_list_und(graphs_to_const):
 
     brain_degree = nx.degree(G_AL).values()
     brain_degree_mean = np.mean(brain_degree)
-
-    # Construct Random (ER) graph
+# Construct Random (ER) graph
     if graph_check[0] in graphs_to_const:
         graph_list.append(nx.erdos_renyi_graph(bc.num_brain_nodes,
                                                bc.p_brain_edge_undirected))
@@ -140,17 +139,18 @@ else:
 
 # Directed
 if gen_directed:
-    func_list = [perc.lesion_met_largest_strong_component,
-                 perc.lesion_met_largest_weak_component]
+    func_list = [(perc.lesion_met_largest_strong_component, 'Largest Strong Component'),
+                 (perc.lesion_met_avg_shortest_path, 'Average Shortest Path'),
+                 (perc.lesion_met_largest_weak_component, 'Largest Weak Componenet')]
 
 # Undirected
 else:
-    func_list = [perc.lesion_met_largest_component,
-                 perc.lesion_met_avg_shortest_path]
+    func_list = [(perc.lesion_met_largest_component, 'Largest Component'),
+                 (perc.lesion_met_avg_shortest_path, 'Average Shortest Path')]
 
 ##############################################################################
 ### Do percolation
-print 'Percolating...'
+print 'Building percolation data...'
 print 'Graphs: ' + str(graph_names)
 print 'Directed: ' + str(gen_directed) + '\n'
 # Matrices for random and targetted attacks
@@ -169,7 +169,7 @@ for ri in np.arange(repeats):
     # Cycle over graphs and metric functions
     for gi, G in enumerate(graph_list):
         print '\tLesioning: ' + graph_names[gi],
-        for fi, func in enumerate(func_list):
+        for fi, (func, func_label) in enumerate(func_list):
             rand[gi, fi, :, ri] = perc.percolate_random(G, prop_rm, func)
             targ[gi, fi, :, ri] = perc.percolate_degree(G, lesion_list, func)
         print ' ... Done'
@@ -188,7 +188,9 @@ if save_files:
 
         outfile = open(save_fname, 'wb')
         pickle.dump({'graph_name': graph_names[gi], 'metrics_list':
-                    [f.func_name for f in func_list], 'repeats': repeats,
+                    [f.func_name for (f, f_label) in func_list],
+                    'repeats': repeats,
+                    'metrics_label': [f_label for (f, f_label) in func_list],
                     'data_rand': rand[gi, :, :, :],
                     'data_targ': targ[gi, :, :, :],
                     'removed_rand': prop_rm,

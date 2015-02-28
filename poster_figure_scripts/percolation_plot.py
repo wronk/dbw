@@ -52,15 +52,15 @@ for g_name in graph_names_dir:
 
 # Calculate mean and std dev across repeats
 for g_dict in graph_metrics_und:
-    g_dict['data_rand_avg'] = np.nanmean(g_dict['data_rand'], axis=-1)
-    g_dict['data_rand_std'] = np.nanstd(g_dict['data_rand'], axis=-1)
-    g_dict['data_targ_avg'] = np.nanmean(g_dict['data_targ'], axis=-1)
-    g_dict['data_targ_std'] = np.nanstd(g_dict['data_targ'], axis=-1)
+    g_dict['data_rand_avg'] = np.mean(g_dict['data_rand'], axis=-1)
+    g_dict['data_rand_std'] = np.std(g_dict['data_rand'], axis=-1)
+    g_dict['data_targ_avg'] = np.mean(g_dict['data_targ'], axis=-1)
+    g_dict['data_targ_std'] = np.std(g_dict['data_targ'], axis=-1)
 for g_dict in graph_metrics_dir:
-    g_dict['data_rand_avg'] = np.nanmean(g_dict['data_rand'], axis=-1)
-    g_dict['data_rand_std'] = np.nanstd(g_dict['data_rand'], axis=-1)
-    g_dict['data_targ_avg'] = np.nanmean(g_dict['data_targ'], axis=-1)
-    g_dict['data_targ_std'] = np.nanstd(g_dict['data_targ'], axis=-1)
+    g_dict['data_rand_avg'] = np.mean(g_dict['data_rand'], axis=-1)
+    g_dict['data_rand_std'] = np.std(g_dict['data_rand'], axis=-1)
+    g_dict['data_targ_avg'] = np.mean(g_dict['data_targ'], axis=-1)
+    g_dict['data_targ_std'] = np.std(g_dict['data_targ'], axis=-1)
 ##############################################################################
 ### Plot results
 # Set font type for compatability with adobe if doing editing later
@@ -82,7 +82,7 @@ fig1, ax_list1 = plt.subplots(nrows=1,
                               figsize=FIGSIZE)
 
 # Loop over each metric and then each graph
-for fi, func in enumerate(graph_metrics_und[0]['metrics_list']):
+for fi, func_label in enumerate(graph_metrics_und[0]['metrics_label']):
     for gi, g_dict in enumerate(graph_metrics_und):
         # Compute x axis vals, y vals, and std devs
         x = g_dict['removed_rand']
@@ -99,9 +99,7 @@ for fi, func in enumerate(graph_metrics_und[0]['metrics_list']):
                                   alpha=.3)
     ax_list1[fi].set_title('Random Attack', fontsize=FONTSIZE)
     ax_list1[fi].set_xlabel('Proportion Nodes Removed', fontsize=FONTSIZE)
-    ax_list1[fi].set_ylabel(['Largest Component Size',
-                             'Average Shortest Path'][fi],
-                            fontsize=FONTSIZE)
+    ax_list1[fi].set_ylabel(func_label, fontsize=FONTSIZE)
 
 ax_list1[1].legend(loc=0)
 
@@ -115,7 +113,7 @@ fig2, ax_list2 = plt.subplots(nrows=1,
                               ncols=len(graph_metrics_dir[0]['metrics_list']),
                               figsize=FIGSIZE)
 
-for fi, func in enumerate(graph_metrics_dir[0]['metrics_list']):
+for fi, func_label in enumerate(graph_metrics_dir[0]['metrics_label']):
     for gi, g_dict in enumerate(graph_metrics_dir):
         x = g_dict['removed_rand']
         avg = g_dict['data_rand_avg'][fi, :]
@@ -129,9 +127,7 @@ for fi, func in enumerate(graph_metrics_dir[0]['metrics_list']):
                                   alpha=.3)
     ax_list2[fi].set_title('Random Attack', fontsize=FONTSIZE)
     ax_list2[fi].set_xlabel('Proportion Nodes Removed', fontsize=FONTSIZE)
-    ax_list2[fi].set_ylabel(['Largest Strong Component',
-                             'Largest Weak Component'][fi],
-                            fontsize=FONTSIZE)
+    ax_list2[fi].set_ylabel(func_label, fontsize=FONTSIZE)
 
 ax_list2[1].legend(loc=0)
 
@@ -145,7 +141,7 @@ fig3, ax_list3 = plt.subplots(nrows=1,
                               ncols=len(graph_metrics_und[0]['metrics_list']),
                               figsize=FIGSIZE)
 
-for fi, func in enumerate(graph_metrics_und[0]['metrics_list']):
+for fi, func_label in enumerate(graph_metrics_und[0]['metrics_label']):
     for gi, g_dict in enumerate(graph_metrics_und):
         x = g_dict['removed_targ']
         avg = g_dict['data_targ_avg'][fi, :]
@@ -159,9 +155,7 @@ for fi, func in enumerate(graph_metrics_und[0]['metrics_list']):
                                   alpha=.3)
     ax_list3[fi].set_title('Targeted Attack', fontsize=FONTSIZE)
     ax_list3[fi].set_xlabel('Number of Nodes Removed', fontsize=FONTSIZE)
-    ax_list3[fi].set_ylabel(['Largest Component Size',
-                             'Average Shortest Path'][fi],
-                            fontsize=FONTSIZE)
+    ax_list3[fi].set_ylabel(func_label, fontsize=FONTSIZE)
 
 ax_list3[1].legend(loc=0)
 
@@ -175,7 +169,7 @@ fig4, ax_list4 = plt.subplots(nrows=1,
                               ncols=len(graph_metrics_dir[0]['metrics_list']),
                               figsize=FIGSIZE)
 
-for fi, func in enumerate(graph_metrics_dir[0]['metrics_list']):
+for fi, func_label in enumerate(graph_metrics_dir[0]['metrics_label']):
     for gi, g_dict in enumerate(graph_metrics_dir):
         x = g_dict['removed_targ']
         avg = g_dict['data_targ_avg'][fi, :]
@@ -189,9 +183,7 @@ for fi, func in enumerate(graph_metrics_dir[0]['metrics_list']):
                                   alpha=.3)
     ax_list4[fi].set_title('Targeted Attack', fontsize=FONTSIZE)
     ax_list4[fi].set_xlabel('Number of Nodes Removed', fontsize=FONTSIZE)
-    ax_list4[fi].set_ylabel(['Largest Strong Component',
-                             'Largest Weak Component'][fi],
-                            fontsize=FONTSIZE)
+    ax_list4[fi].set_ylabel(func_label, fontsize=FONTSIZE)
 
 ax_list4[1].legend(loc=0)
 
