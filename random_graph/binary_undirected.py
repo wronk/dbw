@@ -107,16 +107,12 @@ def undirected_biophysical_reverse_outdegree(N=426, N_directed_edges=8820,
                                              brain_size=[7., 7, 7]):
     """Identical to the biophysical reverse outdegree model, except that
     adjacency matrix is symmetrized so that reciprocal edges merge into one."""
-
-    # create graph
-    G, A, D = biophysical_reverse_outdegree(N=N, N_edges=N_directed_edges,
-                                            L=L, gamma=gamma,
-                                            brain_size=brain_size)
-
-    # symmetrize graph
-    A = ((A + A.T) > 0).astype(int)
-
-    # cast as undirected and return
-    G = nx.from_numpy_matrix(A).to_undirected()
-
+    
+    # create
+    G, A, D = biophysical_reverse_outdegree(N=N, N_edges=N_directed_edges, L=L, gamma=gamma, brain_size=brain_size)
+    
+    # symmetrize graph    
+    G = G.to_undirected()
+    
     return G, A, D
+

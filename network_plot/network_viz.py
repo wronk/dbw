@@ -259,10 +259,9 @@ def plot_scatterAndMarginal(ax_scat, ax_histTop, ax_histRight, k_in, k_out,
     ax_histRight.hist(k_out, bins=outdegree_bins, orientation='horizontal',
                       fc=marker_color)
     ax_histRight.xaxis.set_major_locator(plt.MaxNLocator(3))
-    plt.setp(ax_histRight.xaxis.get_majorticklabels(), rotation=-45, va='top')
+    plt.setp(ax_histRight.xaxis.get_majorticklabels(), va='top')
     #ax_histRight.set_xticks(x_histTics)
     #ax_histRight.set_xticklabels([str(l) for l in x_histTics], rotation=0)
-
 
 if __name__ == '__main__':
     #make_movie()

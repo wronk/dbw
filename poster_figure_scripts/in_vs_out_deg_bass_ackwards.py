@@ -3,14 +3,13 @@ Created on Fri Jan 23 13:11:36 2015
 
 @author: rkp
 
-Plot the in- vs. outdegree distribution for the Allen Brain mouse connectome.
+Plot the in- vs. outdegree distribution for the biophysical model.
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
-import networkx as nx
 
-from extract.brain_graph import binary_directed as brain_graph
+from random_graph.binary_directed import biophysical_indegree as biophysical_model
 
 from network_plot.change_settings import set_all_text_fontsizes, set_all_colors
 
@@ -27,12 +26,15 @@ plt.ion()
 
 # PLOT PARAMETERS
 FACECOLOR = 'black'
-MARKERCOLOR='m'
-FONTSIZE = 24
+MARKERCOLOR='c'
+FONTSIZE = 16
 NBINS = 15
 
-# load brain graph, adjacency matrix, and labels
-G, A, labels = brain_graph()
+# create model graph
+G, A, D = biophysical_model(N=bc.num_brain_nodes,
+                            N_edges=bc.num_brain_edges_directed,
+                            L=np.inf,
+                            gamma=1.)
 
 # Get in & out degree
 indeg = np.array([G.in_degree()[node] for node in G])
@@ -62,19 +64,20 @@ ax1_right = divider1.append_axes('right', 1.0, pad=0.3, sharey=ax1)
 # Call plotting function for scatter/marginal histograms (LEFT SIDE)
 plot_scatterAndMarginal(ax0, ax0_histTop, ax0_histRight, indeg, outdeg,
                         bin_width=cf.BINWIDTH, marker_size=cf.MARKERSIZE,
-                        marker_color=MARKERCOLOR, indegree_bins=cf.INDEGREE_BINS,
-                        outdegree_bins=cf.OUTDEGREE_BINS)
+                        marker_color=MARKERCOLOR, indegree_bins=cf.OUTDEGREE_BINS,
+                        outdegree_bins=cf.INDEGREE_BINS)
 
 ax0.set_xlabel('Indegree')
 ax0.set_ylabel('Outdegree')
 #ax0_histTop.set_title('In- vs. Outdegree', va='bottom')
-ax0.set_xlim(*cf.IN_OUT_SCATTER_XLIM)
-ax0.set_ylim(*cf.IN_OUT_SCATTER_YLIM)
+ax0.set_xlim(*cf.IN_OUT_SCATTER_YLIM)
+ax0.set_ylim(*cf.IN_OUT_SCATTER_XLIM)
 ax0.set_aspect('auto')
-ax0.set_yticks(np.arange(0,121,30))
 
 ax0_histTop.set_ylabel('# Nodes')
 ax0_histRight.set_xlabel('# Nodes')
+
+ax0.set_xticks(np.arange(0,121,30))
 
 ##########################################################################
 # Plot percent_indeg vs. degree (RIGHT SIDE)
@@ -100,5 +103,5 @@ for temp_ax in [ax0, ax0_histRight, ax0_histTop, ax1, ax1_right]:
     #temp_ax.patch.set_facecolor(FACECOLOR)  # Set color of plot area
     temp_ax.tick_params(width=cf.TICKSIZE)
 
-fig.savefig('/Users/richpang/Desktop/brain_in_out.png', transparent=True)
+fig.savefig('/Users/richpang/Desktop/bass_ackwards_in_out.png', transparent=True)
 plt.show()
