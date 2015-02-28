@@ -19,6 +19,8 @@ import in_out_plot_config as cf
 import os
 import os.path as op
 import pickle
+from network_plot.change_settings import (set_all_text_fontsizes,
+                                          set_all_colors)
 
 prop_rm = np.arange(0., 1.00, 0.05)
 lesion_list = np.arange(0, 426, 10)
@@ -73,12 +75,16 @@ graph_col = ['k', 'r', 'g', 'b', 'c']
 LW = 3.
 FONTSIZE = cf.FONTSIZE
 FIGSIZE = (11, 5.5)
+FACECOLOR = cf.FACECOLOR
+LABELCOLOR = cf.LABELCOLOR
+TICKSIZE = cf.TICKSIZE
 
 #######################################
 ### Random attack (undirected) with subplot for each metric
 # construct figure
 fig1, ax_list1 = plt.subplots(nrows=1,
                               ncols=len(graph_metrics_und[0]['metrics_list']),
+                              facecolor=FACECOLOR,
                               figsize=FIGSIZE)
 
 # Loop over each metric and then each graph
@@ -111,6 +117,7 @@ for ax in ax_list1:
 ### Random attack (directed) with subplot for each metric
 fig2, ax_list2 = plt.subplots(nrows=1,
                               ncols=len(graph_metrics_dir[0]['metrics_list']),
+                              facecolor=FACECOLOR,
                               figsize=FIGSIZE)
 
 for fi, func_label in enumerate(graph_metrics_dir[0]['metrics_label']):
@@ -139,6 +146,7 @@ for ax in ax_list2:
 ### Targeted attack (undirected) with subplot for each metric
 fig3, ax_list3 = plt.subplots(nrows=1,
                               ncols=len(graph_metrics_und[0]['metrics_list']),
+                              facecolor=FACECOLOR,
                               figsize=FIGSIZE)
 
 for fi, func_label in enumerate(graph_metrics_und[0]['metrics_label']):
@@ -167,6 +175,7 @@ for ax in ax_list3:
 ### Targeted attack (directed) with subplot for each metric
 fig4, ax_list4 = plt.subplots(nrows=1,
                               ncols=len(graph_metrics_dir[0]['metrics_list']),
+                              facecolor=FACECOLOR,
                               figsize=FIGSIZE)
 
 for fi, func_label in enumerate(graph_metrics_dir[0]['metrics_label']):
@@ -191,45 +200,50 @@ for ax in ax_list4:
     for text in ax.get_xticklabels() + ax.get_yticklabels():
         text.set_fontsize(FONTSIZE)
 
-'''
 #######################################
 ### Combined plot hack
-fig4, ax_list4 = plt.subplots(nrows=1, ncols=2, figsize=FIGSIZE)
+fig_col = ['m', 'r', 'c']
+fig5, ax_list5 = plt.subplots(nrows=1, ncols=2, figsize=(9, 3.75),
+                              facecolor=FACECOLOR, tight_layout=True)
 
-for gi in np.arange(len(graph_names)):
-    ax_list4[0].plot(lesion_list, metrics_target_avg[0, gi, :] * node_order,
-                     lw=LW, label=graph_names[gi], color=graph_col[gi])
+for fi, func_label in enumerate(graph_metrics_dir[0]['metrics_label'][0:2]):
+    for gi, g_dict in enumerate(graph_metrics_dir):
+        x = g_dict['removed_targ']
+        avg = g_dict['data_targ_avg'][fi, :]
+        fill_upper = avg + g_dict['data_targ_std'][fi, :]
+        fill_lower = avg - g_dict['data_targ_std'][fi, :]
 
-for gi in np.arange(len(graph_names)):
-    ax_list4[1].plot(lesion_list, metrics_target_avg[1, gi, :],
-                     label=graph_names[gi], color=graph_col[gi], lw=LW)
+        ax_list5[fi].plot(x, avg, lw=LW, label=g_dict['graph_name'],
+                          color=fig_col[gi])
+        ax_list5[fi].fill_between(x, fill_upper, fill_lower, lw=0,
+                                  facecolor=fig_col[gi], interpolate=True,
+                                  alpha=.3)
+    ax_list5[fi].set_title('Targeted Lesion')
+    ax_list5[fi].set_xlabel('# Nodes Removed')
+    ax_list5[fi].set_ylabel(['Largest Strong\nComponent',
+                             'Avg. Shortest Path'][fi])
 
-ax_list4[0].set_title('Targeted Attack (by Degree)', fontsize=FONTSIZE)
-ax_list4[0].set_xlabel('Number Nodes Removed', fontsize=FONTSIZE)
-ax_list4[0].set_ylabel('Size of Largest\nRemaining Cluster', fontsize=FONTSIZE)
-ax_list4[0].set_xlim((0, 400))
-ax_list4[0].set_ylim((0, 450))
-ax_list4[0].locator_params(axis='x', nbins=5)
-ax_list4[0].locator_params(axis='y', nbins=5)
-ax_list4[0].text(.95, .95, 'a', ha='right', va='top', fontsize=FONTSIZE,
-                 transform=ax_list4[0].transAxes, weight='bold')
+#ax_list5[0].set_xlim((0, 400))
+#ax_list5[0].set_ylim((0, 450))
 
-ax_list4[1].set_title('Targeted Attack (by Degree)', fontsize=FONTSIZE)
-ax_list4[1].set_xlabel('Number Nodes Removed', fontsize=FONTSIZE)
-ax_list4[1].set_ylabel('Avg. Shortest\nGeodesic Distance', fontsize=FONTSIZE)
-ax_list4[1].legend(loc=2, fontsize=FONTSIZE - 4.5, labelspacing=0.25,
-                   borderpad=0.25)
-ax_list4[1].set_xlim((0, 350))
-ax_list4[1].set_ylim((1, 8))
-ax_list4[1].locator_params(axis='x', nbins=5)
-ax_list4[1].locator_params(axis='y', nbins=8)
-ax_list4[1].text(.925, .95, 'b', ha='right', va='top', fontsize=FONTSIZE,
-                 transform=ax_list4[1].transAxes, weight='bold')
+leg = ax_list5[0].legend(loc=1, fontsize=FONTSIZE - 4., labelspacing=0.2,
+                         borderpad=0.15)
+leg.get_frame().set_alpha(0.)
+for text in leg.get_texts():
+    text.set_color(LABELCOLOR)
+#ax_list5[1].set_xlim((0, 350))
+#ax_list5[1].set_ylim((1, 8))
+ax_list5[0].xaxis.set_major_locator(plt.MaxNLocator(4))
+ax_list5[0].yaxis.set_major_locator(plt.MaxNLocator(4))
+ax_list5[1].xaxis.set_major_locator(plt.MaxNLocator(4))
 
-for ax in ax_list4:
-    for text in ax.get_xticklabels() + ax.get_yticklabels():
-        text.set_fontsize(FONTSIZE)
+for temp_ax in ax_list5:
+    set_all_text_fontsizes(temp_ax, FONTSIZE)
+    set_all_colors(temp_ax, LABELCOLOR)
+    #temp_ax.patch.set_facecolor(FACECOLOR)  # Set color of plot area
+    temp_ax.tick_params(width=TICKSIZE)
 
+fig5.savefig('/home/wronk/Builds/lesion_fig_poster.png', transparent=True)
 
 '''
 #######################################
@@ -237,3 +251,4 @@ fig1.tight_layout()
 #fig2.tight_layout()
 
 plt.show()
+'''
