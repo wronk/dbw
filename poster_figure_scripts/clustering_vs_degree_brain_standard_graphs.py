@@ -17,7 +17,7 @@ from network_plot.change_settings import set_all_text_fontsizes, set_all_colors
 # PLOTTING PARAMETERS
 FACECOLOR = 'black'
 FONTSIZE = 24
-BRAIN_COLOR = 'k'
+BRAIN_COLOR = 'm'
 ER_COLOR = 'r'
 WS_COLOR = 'g'
 BA_COLOR = 'b'

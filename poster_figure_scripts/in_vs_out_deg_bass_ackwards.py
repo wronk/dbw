@@ -3,13 +3,13 @@ Created on Fri Jan 23 13:11:36 2015
 
 @author: rkp
 
-Plot the in- vs. outdegree distribution for the reverse outdegree model.
+Plot the in- vs. outdegree distribution for the biophysical model.
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-from random_graph.binary_directed import biophysical_reverse_outdegree as biophysical_model
+from random_graph.binary_directed import biophysical_indegree as biophysical_model
 
 from network_plot.change_settings import set_all_text_fontsizes, set_all_colors
 
@@ -52,47 +52,56 @@ ax1 = plt.subplot2grid(cf.SUBPLOT_DIVISIONS, cf.AX1_LOCATION,
                        colspan=cf.AX1_COLSPAN)
 
 # Add new axes for histograms in margins
-divider = make_axes_locatable(ax0)
+divider0 = make_axes_locatable(ax0)
 
-ax0_histTop = divider.append_axes('top', 1.0, pad=0.3, sharex=ax0)
-ax0_histRight = divider.append_axes('right', 2.0, pad=0.3, sharey=ax0)
+ax0_histTop = divider0.append_axes('top', 1.0, pad=0.3, sharex=ax0)
+ax0_histRight = divider0.append_axes('right', 2.0, pad=0.3, sharey=ax0)
 
+divider1 = make_axes_locatable(ax1)
+ax1_right = divider1.append_axes('right', 1.0, pad=0.3, sharey=ax1)
 
 ##########################################################################
 # Call plotting function for scatter/marginal histograms (LEFT SIDE)
 plot_scatterAndMarginal(ax0, ax0_histTop, ax0_histRight, indeg, outdeg,
                         bin_width=cf.BINWIDTH, marker_size=cf.MARKERSIZE,
-                        marker_color=MARKERCOLOR, indegree_bins=cf.INDEGREE_BINS,
-                        outdegree_bins=cf.OUTDEGREE_BINS)
+                        marker_color=MARKERCOLOR, indegree_bins=cf.OUTDEGREE_BINS,
+                        outdegree_bins=cf.INDEGREE_BINS)
 
 ax0.set_xlabel('Indegree')
 ax0.set_ylabel('Outdegree')
-ax0_histTop.set_title('In- vs. Outdegree', fontsize=FONTSIZE + 2,
-                      va='bottom')
-ax0.set_xlim(*cf.IN_OUT_SCATTER_XLIM)
-ax0.set_ylim(*cf.IN_OUT_SCATTER_YLIM)
+#ax0_histTop.set_title('In- vs. Outdegree', va='bottom')
+ax0.set_xlim(*cf.IN_OUT_SCATTER_YLIM)
+ax0.set_ylim(*cf.IN_OUT_SCATTER_XLIM)
 ax0.set_aspect('auto')
 
-ax0_histTop.set_ylabel('# nodes')
-ax0_histRight.set_xlabel('# nodes')
+ax0_histTop.set_ylabel('# Nodes')
+ax0_histRight.set_xlabel('# Nodes')
+
+ax0.set_xticks(np.arange(0,121,30))
+
 ##########################################################################
 # Plot percent_indeg vs. degree (RIGHT SIDE)
 ax1.scatter(deg, percent_indeg, s=cf.MARKERSIZE, lw=0, c=MARKERCOLOR)
 ax1.set_xlabel('Total degree (in + out)')
-ax1.set_ylabel('Proportion in-degree')
+ax1.set_ylabel('Proportion indegree')
 ax1.xaxis.set_major_locator(plt.MaxNLocator(4))
 ax1.set_yticks(np.arange(0, 1.1, .2))
-ax1.set_title('Proportion of Edges that are Incoming\nvs. Degree',
-              fontsize=cf.FONTSIZE + 2, va='bottom')
+#ax1.set_title('Incoming edge proportion vs. degree',
+#              fontsize=cf.FONTSIZE + 2, va='bottom')
 ax1.set_ylim([0., 1.05])
+ax1.set_xticks(np.arange(0,121,30))
 
+ax1_right.hist(percent_indeg, orientation='horizontal', color=MARKERCOLOR)
+ax1_right.set_xticks([0,30,60])
+plt.setp(ax1_right.get_yticklabels(), visible=False)
+ax1_right.set_xlabel('# Nodes')
 ##########################################################################
 # Set background color and text size for all spines/ticks
-for temp_ax in [ax0, ax0_histRight, ax0_histTop, ax1]:
-    set_all_text_fontsizes(temp_ax, FONTSIZE)
+for temp_ax in [ax0, ax0_histRight, ax0_histTop, ax1, ax1_right]:
+    set_all_text_fontsizes(temp_ax, cf.FONTSIZE)
     set_all_colors(temp_ax, cf.LABELCOLOR)
     #temp_ax.patch.set_facecolor(FACECOLOR)  # Set color of plot area
     temp_ax.tick_params(width=cf.TICKSIZE)
 
-#fig.savefig('/Users/richpang/Desktop/brain_in_out.png', transparent=True)
+fig.savefig('/Users/richpang/Desktop/bass_ackwards_in_out.png', transparent=True)
 plt.show()
