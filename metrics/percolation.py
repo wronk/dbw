@@ -46,7 +46,9 @@ def percolate_random(graph, prop_removed, func, func_kwargs=dict()):
         temp_G, _ = aux.lesion_graph_randomly(graph, prop)
 
         if pi > 0. and metrics[pi - 1] == np.nan:
-            metrics[pi] = np.nan
+            metrics[pi:] = np.nan
+            print 'Breaking computation on pi: ' + str(pi)
+            return metrics
         else:
             metrics[pi] = func(temp_G, **func_kwargs)
 
@@ -88,7 +90,8 @@ def percolate_degree(graph, num_lesions, func, func_kwargs=dict()):
 
         # Check that previous perc gave a meaningful result
         if li > 0. and metrics[li - 1] == np.nan:
-            metrics[li] = np.nan
+            metrics[li:] = np.nan
+            return metrics
         else:
             metrics[li] = func(temp_G, **func_kwargs)
 
