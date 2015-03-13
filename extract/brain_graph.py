@@ -7,14 +7,13 @@ Created on Wed Nov 12 12:11:43 2014
 Functions to extract graphs from Allen mouse connectivity.
 """
 
-LINEAR_MODEL_DIRECTORY = '../../mouse_connectivity_data/linear_model'
-STRUCTURE_DIRECTORY = '../../mouse_connectivity_data'
-
 import auxiliary as aux
 import graph_tools.auxiliary as aux_tools
 import networkx as nx
 import numpy as np
 
+LINEAR_MODEL_DIRECTORY = '../../mouse_connectivity_data/linear_model'
+STRUCTURE_DIRECTORY = '../../mouse_connectivity_data'
 
 def binary_undirected(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
     """Load brain as binary undirected graph.
@@ -38,7 +37,6 @@ def binary_undirected(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
     
     return G, A, labels
     
-    
 def binary_directed(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
     """Load brain as binary directed graph.
     
@@ -60,7 +58,6 @@ def binary_directed(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
     G = nx.from_numpy_matrix(A, create_using=nx.DiGraph())
     
     return G, A, labels
-    
     
 def weighted_undirected(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
     """Load brain as binary undirected graph.
@@ -84,7 +81,6 @@ def weighted_undirected(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
     
     return G, W, labels
 
-
 def distance_matrix(lm_dir=LINEAR_MODEL_DIRECTORY, cent_dir=STRUCTURE_DIRECTORY,
                     in_mm=True):
     """Compute distance matrix from centroid data.
@@ -103,3 +99,22 @@ def distance_matrix(lm_dir=LINEAR_MODEL_DIRECTORY, cent_dir=STRUCTURE_DIRECTORY,
     dist_mat = aux_tools.dist_mat(centroids)
     
     return dist_mat, centroids
+    
+def binary_directed_with_distance(p_th=.01, w_th=0, 
+                                  data_dir=LINEAR_MODEL_DIRECTORY,
+                                  cent_dir=STRUCTURE_DIRECTORY,
+                                  in_mm=True):
+    """Return binary directed graph with distances as edge attributes."""
+    
+    # Load/create binary graph
+    G, A, labels = binary_directed(p_th=p_th, w_th=w_th, data_dir=data_dir)
+    
+    D, _ = distance_matrix(lm_dir=data_dir, cent_dir=cent_dir, in_mm=in_mm)
+    
+    # Create dictionary of edge distances
+    dd = {edge:D[edge] for edge in G.edges()}
+    
+    # Set edge distances
+    nx.set_edge_attributes(G, 'distance', dd)
+    
+    return G, A, D, labels
