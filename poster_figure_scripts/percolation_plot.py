@@ -202,12 +202,14 @@ for ax in ax_list4:
 
 #######################################
 ### Combined plot hack
-fig_col = ['m', 'r', 'c']
+fig_col = ['m', 'r', 'orange']
 fig5, ax_list5 = plt.subplots(nrows=1, ncols=2, figsize=(9, 3.75),
                               facecolor=FACECOLOR, tight_layout=True)
 
 for fi, func_label in enumerate(graph_metrics_dir[0]['metrics_label'][0:2]):
     for gi, g_dict in enumerate(graph_metrics_dir):
+        if g_dict['graph_name'] == 'Biophysical':
+            g_dict['graph_name'] = 'Model'
         x = g_dict['removed_targ']
         avg = g_dict['data_targ_avg'][fi, :]
         fill_upper = avg + g_dict['data_targ_std'][fi, :]
@@ -238,7 +240,7 @@ ax_list5[0].yaxis.set_major_locator(plt.MaxNLocator(4))
 ax_list5[1].xaxis.set_major_locator(plt.MaxNLocator(4))
 
 for temp_ax in ax_list5:
-    set_all_text_fontsizes(temp_ax, FONTSIZE)
+    set_all_text_fontsizes(temp_ax, FONTSIZE + 2)
     set_all_colors(temp_ax, LABELCOLOR)
     #temp_ax.patch.set_facecolor(FACECOLOR)  # Set color of plot area
     temp_ax.tick_params(width=TICKSIZE)
