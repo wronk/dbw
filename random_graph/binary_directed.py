@@ -26,7 +26,8 @@ def ER_distance(N=426, p=.043, brain_size=[7., 7., 7.]):
     return G, A, D
 
 
-def biophysical(N=426, N_edges=8820, L=np.inf, gamma=1.7, brain_size=[7., 7., 7.]):
+def biophysical(N=426, N_edges=8820, L=np.inf, gamma=1.7,
+                brain_size=[7., 7., 7.]):
     """Create a biophysically inspired graph. Connection probabilities depend
     on distance & degree.
 
@@ -402,7 +403,8 @@ def biophysical_reverse_outdegree_reciprocal(N=426, N_edges=8820, gamma=1.,
         N: how many nodes
         N_edges: how many edges
         gamma: power to raise outdegree to
-        reciprocity: probability ratio of connecting to already connected vs. unconnected targets
+        reciprocity: probability ratio of connecting to already connected vs.
+            unconnected targets
     Returns:
         Networkx graph object"""
 
@@ -461,9 +463,9 @@ def biophysical_reverse_outdegree_reciprocal(N=426, N_edges=8820, gamma=1.,
     return G
 
 
-def directed_degree_sequence(in_sequence, out_sequence, simplify,
-                             brain_size=[7., 7., 7.], create_using=None,
-                             seed=None):
+def random_directed_deg_seq(in_sequence, out_sequence, simplify,
+                            brain_size=[7., 7., 7.], create_using=None,
+                            seed=None):
     '''Wrapper function to get a MULTIGRAPH (parallel or self-loop edges may
     exist) given degree sequence. Chance of parallel/multiedges diminish
     as graph has more nodes.
