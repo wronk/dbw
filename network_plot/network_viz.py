@@ -206,8 +206,8 @@ def plot_scatterAndMarginal(ax_scat, ax_histTop, ax_histRight, k_in, k_out,
         Color of scatter points and histogram
     """
     # Set font type for compatability with adobe if editting later
-    mpl.rcparams['ps.fonttype'] = 42
-    mpl.rcparams['pdf.fonttype'] = 42
+    mpl.rcParams['ps.fonttype'] = 42
+    mpl.rcParams['pdf.fonttype'] = 42
 
     # Params
     lw = 0  # Line width around markers
