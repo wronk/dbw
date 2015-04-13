@@ -1,7 +1,7 @@
 """
 Created on Wed Nov 12 11:18:14 2014
 
-@author: rkp
+@author: rkp, wronk
 
 Functions for generating random binary undirected graphs not included in
 NetworkX.
@@ -28,7 +28,8 @@ def ER_distance(N=426, p=.086, brain_size=[7., 7., 7.]):
     return G, A, D
 
 
-def biophysical(N=426, N_edges=7804, L=2.2, gamma=1.7, brain_size=[7., 7, 7]):
+def biophysical(N=426, N_edges=7804, L=2.2, gamma=1.7,
+                brain_size=[7., 7., 7.]):
     """Create a biophysically inspired graph. Connection probabilities depend
     on distance & degree.
 
@@ -104,15 +105,47 @@ def biophysical(N=426, N_edges=7804, L=2.2, gamma=1.7, brain_size=[7., 7, 7]):
 
 def undirected_biophysical_reverse_outdegree(N=426, N_directed_edges=8820,
                                              L=np.inf, gamma=1.7,
-                                             brain_size=[7., 7, 7]):
+                                             brain_size=[7., 7., 7.]):
     """Identical to the biophysical reverse outdegree model, except that
     adjacency matrix is symmetrized so that reciprocal edges merge into one."""
-    
+
     # create
-    G, A, D = biophysical_reverse_outdegree(N=N, N_edges=N_directed_edges, L=L, gamma=gamma, brain_size=brain_size)
-    
-    # symmetrize graph    
+    G, A, D = biophysical_reverse_outdegree(N=N, N_edges=N_directed_edges, L=L,
+                                            gamma=gamma, brain_size=brain_size)
+
+    # symmetrize graph
     G = G.to_undirected()
-    
+
     return G, A, D
 
+
+def random_simple_deg_seq(sequence, brain_size=[7., 7., 7.],
+                          seed=None, tries=10):
+    '''Wrapper function to get a SIMPLE (no parallel or self-loop edges) graph
+    that has a given degree sequence.
+
+    This graph is used conventionally as a control because it yields a random
+    graph that accounts for degree distribution.
+
+    Parameters:
+        sequence: list of int
+            Degree of each node to be added to the graph.
+        brain_size: list of 3 floats
+            Size of the brain to use when distributing  node locations.
+        seed: hashable object for random seed
+            Seed for the random number generator.
+        tries: int
+            Number of attempts at creating graph (function will retry if
+            self-loops.
+    Returns:
+        Networkx graph object, adjacency matrix, and random distances'''
+
+    G = nx.random_degree_sequence_graph(sequence=sequence, seed=seed,
+                                        tries=tries)
+
+    A = nx.adjacency_matrix(G)
+    N = len(sequence)
+    centroids = np.random.uniform([0, 0, 0], brain_size, (N, 3))
+    D = aux_tools.dist_mat(centroids)
+
+    return G, A, D
