@@ -23,7 +23,7 @@ def ER_distance(N=426, p=.043, brain_size=[7., 7., 7.]):
     centroids = np.random.uniform([0, 0, 0], brain_size, (N, 3))
     D = aux_tools.dist_mat(centroids)
 
-    return G, A, D
+    return G, A.todense(), D
 
 
 def biophysical(N=426, N_edges=8820, L=np.inf, gamma=1.7,
