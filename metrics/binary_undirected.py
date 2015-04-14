@@ -104,6 +104,7 @@ def swapped_cost_distr(A, D, n_trials=500, percent_change=True):
     
     # Perform random swaps
     for trial in range(n_trials):
+        print 'trial %d' % trial
         # Randomly select two nodes
         idx0, idx1 = np.random.permutation(D.shape[0])[:2]
         # Create new distance matrix
