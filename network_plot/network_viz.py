@@ -27,23 +27,26 @@ def plot_3D_network(ax, node_names, node_positions, node_label_set, edges,
         labels of nodes in graph
     node_positions : N x 3 array
         array of positions
-    edges : list
-        connections between nodes
     node_label_set : list of bool
         whether or not to text label the nodes
-    edges : list of tuples
-        edges between nodes (use graph.edges())
+    edges : list of tuple containing edge pairs
+        connections between nodes
+    edge_label_set : list of bool
+        whether or not to text label the edges
     edge_label_set : list of bool
         whether or not to label the edges
     node_sizes : list | None
         size of each node's marker in the graph
     node_colors : list | None
         color of each node's marker
+    node_alpha : list | None
+        alpha for each node
     edge_sizes : list | None
         size of each edge's line
     edge_colors : list | None
         color of each edge's line
-
+    edge_alpha : list | None
+        alpha for each edge
     '''
 
     node_label_offset = 0.05
