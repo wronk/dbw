@@ -3,7 +3,8 @@ Created on Mon Nov 24 09:17:11 2014
 
 @author: rkp
 
-Plot the clustering vs. degree for binary undirected biophysical model at multiple gammas.
+Plot the clustering vs. degree for binary undirected biophysical model at
+multiple gammas.
 """
 
 import numpy as np
@@ -59,13 +60,15 @@ for gamma_idx, gamma in enumerate(GAMMAS):
 
 # Set axis limits and ticks, and label subplots
 labels = ('a', 'b', 'c', 'd')
+plt.ion()
 for ax_idx, ax in enumerate(axs.flat):
     ax.set_xlim(0, DEG_MAX)
     ax.set_ylim(0, 1)
     ax.set_xticks(DEG_TICKS)
     ax.set_yticks(CC_TICKS)
-    ax.text(10, .88, labels[ax_idx], color='w', fontsize=FONTSIZE, fontweight='bold')
-        
+    ax.text(10, .88, labels[ax_idx], color='w', fontsize=FONTSIZE,
+            fontweight='bold')
+
 # Hide x ticklabels in top row & y ticklabels in right columns
 for row in axs.flatten()[1:]:
     ax.set_yticklabels('')
