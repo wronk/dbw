@@ -10,7 +10,6 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 import extract.brain_graph
-import random_graph.binary_undirected as rg
 
 from network_plot.change_settings import set_all_text_fontsizes, set_all_colors
 
@@ -25,6 +24,7 @@ MODEL_COLOR = 'c'
 DEG_MAX = 250
 DEG_TICKS = [0, 125, 250]
 CC_TICKS = [0, .2, .4, .6, .8, 1.0]
+plt.ion()
 
 # Load mouse connectivity graph
 G_brain, W_brain, _ = extract.brain_graph.binary_undirected()
@@ -71,7 +71,8 @@ for ax_idx, ax in enumerate(axs.flatten()):
     ax.set_ylim(0, 1)
     ax.set_xticks(DEG_TICKS)
     ax.set_yticks(CC_TICKS)
-    ax.text(10, .88, labels[ax_idx], color='w', fontsize=FONTSIZE, fontweight='bold')
+    ax.text(10, .88, labels[ax_idx], color='w', fontsize=FONTSIZE,
+            fontweight='bold')
 
 # Hide x ticklabels in top row & y ticklabels in right columns
 for ax in axs.flatten()[1:]:
@@ -92,6 +93,5 @@ axs[0].set_ylabel('Clustering\ncoefficient')
 for ax in axs.flatten():
     set_all_text_fontsizes(ax, FONTSIZE)
     set_all_colors(ax, 'w')
-
 
 plt.draw()
