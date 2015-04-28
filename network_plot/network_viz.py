@@ -12,8 +12,8 @@ from os import path as op
 from mpl_toolkits.mplot3d import Axes3D
 
 
-def plot_3D_network(ax, node_names, node_positions, node_label_set, edges,
-                    edge_label_set, node_sizes=None, node_colors=None,
+def plot_3D_network(ax, node_names, node_positions, node_label_set, edges=[],
+                    edge_label_set=None, node_sizes=None, node_colors=None,
                     node_alpha=None, edge_sizes=None, edge_colors=None,
                     edge_alpha=None):
     '''
@@ -29,9 +29,9 @@ def plot_3D_network(ax, node_names, node_positions, node_label_set, edges,
         array of positions
     node_label_set : list of bool
         whether or not to text label the nodes
-    edges : list of tuple containing edge pairs
+    edges : list of tuple containing edge pairs | []
         connections between nodes
-    edge_label_set : list of bool
+    edge_label_set : list of bool | None
         whether or not to text label the edges
     edge_label_set : list of bool
         whether or not to label the edges
@@ -60,6 +60,8 @@ def plot_3D_network(ax, node_names, node_positions, node_label_set, edges,
         node_colors = ['green'] * len(node_names)
     if node_alpha is None:
         node_alpha = [1.] * len(node_names)
+    if edge_label_set is None:
+        edge_label_set = [False] * len(edges)
     if edge_sizes is None:
         edge_sizes = [1] * len(edges)
     if edge_colors is None:
@@ -108,9 +110,7 @@ def plot_3D_network(ax, node_names, node_positions, node_label_set, edges,
     #ax.set_xlabel('A <-> P')
     #ax.set_ylabel('L <-> M <-> L')
     #ax.set_zlabel('S <-> I')
-    ax.set_axis_off()
-
-    ax.set_title('Top Clustering Coefficients')
+    #ax.set_axis_off()
 
     return ax
 
