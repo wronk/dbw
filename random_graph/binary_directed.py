@@ -268,7 +268,8 @@ def biophysical_reverse_outdegree(N=426, N_edges=8820, L=np.inf, gamma=1.7,
         Networkx graph object, adjacency matrix, distance matrix"""
     # Pick node positions & calculate distance matrix
     centroids = np.random.uniform([0, 0, 0], brain_size, (N, 3))
-
+    
+    
     # Calculate distance matrix and distance decay matrix
     D = aux_tools.dist_mat(centroids)
     D_decay = np.exp(-D / L)
@@ -279,6 +280,7 @@ def biophysical_reverse_outdegree(N=426, N_edges=8820, L=np.inf, gamma=1.7,
     # Make graph object
     G = nx.DiGraph()
     G.add_nodes_from(np.arange(N))
+    G.centroids = centroids
 
     # Randomly add edges
     edge_ctr = 0
