@@ -41,7 +41,7 @@ NBINS = 15
 # Create graph/ compute metrics
 ###############################
 
-# generate erdos-renyi graph
+# Extract brain graph
 G_brain, _, _ = extract.brain_graph.binary_directed()
 
 # Error check that keys all match (in_seq is in the same order as out_seq)
