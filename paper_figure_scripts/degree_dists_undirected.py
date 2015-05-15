@@ -29,13 +29,13 @@ WS_COLOR = 'g'
 BA_COLOR = 'b'
 MODEL_COLOR = 'c'
 
-n_bins = 70
 plt.ion()
 plt.close('all')
 plt.rcParams['ps.fonttype'] = 42
 plt.rcParams['pdf.fonttype'] = 42
 
-repeats = 100
+n_bins = 70
+repeats = 200
 ###############################################
 # Calculate degree distributions for all graphs
 ###############################################
@@ -73,26 +73,27 @@ labels = ['Small-world', 'Random', 'Scale-free']
 
 label_brain = 'Mouse Connectome'
 
-
-##################
-# Plot
-#################
+###################################################
+# Plot semilogy (looking for exponential solutions)
+###################################################
+lin_bins = np.linspace(0, 200, n_bins)
 
 figsize = (8, 6)
 fig, ax = plt.subplots(1, 1, figsize=figsize)
 
-n, bins, _ = ax.hist(deg_dists, n_bins, normed=1, histtype='stepfilled',
-                     color=colors, label=labels, lw=0, alpha=0.4)
-ax.hist(brain_degree, bins, normed=1, histtype='step',
-        color=BRAIN_COLOR, label=label_brain, lw=3, alpha=1.0)
+for deg, col, lab in zip(deg_dists, colors, labels):
+    hist, plt_bins = np.histogram(deg, lin_bins, normed=True)
+    ax.plot(plt_bins[:-1], hist, lw=2, color=col, label=lab)
+
+hist_brain, plt_bins = np.histogram(brain_degree, lin_bins, normed=True)
+ax.plot(plt_bins[:-1], hist_brain, lw=2, color=BRAIN_COLOR,
+        label=label_brain)
 
 # Set axis limits and ticks, and label subplots
-ax.set_xlim([0, 100])
-ax.set_ylim([0, .15])
+ax.set_xlim([0, 200])
+#ax.set_ylim([0, .15])
 ax.locator_params(axis='x', nbins=5)
-ax.locator_params(axis='y', nbins=5)
-#ax.text(10, .88, labels[ax_idx], color='w', fontsize=FONTSIZE,
-#        fontweight='bold')
+#ax.locator_params(axis='y', nbins=5)
 ax.legend(loc='best', fontsize=FONTSIZE - 8)
 
 # Set title
@@ -107,4 +108,22 @@ set_all_text_fontsizes(ax, FONTSIZE)
 #set_all_colors(ax, 'w')
 
 plt.tight_layout()
+
+###################################################
+# Plot semilogy (looking for exponential solutions)
+###################################################
+raw_input('Press key')
+ax.set_yscale('log')
+ax.set_ylabel('Log[P(k)]')
+plt.draw()
+
+###################################################
+# Plot on log scale (looking for power-law
+###################################################
+
+raw_input('Press key')
+ax.set_xscale('log')
+ax.set_xlim([1, 200])
+ax.set_xlabel('Log[Degree]')
+ax.set_ylabel('Log[P(k)]')
 plt.draw()
