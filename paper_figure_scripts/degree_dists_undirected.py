@@ -10,6 +10,8 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 import extract.brain_graph
+from copy import copy
+from copy import deepcopy
 
 from network_plot.change_settings import set_all_text_fontsizes
 
@@ -34,8 +36,39 @@ plt.close('all')
 plt.rcParams['ps.fonttype'] = 42
 plt.rcParams['pdf.fonttype'] = 42
 
-n_bins = 70
-repeats = 200
+n_bins = 50
+repeats = 1000
+
+###############################################
+# Histogram plot function
+###############################################
+# Function to plot a list of histograms on a single axis. Allows code to be
+# reused for similar plots that will have just a change in x or y scale (log)
+
+
+def hist_plot(ax, deg_dists, colors, labels):
+    for deg, col, lab in zip(deg_dists, colors, labels):
+        hist, plt_bins = np.histogram(deg, lin_bins, normed=True)
+        ax.plot(plt_bins[:-1], hist, lw=2, color=col, label=lab)
+
+    # Set axis limits and ticks, and label subplots
+    ax.set_xlim([0, 150])
+    #ax.set_ylim([0, .15])
+    ax.locator_params(axis='x', nbins=5)
+    #a.locator_params(axis='y', nbins=5)
+    ax.legend(loc='best', fontsize=FONTSIZE - 10)
+
+    # Set title
+    ax.set_title('Degree Distributions')
+
+    # Set xlabels
+    ax.set_xlabel('Degree')
+    ax.set_ylabel('P(k)')
+
+    # Set all fontsizes and axis colors
+    set_all_text_fontsizes(ax, FONTSIZE)
+    #set_all_colors(ax, 'w')
+
 ###############################################
 # Calculate degree distributions for all graphs
 ###############################################
@@ -71,59 +104,45 @@ deg_dists = [WS_deg_mat.flatten(), ER_deg_mat.flatten(), BA_deg_mat.flatten()]
 colors = [WS_COLOR, ER_COLOR, BA_COLOR]
 labels = ['Small-world', 'Random', 'Scale-free']
 
-label_brain = 'Mouse Connectome'
+label_brain = 'Mouse\nConnectome'
 
 ###################################################
 # Plot semilogy (looking for exponential solutions)
 ###################################################
-lin_bins = np.linspace(0, 200, n_bins)
+lin_bins = np.linspace(0, 150, n_bins)
 
-figsize = (8, 6)
-fig, ax = plt.subplots(1, 1, figsize=figsize)
+figsize = (16, 5)
+fig, axs = plt.subplots(1, 3, figsize=figsize)
 
-for deg, col, lab in zip(deg_dists, colors, labels):
-    hist, plt_bins = np.histogram(deg, lin_bins, normed=True)
-    ax.plot(plt_bins[:-1], hist, lw=2, color=col, label=lab)
-
-hist_brain, plt_bins = np.histogram(brain_degree, lin_bins, normed=True)
-ax.plot(plt_bins[:-1], hist_brain, lw=2, color=BRAIN_COLOR,
-        label=label_brain)
-
-# Set axis limits and ticks, and label subplots
-ax.set_xlim([0, 200])
-#ax.set_ylim([0, .15])
-ax.locator_params(axis='x', nbins=5)
-#ax.locator_params(axis='y', nbins=5)
-ax.legend(loc='best', fontsize=FONTSIZE - 8)
-
-# Set title
-ax.set_title('Degree Distributions')
-
-# Set xlabels
-ax.set_xlabel('Degree')
-ax.set_ylabel('P(k)')
-
-# Set all fontsizes and axis colors
-set_all_text_fontsizes(ax, FONTSIZE)
-#set_all_colors(ax, 'w')
-
-plt.tight_layout()
+hist_plot(axs[0], deg_dists, colors, labels)
+hist_plot(axs[0], [brain_degree], [BRAIN_COLOR], [label_brain])
+axs[0].locator_params(axis='y', nbins=5)
 
 ###################################################
 # Plot semilogy (looking for exponential solutions)
 ###################################################
-raw_input('Press key')
-ax.set_yscale('log')
-ax.set_ylabel('Log[P(k)]')
-plt.draw()
+hist_plot(axs[1], deg_dists, colors, labels)
+hist_plot(axs[1], [brain_degree], [BRAIN_COLOR], [label_brain])
+
+axs[1].set_ylim([10E-4, 1])
+axs[1].set_yscale('log')
+axs[1].set_ylabel('Log[P(k)]')
+axs[1].legend_.remove()
 
 ###################################################
 # Plot on log scale (looking for power-law
 ###################################################
+hist_plot(axs[2], deg_dists, colors, labels)
+hist_plot(axs[2], [brain_degree], [BRAIN_COLOR], [label_brain])
 
-raw_input('Press key')
-ax.set_xscale('log')
-ax.set_xlim([1, 200])
-ax.set_xlabel('Log[Degree]')
-ax.set_ylabel('Log[P(k)]')
+axs[2].set_xlim([1, 150])
+axs[2].set_ylim([10E-4, 1])
+axs[2].set_xscale('log')
+axs[2].set_yscale('log')
+axs[2].set_xlabel('Log[Degree]')
+axs[2].set_ylabel('Log[P(k)]')
+axs[2].legend_.remove()
+
+plt.tight_layout()
+fig.subplots_adjust(wspace=0.325, top=.925, bottom=.17)
 plt.draw()
