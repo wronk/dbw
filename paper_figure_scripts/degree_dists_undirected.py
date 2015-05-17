@@ -29,7 +29,6 @@ BRAIN_COLOR = 'm'
 ER_COLOR = 'r'
 WS_COLOR = 'g'
 BA_COLOR = 'b'
-MODEL_COLOR = 'c'
 
 plt.ion()
 plt.close('all')
