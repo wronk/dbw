@@ -31,7 +31,7 @@ plt.rcParams['ps.fonttype'] = 42
 plt.rcParams['pdf.fonttype'] = 42
 
 n_bins = 50
-repeats = 5
+repeats = 100
 
 ###############################################
 # Histogram plot function
@@ -98,9 +98,9 @@ axs[0].locator_params(axis='y', nbins=5)
 ###################################################
 # Plot semilogy (looking for exponential solutions)
 ###################################################
-hist_plot(axs[0], gamma_dists, colors, GAMMAS)
+hist_plot(axs[1], gamma_dists, colors, GAMMAS)
 
-axs[1].set_ylim([10E-4, 1])
+axs[1].set_ylim([10E-5, 1])
 axs[1].set_yscale('log')
 axs[1].set_ylabel('Log[P(k)]')
 #axs[1].legend_.remove()
@@ -108,10 +108,10 @@ axs[1].set_ylabel('Log[P(k)]')
 ###################################################
 # Plot on log scale (looking for power-law
 ###################################################
-hist_plot(axs[0], gamma_dists, colors, GAMMAS)
+hist_plot(axs[2], gamma_dists, colors, GAMMAS)
 
 axs[2].set_xlim([1, 150])
-axs[2].set_ylim([10E-4, 1])
+axs[2].set_ylim([10E-5, 1])
 axs[2].set_xscale('log')
 axs[2].set_yscale('log')
 axs[2].set_xlabel('Log[Degree]')
