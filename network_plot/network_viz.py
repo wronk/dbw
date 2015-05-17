@@ -185,7 +185,8 @@ def make_movie():
 
 def plot_scatterAndMarginal(ax_scat, ax_histTop, ax_histRight, k_in, k_out,
                             bin_width, marker_size, marker_color,
-                            indegree_bins=None, outdegree_bins=None):
+                            indegree_bins=None, outdegree_bins=None,
+                            log_probs=False):
     """
     Function to create a scatter plot with marginal histogram distributions.
 
@@ -207,6 +208,8 @@ def plot_scatterAndMarginal(ax_scat, ax_histTop, ax_histRight, k_in, k_out,
         Size of scatter points in scatter plot
     marker_color : str
         Color of scatter points and histogram
+    log_probs : bool
+        Whether or not to plot on logarithmic axes
     """
     # Set font type for compatability with adobe if editting later
     mpl.rcParams['ps.fonttype'] = 42
@@ -231,8 +234,8 @@ def plot_scatterAndMarginal(ax_scat, ax_histTop, ax_histRight, k_in, k_out,
     max_lim = np.max((x_lim[1], y_lim[1]))
     ax_scat.set_xlim([-5, max_lim])
     ax_scat.set_ylim([-5, max_lim])
-    #ax_scat.set_xlim([-5, round(x_lim[1] + 5.)])
-    #ax_scat.set_ylim([-5, round(y_lim[1] + 5.)])
+    ax_scat.set_xlim([-5, round(x_lim[1] + 5.)])
+    ax_scat.set_ylim([-5, round(y_lim[1] + 5.)])
 
     ############################
     # Plot marginal histograms
@@ -254,17 +257,34 @@ def plot_scatterAndMarginal(ax_scat, ax_histTop, ax_histRight, k_in, k_out,
 
     # Plot histograms and limit number of ticks
     ax_histTop.hist(k_in, bins=indegree_bins, orientation='vertical',
-                    fc=marker_color)
+                    fc=marker_color, normed=True)
     ax_histTop.yaxis.set_major_locator(plt.MaxNLocator(3))
     #ax_histTop.set_yticks(y_histTics)
     #ax_histTop.set_yticklabels([str(l) for l in y_histTics], rotation=0)
 
     ax_histRight.hist(k_out, bins=outdegree_bins, orientation='horizontal',
-                      fc=marker_color)
+                      fc=marker_color, normed=True)
     ax_histRight.xaxis.set_major_locator(plt.MaxNLocator(3))
     plt.setp(ax_histRight.xaxis.get_majorticklabels(), va='top')
     #ax_histRight.set_xticks(x_histTics)
     #ax_histRight.set_xticklabels([str(l) for l in x_histTics], rotation=0)
+
+    #################################
+    # Change to log scales if desired
+    #################################
+    if log_probs:
+        ax_histTop.set_yscale('log')
+        ax_histRight.set_xscale('log')
+
+    '''
+    if log_nodes:
+        ax_scat.set_xlim([1, max_lim])
+        ax_scat.set_ylim([1, 120])
+        ax_scat.set_xscale('log')
+        ax_scat.set_yscale('log')
+        ax_histTop.set_xscale('log')
+        ax_histRight.set_yscale('log')
+        '''
 
 if __name__ == '__main__':
     #make_movie()
