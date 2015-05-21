@@ -36,8 +36,9 @@ plt.rcParams['ps.fonttype'] = 42
 plt.rcParams['pdf.fonttype'] = 42
 
 n_bins = 50
-repeats = 1000
+repeats = 10
 
+hist_brain = True  # Plot brain as histogram bars? Otherwise, as line
 ###############################################
 # Histogram plot function
 ###############################################
@@ -48,14 +49,13 @@ repeats = 1000
 def hist_plot(ax, deg_dists, colors, labels):
     for deg, col, lab in zip(deg_dists, colors, labels):
         hist, plt_bins = np.histogram(deg, lin_bins, normed=True)
-        ax.plot(plt_bins[:-1], hist, lw=2, color=col, label=lab)
+        ax.plot(plt_bins[:-1], hist, lw=3, color=col, label=lab)
 
     # Set axis limits and ticks, and label subplots
     ax.set_xlim([0, 150])
     #ax.set_ylim([0, .15])
     ax.locator_params(axis='x', nbins=5)
     #a.locator_params(axis='y', nbins=5)
-    ax.legend(loc='best', fontsize=FONTSIZE - 10)
 
     # Set title
     ax.set_title('Degree Distributions')
@@ -86,7 +86,6 @@ ER_deg_mat = -1 * np.ones((repeats, n_nodes))
 WS_deg_mat = -1 * np.ones((repeats, n_nodes))
 BA_deg_mat = -1 * np.ones((repeats, n_nodes))
 
-# XXX: Should these be reseeded for each repeat?
 for r in np.arange(repeats):
     # Erdos-Renyi
     ER_deg_mat[r, :] = er(n_nodes, edge_density).degree().values()
@@ -103,43 +102,43 @@ deg_dists = [WS_deg_mat.flatten(), ER_deg_mat.flatten(), BA_deg_mat.flatten()]
 colors = [WS_COLOR, ER_COLOR, BA_COLOR]
 labels = ['Small-world', 'Random', 'Scale-free']
 
-label_brain = 'Mouse\nConnectome'
+brain_label = 'Mouse\nConnectome'
+brain_lw = 0.5
+brain_alpha = 0.7
 
 ###################################################
-# Plot semilogy (looking for exponential solutions)
+# Make all plots
 ###################################################
 lin_bins = np.linspace(0, 150, n_bins)
-
 figsize = (16, 5)
 fig, axs = plt.subplots(1, 3, figsize=figsize)
 
-hist_plot(axs[0], deg_dists, colors, labels)
-hist_plot(axs[0], [brain_degree], [BRAIN_COLOR], [label_brain])
+for ax in axs:
+    hist_plot(ax, deg_dists, colors, labels)
+
+    if hist_brain:
+        ax.hist(brain_degree, lin_bins, normed=True, lw=brain_lw,
+                color=BRAIN_COLOR, label=brain_label, alpha=brain_alpha)
+    else:
+        hist_plot(ax, [brain_degree], [BRAIN_COLOR], [brain_label])
+    ax.legend(loc='best', fontsize=FONTSIZE - 10)
+
+###################################################
+# Change scale for all plots
+###################################################
+# Plot linear brain degrees
 axs[0].locator_params(axis='y', nbins=5)
 
-###################################################
 # Plot semilogy (looking for exponential solutions)
-###################################################
-hist_plot(axs[1], deg_dists, colors, labels)
-hist_plot(axs[1], [brain_degree], [BRAIN_COLOR], [label_brain])
-
 axs[1].set_ylim([10E-4, 1])
 axs[1].set_yscale('log')
-axs[1].set_ylabel('Log[P(k)]')
 axs[1].legend_.remove()
 
-###################################################
-# Plot on log scale (looking for power-law
-###################################################
-hist_plot(axs[2], deg_dists, colors, labels)
-hist_plot(axs[2], [brain_degree], [BRAIN_COLOR], [label_brain])
-
+# Plot on log scale (looking for power-law solutions)
 axs[2].set_xlim([1, 150])
 axs[2].set_ylim([10E-4, 1])
 axs[2].set_xscale('log')
 axs[2].set_yscale('log')
-axs[2].set_xlabel('Log[Degree]')
-axs[2].set_ylabel('Log[P(k)]')
 axs[2].legend_.remove()
 
 plt.tight_layout()
