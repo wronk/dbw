@@ -40,7 +40,8 @@ deg = indeg + outdeg
 percent_indeg = indeg / deg.astype(float)
 
 # Create figure
-fig = plt.figure(figsize=cf.FIGSIZE, facecolor=cf.FACECOLOR, tight_layout=True)
+#fig = plt.figure(figsize=cf.FIGSIZE, facecolor=cf.FACECOLOR, tight_layout=True)
+fig = plt.figure(figsize=cf.FIGSIZE, tight_layout=True)
 ax0 = plt.subplot2grid((1, 1), (0, 0))
 #ax0 = plt.subplot2grid(cf.SUBPLOT_DIVISIONS, cf.AX0_LOCATION,
 #                       colspan=cf.AX0_COLSPAN)

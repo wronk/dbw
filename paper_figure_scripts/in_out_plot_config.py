@@ -8,7 +8,7 @@ In and outdegree plotting configuration parameters.
 
 import numpy as np
 
-FIGSIZE = (10, 8)
+FIGSIZE = (9, 8)
 FONTSIZE = 20
 MARKERSIZE = 25
 BINWIDTH = 4
