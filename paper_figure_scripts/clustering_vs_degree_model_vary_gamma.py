@@ -1,7 +1,7 @@
 """
 Created on Mon Nov 24 09:17:11 2014
 
-@author: rkp
+@author: rkp, wronk
 
 Plot the clustering vs. degree for binary undirected biophysical model at
 multiple gammas.
@@ -20,10 +20,11 @@ FACECOLOR = 'w'
 FIGSIZE = (12, 3.5)
 TEXTCOLOR = 'k'
 FONTSIZE = 18
-MODEL_COLOR = 'c'
+MODEL_COLOR = ['c'] * 4
 DEG_MAX = 250
-DEG_TICKS = [0, 125, 250]
+DEG_TICKS = [0, 125, DEG_MAX]
 CC_TICKS = [0, .2, .4, .6, .8, 1.0]
+ax_labels = ('a', 'b', 'c', 'd')
 
 LS = [np.inf, np.inf, np.inf, np.inf]  # Length scale parameters all infinite
 GAMMAS = [1., 1.333, 1.667, 2.0]  # Preferential attachment parameters
@@ -44,50 +45,55 @@ for gamma_idx, gamma in enumerate(GAMMAS):
     print 'Generating model graph for gamma = %.2f' % gamma
     G_model, A_model, D_model = rg.biophysical(n_nodes, n_edges, L, gamma,
                                                BRAIN_SIZE)
-    model_degree = nx.degree(G_model).values()
-    model_clustering = nx.clustering(G_model).values()
-
     # Store examples
-    model_degrees[gamma_idx] = model_degree
-    model_clusterings[gamma_idx] = model_clustering
+    model_degrees[gamma_idx] = nx.degree(G_model).values()
+    model_clusterings[gamma_idx] = nx.clustering(G_model).values()
 
-# Make clustering vs. degree plots
-fig, axs = plt.subplots(1, 4, facecolor=FACECOLOR, figsize=FIGSIZE, tight_layout=True)
+#################################
+# Plotting
+#################################
+plt.ion()
+plt.close('all')
+plt.rcParams['ps.fonttype'] = 42
+plt.rcParams['pdf.fonttype'] = 42
 
-# Model graphs w/ different gammas
+fig, axs = plt.subplots(1, 4, facecolor=FACECOLOR, figsize=FIGSIZE,
+                        sharey=True, tight_layout=True)
+
+# Convert to list if not 1 x n
+if type(axs) == np.ndarray:
+    axs = list(axs.ravel())
+
+# Make clustering vs. degree plots w/ different gammas
 for gamma_idx, gamma in enumerate(GAMMAS):
-    degree = model_degrees[gamma_idx]
-    clustering = model_clusterings[gamma_idx]
-    axs[gamma_idx].scatter(degree, clustering, color=MODEL_COLOR)
+    axs[gamma_idx].scatter(model_degrees[gamma_idx],
+                           model_clusterings[gamma_idx],
+                           color=MODEL_COLOR[gamma_idx])
 
 # Set axis limits and ticks, and label subplots
-labels = ('a', 'b', 'c', 'd')
-plt.ion()
-for ax_idx, ax in enumerate(axs.flat):
+for ax_ind, (ax, label) in enumerate(zip(axs, ax_labels)):
     ax.set_xlim(0, DEG_MAX)
     ax.set_ylim(0, 1)
     ax.set_xticks(DEG_TICKS)
     ax.set_yticks(CC_TICKS)
-    ax.text(10, .88, labels[ax_idx], color=TEXTCOLOR, fontsize=FONTSIZE,
+
+    ax.text(19, .88, label, color=TEXTCOLOR, fontsize=FONTSIZE,
             fontweight='bold')
 
-# Hide x ticklabels in top row & y ticklabels in right columns
-for row in axs.flatten()[1:]:
-    ax.set_yticklabels('')
-
-# Set titles
-for gamma_idx, gamma in enumerate(GAMMAS):
-    title = r'$\gamma$ = %.2f' % gamma
-    axs[gamma_idx].set_title(title)
-
-# Set xlabels
-for ax in axs:
-    ax.set_xlabel('Degree')
-axs[0].set_ylabel('Clustering\ncoefficient')
-
-# Set all fontsizes and axis colors
-for ax in axs.flatten():
     set_all_text_fontsizes(ax, FONTSIZE)
     set_all_colors(ax, TEXTCOLOR)
 
-plt.draw()
+    # Set titles/labels
+    ax.set_xlabel('Degree')
+    ax.set_title(r'$\gamma$ = %.2f' % GAMMAS[ax_ind],
+                 fontsize=FONTSIZE)
+
+    # Hide axis labels if not first axis
+    #if ax_ind != 0:
+        #ax.set_yticklabels('')
+
+axs[0].set_ylabel('Clustering\ncoefficient')
+
+fig.subplots_adjust(wspace=0.18)
+
+plt.plot()
