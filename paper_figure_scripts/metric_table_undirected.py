@@ -11,6 +11,7 @@ import numpy as np
 import networkx as nx
 
 import extract.brain_graph
+import random_graph.binary_undirected as bio_und
 
 ###############################
 # Parameters
@@ -22,7 +23,9 @@ save_dir = '/home/wronk/Documents/dbw_figs/'
 repeats = 2
 graph_names = ['Mouse Connectome', 'Random', 'Small-World', 'Scale-Free']
 metrics = [nx.average_clustering, nx.average_shortest_path_length]
+brain_size = [7., 7., 7.]
 
+# Initialize matrix to store metric values
 met_arr = -1 * np.ones((len(graph_names), repeats, len(metrics)))
 
 
@@ -32,14 +35,17 @@ def calc_metrics(G, metrics):
     for fi, func in enumerate(metrics):
         metric_vals[fi] = func(G)
 
+    return metric_vals
 
 ###############################
 # Create graph/ compute metrics
 ###############################
+#TODO: consider using a dict instead of checking for each graph type
 
 # Load mouse connectivity graph
-G_brain, W_brain, _ = extract.brain_graph.binary_undirected()
-n_nodes = G_brain.order()
+G_brain, _, _ = extract.brain_graph.binary_undirected()
+n_nodes = G_brain.number_of_nodes()
+n_edges = G_brain.number_of_edges()
 
 # Calculate degree & clustering coefficient distribution
 brain_degree = nx.degree(G_brain).values()
@@ -52,32 +58,35 @@ for met_i, bm in enumerate(metrics):
     met_arr[graph_names.index('Mouse Connectome'), :, met_i] = bm(G_brain)
 
 for rep in np.arange(repeats):
+    # Amplified pref attachment model using gamma 0f 1.67
     if 'Amplified Pref. Attachment' in graph_names:
-        pass
+        G_Bio, _, _ = bio_und(n_nodes, n_edges, np.info, 1.67, brain_size)
+        met_arr[graph_names.index('Amplified Pref. Attachment'), rep, :] = \
+            calc_metrics(G_Bio, metrics)
 
+    # Random Configuration model (random with fixed degree sequence)
     if 'Random' in graph_names:
-        # Configuration model (random with fixed degree sequence)
         G_CM = nx.random_degree_sequence_graph(sequence=brain_degree,
                                                tries=100)
         met_arr[graph_names.index('Random'), rep, :] = \
             calc_metrics(G_CM, metrics)
 
-    '''
+    # Small-World (Watts-Strogatz) model with standard reconnection prob
     if 'Small-World' in graph_names:
-        # Watts-Strogatz
-        G_WS = nx.watts_strogatz_graph(n_nodes, int(round(brain_degree_mean)),
-                                    0.159)
+        G_SW = nx.watts_strogatz_graph(n_nodes, int(round(brain_degree_mean)),
+                                       0.159)
+        met_arr[graph_names.index('Small-World'), rep, :] = \
+            calc_metrics(G_SW, metrics)
 
+    # Scale-Free (Barabasi-Albert) graph
     if 'Scale-Free' in graph_names:
-        # Barabasi-Albert
-        G_BA = nx.barabasi_albert_graph(n_nodes,
+        G_SF = nx.barabasi_albert_graph(n_nodes,
                                         int(round(brain_degree_mean / 2.)))
-        #BA_degree = nx.degree(G_BA).values()
-        #BA_clustering = nx.clustering(G_BA).values()
-    '''
+        met_arr[graph_names.index('Scale-Free'), rep, :] = \
+            calc_metrics(G_SF, metrics)
 
 ##########################
 # Save metrics in csv file
 ##########################
 
-#np.savetxt(op.join(save_dir, 'undirected_metrics.csv', met_arr, delimiter=',')
+np.savetxt(op.join(save_dir, 'undirected_metrics.csv', met_arr, delimiter=','))
