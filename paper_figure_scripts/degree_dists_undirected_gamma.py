@@ -21,8 +21,10 @@ FACECOLOR = 'white'
 FONTSIZE = 24
 
 GAMMAS = [1., 1.33, 1.67, 2.0]  # Preferential attachment parameters
-#GAMMAS = [1.33, 1.67]  # Preferential attachment parameters
-BRAIN_SIZE = [7., 7., 7.]  # Size brain region volume to distribute nodes
+#GAMMAS = [1.33, 1.67]
+# Preferential attachment parameters
+BRAIN_SIZE = [7., 7., 7.]
+# Size brain region volume to distribute nodes
 colors = ['0.1', '0.25', '0.5', '0.75']
 alphas = [0.55, 0.7, 0.85, 1.]
 BRAIN_COLOR = 'm'
@@ -33,7 +35,7 @@ plt.rcParams['ps.fonttype'] = 42
 plt.rcParams['pdf.fonttype'] = 42
 
 n_bins = 50
-repeats = 1
+repeats = 100
 
 ###############################################
 # Histogram plot function
@@ -42,9 +44,9 @@ repeats = 1
 # reused for similar plots that will have just a change in x or y scale (log)
 
 
-def hist_plot(ax, deg_dists, colors, gammas, alphas):
+def hist_plot(ax, deg_dists, colors, gammas, alphas, bins):
     for deg, col, g, alpha in zip(deg_dists, colors, gammas, alphas):
-        hist, plt_bins = np.histogram(deg, lin_bins, normed=True)
+        hist, plt_bins = np.histogram(deg, bins, normed=True)
         ax.plot(plt_bins[:-1], hist, lw=2, color=col, label=str(g),
                 alpha=alpha)
 
@@ -78,26 +80,28 @@ brain_degree = G_brain.degree().values()
 # Initialize repetition matrices for standard graphs
 gamma_mat = -1 * np.ones((len(GAMMAS), repeats, n_nodes))
 
-for gamma_idx, gamma in enumerate(GAMMAS):
-    for r in np.arange(repeats):
+for r in np.arange(repeats):
+    for gamma_idx, gamma in enumerate(GAMMAS):
         G_model, _, _ = rg.biophysical(n_nodes, n_edges, np.inf, gamma,
                                        BRAIN_SIZE)
 
         gamma_mat[gamma_idx, r, :] = G_model.degree().values()
+    print 'Finished repeat: ' + str(r)
 
 gamma_dists = gamma_mat.reshape((len(GAMMAS), -1))
 
 ###################################################
 # Plot all panels that will have axis scales changes
 ###################################################
-figsize = (16, 5)
-fig, axs = plt.subplots(1, 3, figsize=figsize)
+figsize = (11, 5)
+fig, axs = plt.subplots(1, 2, figsize=figsize)
 lin_bins = np.linspace(0, 150, n_bins)
 
 for ax in axs:
     ax.hist(brain_degree, lin_bins, color=BRAIN_COLOR, normed=True,
-            label='Mouse\nConnectome', lw=0.5, alpha=.8)
-    hist_plot(ax, gamma_dists, ['c'] * 4, GAMMAS, alphas)
+            label='Mouse\nConnectome', lw=0, alpha=.4, histtype='stepfilled')
+    #hist_plot(ax, gamma_dists, ['c'] * 4, GAMMAS, alphas, lin_bins)
+    hist_plot(ax, gamma_dists, colors, GAMMAS, [1] * 4, lin_bins)
 
 ###################################################
 # Plot specific scales
@@ -112,6 +116,7 @@ axs[1].set_yscale('log')
 axs[1].set_ylabel('P(k)')
 axs[1].legend_.remove()
 
+'''
 # Plot on log scale (looking for power-law
 axs[2].set_xlim([1, 150])
 axs[2].set_ylim([10E-5, 1])
@@ -120,6 +125,7 @@ axs[2].set_yscale('log')
 axs[2].set_xlabel('Degree')
 axs[2].set_ylabel('P(k)')
 axs[2].legend_.remove()
+'''
 
 plt.tight_layout()
 fig.subplots_adjust(wspace=0.325, top=.85, bottom=.17)
