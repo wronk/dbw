@@ -12,6 +12,7 @@ import networkx as nx
 
 import extract.brain_graph
 import random_graph.binary_undirected as bio_und
+from random_graph import binary_undirected
 
 ###############################
 # Parameters
@@ -66,8 +67,9 @@ for rep in np.arange(repeats):
 
     # Random Configuration model (random with fixed degree sequence)
     if 'Random' in graph_names:
-        G_CM = nx.random_degree_sequence_graph(sequence=brain_degree,
-                                               tries=100)
+        G_CM, _, _ = binary_undirected.random_simple_deg_seq(sequence=brain_degree,
+                                                             brain_size=brain_size,
+                                                             tries=100)
         met_arr[graph_names.index('Random'), rep, :] = \
             calc_metrics(G_CM, metrics)
 
@@ -86,7 +88,11 @@ for rep in np.arange(repeats):
             calc_metrics(G_SF, metrics)
 
 ##########################
-# Save metrics in csv file
+# Save metrics
 ##########################
 
-np.savetxt(op.join(save_dir, 'undirected_metrics.csv', met_arr, delimiter=','))
+# Save original array and version averaged across repeats
+fname = op.join(save_dir, 'undirected_metrics')
+np.save(fname + '_orig.npy', met_arr)
+np.savetxt(fname + '_averaged.csv', met_arr.mean(1), format='%.3',
+           delimiter=',')
