@@ -487,6 +487,8 @@ def random_directed_deg_seq(in_sequence, out_sequence, simplify,
             increasing size of graphs.
         brain_size: list of 3 floats
             Size of the brain to use when distributing  node locations.
+        create_using: graph, optional
+            Return graph of this type. The instance will be cleared.
         seed: hashable object for random seed
             Seed for the random number generator.
     Returns:

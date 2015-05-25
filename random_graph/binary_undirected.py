@@ -136,7 +136,7 @@ def random_simple_deg_seq(sequence, brain_size=[7., 7., 7.],
             Seed for the random number generator.
         tries: int
             Number of attempts at creating graph (function will retry if
-            self-loops.
+            self-loops exist.
     Returns:
         Networkx graph object, adjacency matrix, and random distances'''
 
