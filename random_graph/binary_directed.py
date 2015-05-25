@@ -268,8 +268,8 @@ def biophysical_reverse_outdegree(N=426, N_edges=8820, L=np.inf, gamma=1.7,
         Networkx graph object, adjacency matrix, distance matrix"""
     # Pick node positions & calculate distance matrix
     centroids = np.random.uniform([0, 0, 0], brain_size, (N, 3))
-    
-    
+
+
     # Calculate distance matrix and distance decay matrix
     D = aux_tools.dist_mat(centroids)
     D_decay = np.exp(-D / L)
@@ -476,6 +476,7 @@ def random_directed_deg_seq(in_sequence, out_sequence, simplify,
     graph that accounts for degree distribution.
 
     Parameters:
+    -----------
         in_sequence: list of int
             In degree of each node to be added to the graph.
         out_sequence: list of int
@@ -489,6 +490,7 @@ def random_directed_deg_seq(in_sequence, out_sequence, simplify,
         seed: hashable object for random seed
             Seed for the random number generator.
     Returns:
+    --------
         Networkx graph object, adjacency matrix, and random distances'''
 
     # Create configuration model using specified properties
