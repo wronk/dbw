@@ -20,8 +20,9 @@ import random_graph.binary_directed as bio_dir
 # SET YOUR SAVE DIRECTORY
 save_dir = '/home/wronk/Documents/dbw_figs/'
 
-repeats = 2
+repeats = 10
 graph_names = ['Mouse Connectome', 'Pref. Growth, Prox. Attachment', 'Random']
+# TODO: Discuss if we want to continue using this assortativity metric
 metrics = [nx.assortativity.degree_assortativity_coefficient,
            nx.average_shortest_path_length]
 brain_size = [7., 7., 7.]
@@ -58,22 +59,25 @@ for met_i, bm in enumerate(metrics):
     met_arr[graph_names.index('Mouse Connectome'), :, met_i] = bm(G_brain)
 
 for rep in np.arange(repeats):
-    # Amplified pref attachment model using gamma 0f 1.67
+    #TODO: recheck for correct brain model
+    # Pref. Growth, Prox. Attachment model
     if 'Pref. Growth, Prox. Attachment' in graph_names:
         G_Bio, _, _ = bio_dir.biophysical_reverse_outdegree(n_nodes, n_edges,
                                                             L=np.inf,
                                                             brain_size=brain_size)
-        met_arr[graph_names.index('Amplified Pref. Attachment'), rep, :] = \
+        met_arr[graph_names.index('Pref. Growth, Prox. Attachment'), rep, :] =\
             calc_metrics(G_Bio, metrics)
 
     # Random Configuration model (random with fixed degree sequence)
     if 'Random' in graph_names:
-        G_CM = bio_dir.random_directed_deg_seq(brain_indegree, brain_outdegree,
-                                               simplify=True, tries=100)
+        G_CM, _, _ = bio_dir.random_directed_deg_seq(brain_indegree,
+                                                     brain_outdegree,
+                                                     simplify=True,
+                                                     brain_size=brain_size)
         met_arr[graph_names.index('Random'), rep, :] = calc_metrics(G_CM,
                                                                     metrics)
 
-    # Scale-Free (Barabasi-Albert) graph
+    # Scale-Free Price's model
     if 'Scale-Free' in graph_names:
         pass
 
@@ -84,5 +88,5 @@ for rep in np.arange(repeats):
 # Save original array and version averaged across repeats
 fname = op.join(save_dir, 'directed_metrics')
 np.save(fname + '_orig.npy', met_arr)
-np.savetxt(fname + '_averaged.csv', met_arr.mean(1), format='%.3',
+np.savetxt(fname + '_averaged.csv', met_arr.mean(1), fmt='%10.3f',
            delimiter=',')
