@@ -94,5 +94,5 @@ for rep in np.arange(repeats):
 # Save original array and version averaged across repeats
 fname = op.join(save_dir, 'undirected_metrics')
 np.save(fname + '_orig.npy', met_arr)
-np.savetxt(fname + '_averaged.csv', met_arr.mean(1), format='%.3',
+np.savetxt(fname + '_averaged.csv', met_arr.mean(1), fmt='%10.3f',
            delimiter=',')
