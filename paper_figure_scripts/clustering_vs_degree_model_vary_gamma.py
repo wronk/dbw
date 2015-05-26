@@ -21,8 +21,8 @@ FIGSIZE = (12, 3.5)
 TEXTCOLOR = 'k'
 FONTSIZE = 18
 MODEL_COLOR = ['c'] * 4
-DEG_MAX = 250
-DEG_TICKS = [0, 125, DEG_MAX]
+DEG_MAX = 150
+DEG_TICKS = [0, 50, 100, DEG_MAX]
 CC_TICKS = [0, .2, .4, .6, .8, 1.0]
 ax_labels = ('a', 'b', 'c', 'd')
 
@@ -88,12 +88,8 @@ for ax_ind, (ax, label) in enumerate(zip(axs, ax_labels)):
     ax.set_title(r'$\gamma$ = %.2f' % GAMMAS[ax_ind],
                  fontsize=FONTSIZE)
 
-    # Hide axis labels if not first axis
-    #if ax_ind != 0:
-        #ax.set_yticklabels('')
-
 axs[0].set_ylabel('Clustering\ncoefficient')
 
-fig.subplots_adjust(wspace=0.18)
+#fig.subplots_adjust(wspace=0.18)
 
 plt.plot()

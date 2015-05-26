@@ -1,7 +1,7 @@
 """
 Created on Mon Nov 24 09:17:11 2014
 
-@author: rkp
+@author: rkp, wronk
 
 Plot clustering vs. degree for mouse connectome and standard random graphs.
 """
@@ -22,10 +22,11 @@ CM_COLOR = 'r'
 WS_COLOR = 'g'
 BA_COLOR = 'b'
 MODEL_COLOR = 'c'
-DEG_MAX = 250
-DEG_TICKS = [0, 125, 250]
+DEG_MAX = 150
+DEG_TICKS = [0, 50, 100, 150]
 CC_TICKS = [0, .2, .4, .6, .8, 1.0]
 plt.ion()
+plt.close('all')
 
 # Load mouse connectivity graph
 G_brain, W_brain, _ = extract.brain_graph.binary_undirected()
@@ -55,7 +56,8 @@ BA_degree = nx.degree(G_BA).values()
 BA_clustering = nx.clustering(G_BA).values()
 
 # Make 8 clustering vs. degree plots
-fig, axs = plt.subplots(1, 4, facecolor=FACECOLOR, figsize=FIGSIZE, tight_layout=True)
+fig, axs = plt.subplots(1, 4, facecolor=FACECOLOR, figsize=FIGSIZE,
+                        tight_layout=True)
 
 # Brain
 axs[0].scatter(brain_degree, brain_clustering, color=BRAIN_COLOR)
@@ -76,8 +78,16 @@ for ax_idx, ax in enumerate(axs.flatten()):
             fontweight='bold')
 
 # Hide x ticklabels in top row & y ticklabels in right columns
-for ax in axs.flatten()[1:]:
+for ax in axs[1:]:
     ax.set_yticklabels('')
+
+axs[0].set_ylabel('Clustering\ncoefficient')
+
+# Set xlabels
+for ax in axs:
+    ax.set_xlabel('Degree')
+    set_all_text_fontsizes(ax, FONTSIZE)
+    set_all_colors(ax, 'k')
 
 # Set titles
 axs[0].set_title('Mouse')
@@ -85,14 +95,6 @@ axs[1].set_title('Configuration model')
 axs[2].set_title('Small-World')
 axs[3].set_title('Scale-Free')
 
-# Set xlabels
-for ax in axs:
-    ax.set_xlabel('Degree')
-axs[0].set_ylabel('Clustering\ncoefficient')
-
-# Set all fontsizes and axis colors
-for ax in axs.flatten():
-    set_all_text_fontsizes(ax, FONTSIZE)
-    set_all_colors(ax, 'k')
+fig.subplots_adjust(wspace=0.18)
 
 plt.draw()
