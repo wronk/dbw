@@ -110,8 +110,8 @@ brain_alpha = 0.7
 # Make all plots
 ###################################################
 lin_bins = np.linspace(0, 150, n_bins)
-figsize = (16, 5)
-fig, axs = plt.subplots(1, 3, figsize=figsize)
+figsize = (12, 5)
+fig, axs = plt.subplots(1, 2, figsize=figsize)
 
 for ax in axs:
     hist_plot(ax, deg_dists, colors, labels)
@@ -121,7 +121,7 @@ for ax in axs:
                 color=BRAIN_COLOR, label=brain_label, alpha=brain_alpha)
     else:
         hist_plot(ax, [brain_degree], [BRAIN_COLOR], [brain_label])
-    ax.legend(loc='best', fontsize=FONTSIZE - 10)
+    ax.legend(loc='best', fontsize=FONTSIZE - 8)
 
 ###################################################
 # Change scale for all plots
@@ -134,13 +134,15 @@ axs[1].set_ylim([10E-4, 1])
 axs[1].set_yscale('log')
 axs[1].legend_.remove()
 
+'''
 # Plot on log scale (looking for power-law solutions)
 axs[2].set_xlim([1, 150])
 axs[2].set_ylim([10E-4, 1])
 axs[2].set_xscale('log')
 axs[2].set_yscale('log')
 axs[2].legend_.remove()
+'''
 
 plt.tight_layout()
-fig.subplots_adjust(wspace=0.325, top=.925, bottom=.17)
+fig.subplots_adjust(top=0.925, bottom=0.17, left=0.12, wspace=0.325)
 plt.draw()
