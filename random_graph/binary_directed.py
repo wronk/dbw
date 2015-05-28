@@ -10,6 +10,7 @@ Functions for generating random binary undirected graphs not included in
 import numpy as np
 import networkx as nx
 import graph_tools.auxiliary as aux_tools
+import aux_random_graphs
 
 
 def ER_distance(N=426, p=.043, brain_size=[7., 7., 7.]):
@@ -267,7 +268,18 @@ def biophysical_reverse_outdegree(N=426, N_edges=8820, L=np.inf, gamma=1.7,
     Returns:
         Networkx graph object, adjacency matrix, distance matrix"""
     # Pick node positions & calculate distance matrix
-    centroids = np.random.uniform([0, 0, 0], brain_size, (N, 3))
+    if brain_size == 'brain':
+        centroidsDict = aux_random_graphs.get_coords()
+        labels = centroidsDict.keys()
+        centroids = np.zeros([N,3])
+
+        for i,label in enumerate(labels):
+            centroids[i,:] = centroidsDict[label]/10.0
+        
+
+        
+    else:
+        centroids = np.random.uniform([0, 0, 0], brain_size, (N, 3))
 
 
     # Calculate distance matrix and distance decay matrix
