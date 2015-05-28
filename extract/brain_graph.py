@@ -8,12 +8,11 @@ Functions to extract graphs from Allen mouse connectivity.
 """
 
 import auxiliary as aux
-import graph_tools.auxiliary as aux_tools
 import networkx as nx
 import numpy as np
 
-LINEAR_MODEL_DIRECTORY = '../../mouse_connectivity_data/linear_model'
-STRUCTURE_DIRECTORY = '../../mouse_connectivity_data'
+LINEAR_MODEL_DIRECTORY = 'data'
+STRUCTURE_DIRECTORY = '../'
 
 def binary_undirected(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
     """Load brain as binary undirected graph.
@@ -81,8 +80,7 @@ def weighted_undirected(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
     
     return G, W, labels
 
-def distance_matrix(lm_dir=LINEAR_MODEL_DIRECTORY, cent_dir=STRUCTURE_DIRECTORY,
-                    in_mm=True):
+def distance_matrix(lm_dir=LINEAR_MODEL_DIRECTORY, cent_dir=STRUCTURE_DIRECTORY, in_mm=True):
     """Compute distance matrix from centroid data.
     
     Args:
@@ -118,3 +116,5 @@ def binary_directed_with_distance(p_th=.01, w_th=0,
     nx.set_edge_attributes(G, 'distance', dd)
     
     return G, A, D, labels
+
+    

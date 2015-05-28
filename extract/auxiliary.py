@@ -11,7 +11,8 @@ STRUCTURE_DIRECTORY = '../../mouse_connectivity_data'
 
 import numpy as np
 import scipy.io as sio
-from friday_harbor.structure import Ontology
+import aux_random_graphs
+#from friday_harbor.structure import Ontology
 
 def load_W_and_P(data_dir=LINEAR_MODEL_DIRECTORY):
     """Load weight and p-value matrices."""
@@ -42,22 +43,19 @@ def load_W_and_P(data_dir=LINEAR_MODEL_DIRECTORY):
 
 def load_centroids(labels, data_dir=STRUCTURE_DIRECTORY, in_mm=True):
     """Load centroids."""
+    centroids = aux_random_graphs.get_coords()
+    centroidsMat = np.zeros([len(labels),3])
+    for i,node in enumerate(labels):
+        centroidsMat[i,:] = centroids[node]
 
-    onto = Ontology(data_dir=data_dir)
-    centroids = np.zeros((len(labels),3),dtype=float)
-    for a_idx,area in enumerate(labels):
-        s_id = onto.structure_by_acronym(area[:-2]).structure_id
-        if area[-1] == 'L':
-            mask = onto.get_mask_from_id_left_hemisphere_nonzero(s_id)
-        elif area[-1] == 'R':
-            mask = onto.get_mask_from_id_right_hemisphere_nonzero(s_id)
-        centroids[a_idx,:] = mask.centroid
     if in_mm:
-        centroids /= 10.
+        centroidsMat /= 10.
 
-    return centroids
+    return centroidsMat
 
-
+'''
+# This function doesn't work for me because I don't have
+# friday_harbor.Ontology...
 def mask_specific_structures(structure_list, parent_structures=['CTX'],
                              data_dir=STRUCTURE_DIRECTORY):
     """Return mask for specific structures in super structure.
@@ -89,3 +87,4 @@ def mask_specific_structures(structure_list, parent_structures=['CTX'],
     for ancestors in ancestors_list]
 
     return np.array(mask)
+'''
