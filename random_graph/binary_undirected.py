@@ -28,7 +28,7 @@ def ER_distance(N=426, p=.086, brain_size=[7., 7., 7.]):
     return G, A, D
 
 
-def biophysical(N=426, N_edges=7804, L=2.2, gamma=1.7,
+def biophysical(N=426, N_edges=7804, L=2.2, gamma=1.67,
                 brain_size=[7., 7., 7.]):
     """Create a biophysically inspired graph. Connection probabilities depend
     on distance & degree.
