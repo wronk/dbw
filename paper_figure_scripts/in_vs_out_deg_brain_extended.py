@@ -8,13 +8,11 @@ Plot the in- vs. outdegree distribution for the Allen Brain mouse connectome.
 
 import numpy as np
 import matplotlib.pyplot as plt
-import networkx as nx
 
 from extract.brain_graph import binary_directed as brain_graph
 
 from network_plot.change_settings import set_all_text_fontsizes, set_all_colors
 
-import brain_constants as bc
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from network_plot.network_viz import plot_scatterAndMarginal
@@ -28,7 +26,7 @@ plt.ion()
 # PLOT PARAMETERS
 FACECOLOR = 'w'
 TEXTCOLOR = 'k'
-MARKERCOLOR='m'
+MARKERCOLOR = 'm'
 FONTSIZE = 24
 NBINS = 15
 
@@ -60,15 +58,16 @@ ax0_histRight = divider0.append_axes('right', 2.0, pad=0.3, sharey=ax0)
 # Call plotting function for scatter/marginal histograms (LEFT SIDE)
 plot_scatterAndMarginal(ax0, ax0_histTop, ax0_histRight, indeg, outdeg,
                         bin_width=cf.BINWIDTH, marker_size=cf.MARKERSIZE,
-                        marker_color=MARKERCOLOR, indegree_bins=cf.INDEGREE_BINS,
+                        marker_color=MARKERCOLOR,
+                        indegree_bins=cf.INDEGREE_BINS,
                         outdegree_bins=cf.OUTDEGREE_BINS)
 
-ax0.set_xlabel('Indegree')
-ax0.set_ylabel('Outdegree')
+ax0.set_xlabel('In-degree')
+ax0.set_ylabel('Out-degree')
 ax0.set_xlim(*cf.IN_OUT_SCATTER_XLIM)
 ax0.set_ylim(*cf.IN_OUT_SCATTER_YLIM)
 ax0.set_aspect('auto')
-ax0.set_yticks(np.arange(0,121,30))
+ax0.set_yticks(np.arange(0, 121, 30))
 
 ax0_histRight.set_xticks([0, .02, 0.04])
 ax0_histTop.set_ylabel('# Nodes')
@@ -78,11 +77,11 @@ ax0_histRight.set_xlabel('# Nodes')
 # Plot percent_indeg vs. degree (RIGHT SIDE)
 ax1.scatter(deg, percent_indeg, s=cf.MARKERSIZE, lw=0, c=MARKERCOLOR)
 ax1.set_xlabel('Total degree (in + out)')
-ax1.set_ylabel('Proportion indegree')
+ax1.set_ylabel('Proportion in-degree')
 ax1.xaxis.set_major_locator(plt.MaxNLocator(4))
 ax1.set_yticks(np.arange(0, 1.1, .2))
 ax1.set_ylim([0., 1.05])
-ax1.set_xticks(np.arange(0,151,50))
+ax1.set_xticks(np.arange(0, 151, 50))
 
 ##########################################################################
 # Set background color and text size for all spines/ticks

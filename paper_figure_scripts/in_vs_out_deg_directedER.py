@@ -3,7 +3,7 @@ Created on Fri Jan 23 13:11:36 2015
 
 @author: rkp
 
-Plot the in- vs. outdegree distribution for the directed ER plot.
+Plot the in- vs. out-degree distribution for the directed ER plot.
 """
 
 import numpy as np
@@ -25,12 +25,13 @@ plt.ion()
 
 # PLOT PARAMETERS
 FACECOLOR = 'black'
-MARKERCOLOR='r'
+MARKERCOLOR = 'r'
 FONTSIZE = 16
 NBINS = 15
 
 # generate erdos-renyi graph
-G = nx.erdos_renyi_graph(bc.num_brain_nodes, bc.p_brain_edge_directed, directed=True)
+G = nx.erdos_renyi_graph(bc.num_brain_nodes, bc.p_brain_edge_directed,
+                         directed=True)
 
 # Get in & out degree
 indeg = np.array([G.in_degree()[node] for node in G])
@@ -57,16 +58,17 @@ ax0_histRight = divider0.append_axes('right', 2.0, pad=0.3, sharey=ax0)
 # Call plotting function for scatter/marginal histograms (LEFT SIDE)
 plot_scatterAndMarginal(ax0, ax0_histTop, ax0_histRight, indeg, outdeg,
                         bin_width=cf.BINWIDTH, marker_size=cf.MARKERSIZE,
-                        marker_color=MARKERCOLOR, indegree_bins=cf.INDEGREE_BINS,
+                        marker_color=MARKERCOLOR,
+                        indegree_bins=cf.INDEGREE_BINS,
                         outdegree_bins=cf.OUTDEGREE_BINS)
 
-ax0.set_xlabel('Indegree')
-ax0.set_ylabel('Outdegree')
+ax0.set_xlabel('In-degree')
+ax0.set_ylabel('Out-degree')
 #ax0_histTop.set_title('In- vs. Outdegree', va='bottom')
 ax0.set_xlim(*cf.IN_OUT_SCATTER_XLIM)
 ax0.set_ylim(*cf.IN_OUT_SCATTER_YLIM)
 ax0.set_aspect('auto')
-ax0.set_yticks(np.arange(0,121,30))
+ax0.set_yticks(np.arange(0, 121, 30))
 
 ax0_histTop.set_ylabel('# Nodes')
 ax0_histRight.set_xlabel('# Nodes')
@@ -75,14 +77,14 @@ ax0_histRight.set_xlabel('# Nodes')
 # Plot percent_indeg vs. degree (RIGHT SIDE)
 ax1.scatter(deg, percent_indeg, s=cf.MARKERSIZE, lw=0, c=MARKERCOLOR)
 ax1.set_xlabel('Total degree (in + out)')
-ax1.set_ylabel('Proportion indegree')
+ax1.set_ylabel('Proportion in-degree')
 ax1.xaxis.set_major_locator(plt.MaxNLocator(4))
 ax1.set_yticks(np.arange(0, 1.1, .2))
 #ax1.set_title('Incoming edge proportion vs. degree',
 #              fontsize=cf.FONTSIZE + 2, va='bottom')
 ax1.set_xlim([0, 150])
 ax1.set_ylim([0., 1.05])
-ax1.set_xticks(np.arange(0,121,30))
+ax1.set_xticks(np.arange(0, 121, 30))
 ##########################################################################
 # Set background color and text size for all spines/ticks
 for temp_ax in [ax0, ax0_histRight, ax0_histTop, ax1]:

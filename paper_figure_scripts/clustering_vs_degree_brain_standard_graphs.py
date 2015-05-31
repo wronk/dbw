@@ -91,7 +91,7 @@ for ax in axs:
 
 # Set titles
 axs[0].set_title('Mouse')
-axs[1].set_title('Configuration model')
+axs[1].set_title('Random')
 axs[2].set_title('Small-World')
 axs[3].set_title('Scale-Free')
 

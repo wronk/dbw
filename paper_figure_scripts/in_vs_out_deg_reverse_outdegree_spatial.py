@@ -3,7 +3,7 @@ Created on Fri Jan 23 13:11:36 2015
 
 @author: rkp
 
-Plot the in- vs. outdegree distribution for the reverse outdegree model.
+Plot the in- vs. out-degree distribution for the reverse outdegree model.
 """
 
 import numpy as np
@@ -26,7 +26,7 @@ plt.ion()
 
 # PLOT PARAMETERS
 FACECOLOR = 'black'
-MARKERCOLOR='c'
+MARKERCOLOR = 'c'
 FONTSIZE = 16
 NBINS = 15
 
@@ -61,11 +61,12 @@ ax0_histRight = divider0.append_axes('right', 2.0, pad=0.3, sharey=ax0)
 # Call plotting function for scatter/marginal histograms (LEFT SIDE)
 plot_scatterAndMarginal(ax0, ax0_histTop, ax0_histRight, indeg, outdeg,
                         bin_width=cf.BINWIDTH, marker_size=cf.MARKERSIZE,
-                        marker_color=MARKERCOLOR, indegree_bins=cf.INDEGREE_BINS,
+                        marker_color=MARKERCOLOR,
+                        indegree_bins=cf.INDEGREE_BINS,
                         outdegree_bins=cf.OUTDEGREE_BINS)
 
-ax0.set_xlabel('Indegree')
-ax0.set_ylabel('Outdegree')
+ax0.set_xlabel('In-degree')
+ax0.set_ylabel('Out-degree')
 ax0.set_xlim(*cf.IN_OUT_SCATTER_XLIM)
 ax0.set_ylim(*cf.IN_OUT_SCATTER_YLIM)
 ax0.set_aspect('auto')
@@ -78,10 +79,10 @@ ax0_histRight.set_xlabel('# Nodes')
 # Plot percent_indeg vs. degree (RIGHT SIDE)
 ax1.scatter(deg, percent_indeg, s=cf.MARKERSIZE, lw=0, c=MARKERCOLOR)
 ax1.set_xlabel('Total degree (in + out)')
-ax1.set_ylabel('Proportion indegree')
+ax1.set_ylabel('Proportion in-degree')
 ax1.xaxis.set_major_locator(plt.MaxNLocator(4))
 ax1.set_yticks(np.arange(0, 1.1, .2))
-ax1.set_xlim([0,150])
+ax1.set_xlim([0, 150])
 ax1.set_ylim([0., 1.05])
 ax1.set_xticks(np.arange(0, 151, 50))
 

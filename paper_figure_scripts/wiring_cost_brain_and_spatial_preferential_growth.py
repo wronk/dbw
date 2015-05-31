@@ -3,7 +3,7 @@ Created on Fri Jan 23 13:11:36 2015
 
 @author: rkp
 
-Plot the in- vs. outdegree distribution for the reverse outdegree model.
+Plot the in- vs. out-degree distribution for the reverse outdegree model.
 """
 
 import numpy as np
@@ -26,10 +26,10 @@ plt.ion()
 NTRIALS = 500
 
 # PLOT PARAMETERS
-FIGSIZE = (11,4)
+FIGSIZE = (11, 4)
 FACECOLOR = 'k'
-BRAINCOLOR='m'
-MODELCOLOR='orange'
+BRAINCOLOR = 'm'
+MODELCOLOR = 'orange'
 ERCOLOR = 'r'
 FONTSIZE = 16
 NBINS = 15
@@ -42,11 +42,11 @@ G, A, D = biophysical_model(N=bc.num_brain_nodes,
                             N_edges=bc.num_brain_edges_directed,
                             L=.75,
                             gamma=1.)
-                            
+
 # create random graph
 Grandom, Arandom, Drandom = ER_distance(bc.num_brain_nodes,
                                         p=bc.p_brain_edge_directed)
-                            
+
 # calculate random swap cost distribution for brain and model
 brain_cost = swapped_cost_distr(Abrain, Dbrain, n_trials=NTRIALS)
 model_cost = swapped_cost_distr(A, D, n_trials=NTRIALS)
@@ -69,7 +69,7 @@ ax.plot(brain_bincs, brain_cts, color=BRAINCOLOR, lw=2)
 ax.plot(model_bincs, model_cts, color=MODELCOLOR, lw=2)
 ax.plot(random_bincs, random_cts, color=ERCOLOR, lw=2)
 
-ax.set_ylim(0,max(brain_cts.max(), model_cts.max(), random_cts.max()))
+ax.set_ylim(0, max(brain_cts.max(), model_cts.max(), random_cts.max()))
 ax.set_xlabel('% change in cost')
 ax.set_ylabel('counts')
 
