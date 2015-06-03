@@ -1,4 +1,3 @@
-import pdb
 """
 Created on Wed Nov 12 12:11:43 2014
 
@@ -7,14 +6,16 @@ Created on Wed Nov 12 12:11:43 2014
 Functions to extract graphs from Allen mouse connectivity.
 """
 
-import auxiliary as aux
+import os
 import networkx as nx
 import numpy as np
 
-LINEAR_MODEL_DIRECTORY = 'data'
-STRUCTURE_DIRECTORY = '../'
+import auxiliary as aux
 
-def binary_undirected(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
+DATA_DIRECTORY = os.getenv('DBW_DATA_DIRECTORY')
+
+
+def binary_undirected(p_th=.01, w_th=0, data_dir=DATA_DIRECTORY):
     """Load brain as binary undirected graph.
     
     Returns:
@@ -35,8 +36,9 @@ def binary_undirected(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
     G = nx.from_numpy_matrix(A)
     
     return G, A, labels
-    
-def binary_directed(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
+
+
+def binary_directed(p_th=.01, w_th=0, data_dir=DATA_DIRECTORY):
     """Load brain as binary directed graph.
     
     Returns:
@@ -57,8 +59,9 @@ def binary_directed(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
     G = nx.from_numpy_matrix(A, create_using=nx.DiGraph())
     
     return G, A, labels
-    
-def weighted_undirected(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
+
+
+def weighted_undirected(p_th=.01, w_th=0, data_dir=DATA_DIRECTORY):
     """Load brain as binary undirected graph.
     
     Returns:
@@ -80,7 +83,8 @@ def weighted_undirected(p_th=.01, w_th=0, data_dir=LINEAR_MODEL_DIRECTORY):
     
     return G, W, labels
 
-def distance_matrix(lm_dir=LINEAR_MODEL_DIRECTORY, cent_dir=STRUCTURE_DIRECTORY, in_mm=True):
+
+def distance_matrix(lm_dir=DATA_DIRECTORY, cent_dir=DATA_DIRECTORY, in_mm=True):
     """Compute distance matrix from centroid data.
     
     Args:
@@ -94,13 +98,14 @@ def distance_matrix(lm_dir=LINEAR_MODEL_DIRECTORY, cent_dir=STRUCTURE_DIRECTORY,
     # Load centroids
     centroids = aux.load_centroids(labels, data_dir=cent_dir, in_mm=in_mm)
     # Compute distance matrix
-    dist_mat = aux_tools.dist_mat(centroids)
+    dist_mat = aux.dist_mat(centroids)
     
     return dist_mat, centroids
-    
+
+
 def binary_directed_with_distance(p_th=.01, w_th=0, 
-                                  data_dir=LINEAR_MODEL_DIRECTORY,
-                                  cent_dir=STRUCTURE_DIRECTORY,
+                                  data_dir=DATA_DIRECTORY,
+                                  cent_dir=DATA_DIRECTORY,
                                   in_mm=True):
     """Return binary directed graph with distances as edge attributes."""
     
@@ -116,5 +121,3 @@ def binary_directed_with_distance(p_th=.01, w_th=0,
     nx.set_edge_attributes(G, 'distance', dd)
     
     return G, A, D, labels
-
-    
