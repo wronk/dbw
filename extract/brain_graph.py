@@ -17,7 +17,7 @@ DATA_DIRECTORY = os.getenv('DBW_DATA_DIRECTORY')
 
 def binary_undirected(p_th=.01, w_th=0, data_dir=DATA_DIRECTORY):
     """Load brain as binary undirected graph.
-    
+
     Returns:
         NetworkX graph, adjacency matrix, row labels & column labels"""
     # Load weights & p-values
@@ -28,19 +28,19 @@ def binary_undirected(p_th=.01, w_th=0, data_dir=DATA_DIRECTORY):
     # Symmetrize W by summing reciprocal weights
     W = W + W.T
     # Set self-weights to zero
-    np.fill_diagonal(W,0.)
+    np.fill_diagonal(W, 0.)
     # Create adjacency matrix
     A = (W > 0).astype(int)
-    
+
     # Create graph from adjacency matrix
     G = nx.from_numpy_matrix(A)
-    
+
     return G, A, labels
 
 
 def binary_directed(p_th=.01, w_th=0, data_dir=DATA_DIRECTORY):
     """Load brain as binary directed graph.
-    
+
     Returns:
         NetworkX graph, adjacency matrix, row labels & column labels"""
     # Load weights & p-values
@@ -50,20 +50,20 @@ def binary_directed(p_th=.01, w_th=0, data_dir=DATA_DIRECTORY):
     W[(P > p_th)] = 0.
 
     # Set self-weights to zero
-    np.fill_diagonal(W,0.)
-    
+    np.fill_diagonal(W, 0.)
+
     # Create adjacency matrix
     A = (W > 0).astype(int)
-    
+
     # Create graph from adjacency matrix
     G = nx.from_numpy_matrix(A, create_using=nx.DiGraph())
-    
+
     return G, A, labels
 
 
 def weighted_undirected(p_th=.01, w_th=0, data_dir=DATA_DIRECTORY):
     """Load brain as binary undirected graph.
-    
+
     Returns:
         NetworkX graph, weight matrix, row labels & column labels"""
     # Load weights & p-values
@@ -74,19 +74,19 @@ def weighted_undirected(p_th=.01, w_th=0, data_dir=DATA_DIRECTORY):
     W[(P > p_th)] = 0.
     # Symmetrize W by summing reciprocal weights
     W = W + W.T
-    
+
     # Set self-weights to zero
-    np.fill_diagonal(W,0.)
-    
+    np.fill_diagonal(W, 0.)
+
     # Create graph from weight matrix
     G = nx.from_numpy_matrix(W)
-    
+
     return G, W, labels
 
 
 def distance_matrix(lm_dir=DATA_DIRECTORY, cent_dir=DATA_DIRECTORY, in_mm=True):
     """Compute distance matrix from centroid data.
-    
+
     Args:
         lm_dir: Directory containing linear model data
         cent_dir: Directory containing centroid data
@@ -99,25 +99,25 @@ def distance_matrix(lm_dir=DATA_DIRECTORY, cent_dir=DATA_DIRECTORY, in_mm=True):
     centroids = aux.load_centroids(labels, data_dir=cent_dir, in_mm=in_mm)
     # Compute distance matrix
     dist_mat = aux.dist_mat(centroids)
-    
+
     return dist_mat, centroids
 
 
-def binary_directed_with_distance(p_th=.01, w_th=0, 
+def binary_directed_with_distance(p_th=.01, w_th=0,
                                   data_dir=DATA_DIRECTORY,
                                   cent_dir=DATA_DIRECTORY,
                                   in_mm=True):
     """Return binary directed graph with distances as edge attributes."""
-    
+
     # Load/create binary graph
     G, A, labels = binary_directed(p_th=p_th, w_th=w_th, data_dir=data_dir)
-    
+
     D, _ = distance_matrix(lm_dir=data_dir, cent_dir=cent_dir, in_mm=in_mm)
-    
+
     # Create dictionary of edge distances
-    dd = {edge:D[edge] for edge in G.edges()}
-    
+    dd = {edge: D[edge] for edge in G.edges()}
+
     # Set edge distances
     nx.set_edge_attributes(G, 'distance', dd)
-    
+
     return G, A, D, labels
