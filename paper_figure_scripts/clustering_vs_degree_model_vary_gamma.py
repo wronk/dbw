@@ -9,26 +9,29 @@ multiple gammas.
 
 import numpy as np
 import networkx as nx
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import extract.brain_graph
 import random_graph.binary_undirected as rg
 
 from network_plot.change_settings import set_all_text_fontsizes, set_all_colors
 
+assert mpl.__version__ == '1.4.3', 'Wrong matplotlib version, need 1.4.3'
+
 # PLOTTING PARAMETERS
 FACECOLOR = 'w'
-FIGSIZE = (12, 3.5)
+FIGSIZE = (12.5, 4.5)
 TEXTCOLOR = 'k'
-FONTSIZE = 18
-MODEL_COLOR = ['c'] * 4
+FONTSIZE = 20
 DEG_MAX = 150
 DEG_TICKS = [0, 50, 100, DEG_MAX]
 CC_TICKS = [0, .2, .4, .6, .8, 1.0]
-ax_labels = ('a', 'b', 'c', 'd')
+ax_labels = ['a', 'b', 'c']
 
-LS = [np.inf, np.inf, np.inf, np.inf]  # Length scale parameters all infinite
-GAMMAS = [1., 1.333, 1.667, 2.0]  # Preferential attachment parameters
+GAMMAS = [1.5, 1.75, 2.0]  # Preferential attachment parameters
+LS = [np.inf] * len(GAMMAS)  # Length scale parameters all infinite
 BRAIN_SIZE = [7., 7., 7.]  # Size brain region volume to distribute nodes
+MODEL_COLOR = ['k'] * len(GAMMAS)
 
 # Load mouse connectivity graph
 G_brain, W_brain, _ = extract.brain_graph.binary_undirected()
@@ -54,10 +57,10 @@ for gamma_idx, gamma in enumerate(GAMMAS):
 #################################
 plt.ion()
 plt.close('all')
-plt.rcParams['ps.fonttype'] = 42
+plt.rcParams['ps.fonttype'] = 42  # Set for text in Adobe Illustrator
 plt.rcParams['pdf.fonttype'] = 42
 
-fig, axs = plt.subplots(1, 4, facecolor=FACECOLOR, figsize=FIGSIZE,
+fig, axs = plt.subplots(1, len(GAMMAS), facecolor=FACECOLOR, figsize=FIGSIZE,
                         sharey=True, tight_layout=True)
 
 # Convert to list if not 1 x n
@@ -68,7 +71,8 @@ if type(axs) == np.ndarray:
 for gamma_idx, gamma in enumerate(GAMMAS):
     axs[gamma_idx].scatter(model_degrees[gamma_idx],
                            model_clusterings[gamma_idx],
-                           color=MODEL_COLOR[gamma_idx])
+                           color=MODEL_COLOR[gamma_idx],
+                           alpha=0.5)
 
 # Set axis limits and ticks, and label subplots
 for ax_ind, (ax, label) in enumerate(zip(axs, ax_labels)):
@@ -77,7 +81,7 @@ for ax_ind, (ax, label) in enumerate(zip(axs, ax_labels)):
     ax.set_xticks(DEG_TICKS)
     ax.set_yticks(CC_TICKS)
 
-    ax.text(19, .88, label, color=TEXTCOLOR, fontsize=FONTSIZE,
+    ax.text(20, .87, label, color=TEXTCOLOR, fontsize=FONTSIZE - 2,
             fontweight='bold')
 
     set_all_text_fontsizes(ax, FONTSIZE)
