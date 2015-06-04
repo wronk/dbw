@@ -7,12 +7,14 @@ Plot undirected degree dists for undirected model with different gammas
 """
 
 import numpy as np
-import networkx as nx
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import extract.brain_graph
 import random_graph.binary_undirected as rg
 
 from network_plot.change_settings import set_all_text_fontsizes
+
+assert mpl.__version__ == '1.4.3', 'Matplotlib version must be 1.4.3!'
 
 ###############################################
 # Plotting params
@@ -20,18 +22,20 @@ from network_plot.change_settings import set_all_text_fontsizes
 FACECOLOR = 'white'
 FONTSIZE = 24
 
-GAMMAS = [1., 1.33, 1.67, 2.0]  # Preferential attachment parameters
-#GAMMAS = [1.33, 1.67]
+GAMMAS = [1.5, 1.75, 2.0]  # Preferential attachment parameters
+
 # Preferential attachment parameters
-BRAIN_SIZE = [7., 7., 7.]
-# Size brain region volume to distribute nodes
-colors = ['0.1', '0.25', '0.5', '0.75']
-alphas = [0.55, 0.7, 0.85, 1.]
+BRAIN_SIZE = [7., 7., 7.]  # Size brain region volume to distribute nodes
+colors = ['0.25', '0.5', '0.75']  # Colors for each gamma
+alphas = [0.5, 0.75, 1.]
+alphas = [1., 1., 1.]
+labels = ['a', 'b', 'c']
 BRAIN_COLOR = 'm'
+titles = ['Degree Distributions', 'Degree Distributions']
 
 plt.ion()
 plt.close('all')
-plt.rcParams['ps.fonttype'] = 42
+plt.rcParams['ps.fonttype'] = 42  # For adobe illustrator
 plt.rcParams['pdf.fonttype'] = 42
 
 n_bins = 50
@@ -40,8 +44,8 @@ repeats = 100
 ###############################################
 # Histogram plot function
 ###############################################
-# Function to plot a list of histograms on a single axis. Allows code to be
-# reused for similar plots that will have just a change in x or y scale (log)
+# Helper function to plot a list of histograms on a single axis. Allows code
+# reuse for similar plots that will have just a change in x or y scale (log)
 
 
 def hist_plot(ax, deg_dists, colors, gammas, alphas, bins):
@@ -56,9 +60,6 @@ def hist_plot(ax, deg_dists, colors, gammas, alphas, bins):
     ax.locator_params(axis='x', nbins=5)
     #a.locator_params(axis='y', nbins=5)
     ax.legend(loc='best', fontsize=FONTSIZE - 10)
-
-    # Set title
-    ax.set_title('Model Degree\nDistributions')
 
     # Set xlabels
     ax.set_xlabel('Degree')
@@ -97,11 +98,17 @@ figsize = (11, 5)
 fig, axs = plt.subplots(1, 2, figsize=figsize)
 lin_bins = np.linspace(0, 150, n_bins)
 
-for ax in axs:
+for ax_i, ax in enumerate(axs):
     ax.hist(brain_degree, lin_bins, color=BRAIN_COLOR, normed=True,
             label='Mouse\nConnectome', lw=0, alpha=.4, histtype='stepfilled')
     #hist_plot(ax, gamma_dists, ['c'] * 4, GAMMAS, alphas, lin_bins)
     hist_plot(ax, gamma_dists, colors, GAMMAS, [1] * 4, lin_bins)
+
+    # Set title
+    ax.set_title(titles[ax_i])
+    ax.text(0.05, .95, labels[ax_i], color='k', fontsize=FONTSIZE - 2,
+            fontweight='bold', transform=ax.transAxes)
+
 
 ###################################################
 # Plot specific scales
