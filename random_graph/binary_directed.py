@@ -254,7 +254,7 @@ def biophysical_indegree(N=426, N_edges=8820, L=np.inf, gamma=1.,
     return G, A, D
 
 
-def biophysical_reverse_outdegree(N=426, N_edges=8820, L=np.inf, gamma=1.7,
+def biophysical_reverse_outdegree(N=426, N_edges=8820, L=np.inf, gamma=1.,
                                   brain_size=[7., 7., 7.]):
     """Create a biophysically inspired graph. Source probability depends on
     outdegree. Target probability depends on distance.
@@ -267,20 +267,18 @@ def biophysical_reverse_outdegree(N=426, N_edges=8820, L=np.inf, gamma=1.7,
         brain_size: size of space in which nodes are randomly placed
     Returns:
         Networkx graph object, adjacency matrix, distance matrix"""
+
     # Pick node positions & calculate distance matrix
     if brain_size == 'brain':
-        centroidsDict = aux_random_graphs.get_coords()
-        labels = centroidsDict.keys()
-        centroids = np.zeros([N,3])
+        centroids_dict = aux_random_graphs.get_coords()
+        labels = centroids_dict.keys()
+        centroids = np.zeros((N, 3))
 
-        for i,label in enumerate(labels):
-            centroids[i,:] = centroidsDict[label]/10.0
-        
+        for ctr, label in enumerate(labels):
+            centroids[ctr, :] = centroids_dict[label] / 10.0
 
-        
     else:
         centroids = np.random.uniform([0, 0, 0], brain_size, (N, 3))
-
 
     # Calculate distance matrix and distance decay matrix
     D = aux_tools.dist_mat(centroids)
