@@ -27,12 +27,11 @@ def reciprocity(G):
 
 def efficiency_matrix(G):
     """Calculate the efficiency (the inverse of the length of the shortest directed path) for all pairs of nodes in a graph.
-        Rows correspond to source nodes, columns to target nodes. Diagonal entries are set to -1."""
+        Rows correspond to source nodes, columns to target nodes."""
 
     shortest_path_lengths = nx.shortest_path_length(G)
 
     efficiency = np.zeros((len(G.nodes()), len(G.nodes())), dtype=float)
-    np.fill_diagonal(efficiency, -1)
 
     for src in shortest_path_lengths.keys():
         for targ in shortest_path_lengths[src].keys():
