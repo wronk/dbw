@@ -393,30 +393,11 @@ def biophysical_reverse_outdegree2(N=426, N_edges=8820, L=np.inf, gamma=1.,
         # Otherwise keep going on
         P /= float(P.sum())  # Normalize probabilities to sum to 1
 
-        # This is a pretty stupid way of doing it. Should probably just
-        # spread the remaining probability across the relevant nodes
-        # (but it's usually like 10^-8 so who cares?)
-        if P.sum() != 1.0:
-            dP = 1. - P.sum()
-            # Select random node to add the missing p
-            potential_Ps = P >= dP
-            idx = np.random.randint(len(potential_Ps))
-            which_P = potential_Ps[idx]
-            P[which_P] += dP
-            
-
         # Sample node from distribution
         from_idx = np.random.choice(np.arange(N), p=P)
 
         D_ij = D_decay[from_idx,:]
-        D_ij /= D_ij.sum()
-
-        if D_ij.sum() != 1.0:
-            dD = 1. - D_ij.sum()
-            potential_Ds = D_ij >= dD
-            idx = np.random.randint(len(potential_Ds))
-            which_D = potential_Ds[idx]
-            D_ij[which_D] += dD
+        D_ij /= float(D_ij.sum())
 
 
         # Pick random node to draw edge to
