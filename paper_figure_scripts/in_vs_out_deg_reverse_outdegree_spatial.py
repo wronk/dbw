@@ -94,4 +94,4 @@ for temp_ax in [ax0, ax0_histRight, ax0_histTop, ax1]:
     #temp_ax.patch.set_facecolor(FACECOLOR)  # Set color of plot area
     temp_ax.tick_params(width=cf.TICKSIZE)
 
-plt.show()
+plt.show(block=True)
