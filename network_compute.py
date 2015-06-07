@@ -17,11 +17,12 @@ def reciprocity(W_net):
     """Calculate the percentage of reciprocal connections."""
     W_binary = W_net > 0
     np.fill_diagonal(W_binary, False)
-    total_cxns = W_net.sum()
-    recip_cxns = (W_net * W_net.T).sum()
+    total_cxns = W_binary.sum()
+    recip_cxns = (W_binary * W_binary.T).sum()
     arecip_cxns = total_cxns - recip_cxns
 
-    recip_coeff = recip_cxns / (recip_cxns + 2 * arecip_cxns)
+#    import pdb; pdb.set_trace()
+    recip_coeff = recip_cxns / (recip_cxns + 2. * arecip_cxns)
     return recip_coeff
 
 

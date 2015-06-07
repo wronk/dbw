@@ -384,7 +384,7 @@ def biophysical_reverse_outdegree2(N=426, N_edges=8820, L=np.inf, gamma=1.,
         # Update degree list & degree-related probability vector
         outdegs = A.sum(1).astype(float)
         outdegs_prob = outdegs.copy()
-
+                
         # Calculate cxn probabilities from degree & distance
         P = (outdegs_prob ** gamma)
         # On the off changes that P == 0, skip
@@ -392,29 +392,30 @@ def biophysical_reverse_outdegree2(N=426, N_edges=8820, L=np.inf, gamma=1.,
             continue
         # Otherwise keep going on
         P /= float(P.sum())  # Normalize probabilities to sum to 1
-
+        
+        
         # Sample node from distribution
         from_idx = np.random.choice(np.arange(N), p=P)
 
         D_ij = D_decay[from_idx,:]
-        D_ij /= float(D_ij.sum())
 
+        # Find unavailable cxns and set their probability to zero
+        unavail_mask = A[from_idx, :] > 0
+        D_ij[unavail_mask] = 0
+
+
+        # Set self-connection probability to 0
+        D_ij[from_idx] = 0
+        
+        D_ij /= float(D_ij.sum())
 
         # Pick random node to draw edge to
         to_idx = np.random.choice(np.arange(N),p=D_ij)
 
-        # Skip this node if already fully connected
-        if outdegs[to_idx] == N:
-            continue
-
         
-        # Find unavailable cxns and set their probability to zero
-        unavail_mask = A[:, to_idx] > 0
-        outdegs_prob[unavail_mask] = 0
-        # Set self cxn probability to zero
-        outdegs_prob[to_idx] = 0
-
-
+        # Skip this node if already fully connected
+        if outdegs[from_idx] == N:
+            continue
 
 
         # Add edge to graph
