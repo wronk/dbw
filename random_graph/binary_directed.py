@@ -338,6 +338,112 @@ def biophysical_reverse_outdegree(N=426, N_edges=8820, L=np.inf, gamma=1.,
 
     return G, A, D
 
+def biophysical_reverse_outdegree2(N=426, N_edges=8820, L=np.inf, gamma=1.,
+                                  brain_size=[7., 7., 7.]):
+    """Create a biophysically inspired graph. Source probability depends on
+    outdegree. Target probability depends on distance.
+
+    Args:
+        N: how many nodes
+        N_edges: how many edges
+        L: length constant
+        gamma: power to raise degree to
+        brain_size: size of space in which nodes are randomly placed
+    Returns:
+        Networkx graph object, adjacency matrix, distance matrix"""
+
+    # Pick node positions & calculate distance matrix
+    if brain_size == 'brain':
+        centroids_dict = aux_random_graphs.get_coords()
+        labels = centroids_dict.keys()
+        centroids = np.zeros((N, 3))
+
+        for ctr, label in enumerate(labels):
+            centroids[ctr, :] = centroids_dict[label] / 10.0
+
+    else:
+        centroids = np.random.uniform([0, 0, 0], brain_size, (N, 3))
+
+    # Calculate distance matrix and distance decay matrix
+    D = aux_tools.dist_mat(centroids)
+    D_decay = np.exp(-D / L)
+
+    D_decay /= D_decay.sum()
+
+    # Initialize diagonal adjacency matrix
+    A = np.eye(N, dtype=float)
+
+    # Make graph object
+    G = nx.DiGraph()
+    G.add_nodes_from(np.arange(N))
+    G.centroids = centroids
+
+    # Randomly add edges
+    edge_ctr = 0
+    while edge_ctr < N_edges:
+        # Update degree list & degree-related probability vector
+        outdegs = A.sum(1).astype(float)
+        outdegs_prob = outdegs.copy()
+
+        # Calculate cxn probabilities from degree & distance
+        P = (outdegs_prob ** gamma)
+        # On the off changes that P == 0, skip
+        if P.sum() == 0:
+            continue
+        # Otherwise keep going on
+        P /= float(P.sum())  # Normalize probabilities to sum to 1
+        if P.sum() != 1.0:
+            dP = 1. - P.sum()
+            # Select random node to add the missing p
+            whichP = np.random.randint(len(P))
+            P[whichP] += dP            
+            
+
+        # Sample node from distribution
+        from_idx = np.random.choice(np.arange(N), p=P)
+
+        D_ij = D_decay[from_idx,:]
+        D_ij /= D_ij.sum()
+
+        if D_ij.sum() != 1.0:
+            dD = 1. - D_ij.sum()
+            whichD = np.random.randint(len(D_ij))
+            D_ij[whichD] += dD
+
+
+        # Pick random node to draw edge to
+        to_idx = np.random.choice(np.arange(N),p=D_ij)
+
+        # Skip this node if already fully connected
+        if outdegs[to_idx] == N:
+            continue
+
+        
+        # Find unavailable cxns and set their probability to zero
+        unavail_mask = A[:, to_idx] > 0
+        outdegs_prob[unavail_mask] = 0
+        # Set self cxn probability to zero
+        outdegs_prob[to_idx] = 0
+
+
+
+
+        # Add edge to graph
+        if A[from_idx, to_idx] == 0:
+            G.add_edge(from_idx, to_idx, {'d': D[from_idx, to_idx]})
+
+        # Add edge to adjacency matrix
+        A[from_idx, to_idx] += 1
+
+        # Increment edge counter
+        edge_ctr += 1
+
+    # Set diagonals to zero
+    np.fill_diagonal(A, 0)
+
+    return G, A, D
+
+
 
 def biophysical_reverse_outdegree_nonspatial(N=426, N_edges=8820, gamma=1.):
     """Create a biophysically inspired graph. Source probability depends on
