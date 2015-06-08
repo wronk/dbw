@@ -11,6 +11,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import extract.brain_graph
 import random_graph.binary_undirected as rg
+import config
 
 from network_plot.change_settings import set_all_text_fontsizes
 
@@ -19,8 +20,8 @@ assert mpl.__version__ == '1.4.3', 'Matplotlib version must be 1.4.3!'
 ###############################################
 # Plotting params
 ###############################################
-FACECOLOR = 'white'
-FONTSIZE = 24
+face_color = config.FACE_COLOR
+ft_size = config.FONT_SIZE
 
 GAMMAS = [1.5, 1.75, 2.0]  # Preferential attachment parameters
 
@@ -30,7 +31,7 @@ colors = ['0.25', '0.5', '0.75']  # Colors for each gamma
 alphas = [0.5, 0.75, 1.]
 alphas = [1., 1., 1.]
 labels = ['a', 'b', 'c']
-BRAIN_COLOR = 'm'
+BRAIN_COLOR = config.COLORS['brain']
 titles = ['Degree Distributions', 'Degree Distributions']
 
 plt.ion()
@@ -39,7 +40,7 @@ plt.rcParams['ps.fonttype'] = 42  # For adobe illustrator
 plt.rcParams['pdf.fonttype'] = 42
 
 n_bins = 50
-repeats = 100
+repeats = 1
 
 ###############################################
 # Histogram plot function
@@ -59,14 +60,14 @@ def hist_plot(ax, deg_dists, colors, gammas, alphas, bins):
     #ax.set_ylim([0, .15])
     ax.locator_params(axis='x', nbins=5)
     #a.locator_params(axis='y', nbins=5)
-    ax.legend(loc='best', fontsize=FONTSIZE - 10)
+    ax.legend(loc='best', fontsize=ft_size - 6)
 
     # Set xlabels
     ax.set_xlabel('Degree')
     ax.set_ylabel('P(k)')
 
     # Set all fontsizes and axis colors
-    set_all_text_fontsizes(ax, FONTSIZE)
+    set_all_text_fontsizes(ax, ft_size)
     #set_all_colors(ax, 'w')
 
 ###############################################
@@ -94,7 +95,7 @@ gamma_dists = gamma_mat.reshape((len(GAMMAS), -1))
 ###################################################
 # Plot all panels that will have axis scales changes
 ###################################################
-figsize = (11, 5)
+figsize = (12.5, 6)
 fig, axs = plt.subplots(1, 2, figsize=figsize)
 lin_bins = np.linspace(0, 150, n_bins)
 
@@ -105,8 +106,8 @@ for ax_i, ax in enumerate(axs):
     hist_plot(ax, gamma_dists, colors, GAMMAS, [1] * 4, lin_bins)
 
     # Set title
-    ax.set_title(titles[ax_i])
-    ax.text(0.05, .95, labels[ax_i], color='k', fontsize=FONTSIZE - 2,
+    ax.set_title(titles[ax_i], fontsize=ft_size)
+    ax.text(0.04, .92, labels[ax_i], color='k', fontsize=ft_size,
             fontweight='bold', transform=ax.transAxes)
 
 

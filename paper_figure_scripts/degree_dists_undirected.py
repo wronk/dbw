@@ -10,8 +10,7 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 import extract.brain_graph
-from copy import copy
-from copy import deepcopy
+import config
 
 from network_plot.change_settings import set_all_text_fontsizes
 
@@ -22,13 +21,14 @@ from networkx import watts_strogatz_graph as ws
 ###############################################
 # Plotting params
 ###############################################
-FACECOLOR = 'white'
-FONTSIZE = 24
+FACECOLOR = config.FACE_COLOR
+FONT_SIZE = config.FONT_SIZE
 
-BRAIN_COLOR = 'm'
-ER_COLOR = 'r'
-WS_COLOR = 'g'
-BA_COLOR = 'b'
+BRAIN_COLOR = config.COLORS['brain']
+ER_COLOR = config.COLORS['configuration']
+WS_COLOR = config.COLORS['small-world']
+BA_COLOR = config.COLORS['scale-free']
+labels = ['a', 'b']
 
 plt.ion()
 plt.close('all')
@@ -46,8 +46,8 @@ hist_brain = True  # Plot brain as histogram bars? Otherwise, as line
 # reused for similar plots that will have just a change in x or y scale (log)
 
 
-def hist_plot(ax, deg_dists, colors, labels):
-    for deg, col, lab in zip(deg_dists, colors, labels):
+def hist_plot(ax, deg_dists, colors, graph_names):
+    for deg, col, lab in zip(deg_dists, colors, graph_names):
         hist, plt_bins = np.histogram(deg, lin_bins, normed=True)
         ax.plot(plt_bins[:-1], hist, lw=3, color=col, label=lab)
 
@@ -65,7 +65,7 @@ def hist_plot(ax, deg_dists, colors, labels):
     ax.set_ylabel('P(k)')
 
     # Set all fontsizes and axis colors
-    set_all_text_fontsizes(ax, FONTSIZE)
+    set_all_text_fontsizes(ax, FONT_SIZE)
     #set_all_colors(ax, 'w')
 
 ###############################################
@@ -97,10 +97,11 @@ for r in np.arange(repeats):
     # Barabasi-Albert
     BA_deg_mat[r, :] = ba(n_nodes,
                           int(round(brain_degree_mean / 2.))).degree().values()
+    print 'Finished repeat: ' + str(r)
 
 deg_dists = [WS_deg_mat.flatten(), ER_deg_mat.flatten(), BA_deg_mat.flatten()]
 colors = [WS_COLOR, ER_COLOR, BA_COLOR]
-labels = ['Small-world', 'Random', 'Scale-free']
+graph_names = ['Small-world', 'Random', 'Scale-free']
 
 brain_label = 'Mouse\nConnectome'
 brain_lw = 0.5
@@ -113,15 +114,18 @@ lin_bins = np.linspace(0, 150, n_bins)
 figsize = (12, 5)
 fig, axs = plt.subplots(1, 2, figsize=figsize)
 
-for ax in axs:
-    hist_plot(ax, deg_dists, colors, labels)
+for ax_i, ax in enumerate(axs):
+    hist_plot(ax, deg_dists, colors, graph_names)
 
     if hist_brain:
         ax.hist(brain_degree, lin_bins, normed=True, lw=brain_lw,
                 color=BRAIN_COLOR, label=brain_label, alpha=brain_alpha)
     else:
         hist_plot(ax, [brain_degree], [BRAIN_COLOR], [brain_label])
-    ax.legend(loc='best', fontsize=FONTSIZE - 8)
+
+    ax.legend(loc='best', fontsize=FONT_SIZE - 6)
+    ax.text(.04, .92, labels[ax_i], color='k', fontsize=FONT_SIZE,
+            fontweight='bold', transform=ax.transAxes)
 
 ###################################################
 # Change scale for all plots
