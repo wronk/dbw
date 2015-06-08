@@ -21,7 +21,6 @@ from network_plot.network_viz import plot_scatterAndMarginal
 # IMPORT PLOT PARAMETERS
 import in_out_plot_config as cf
 
-#plt.close('all')
 plt.ion()
 
 # PLOT PARAMETERS
@@ -33,7 +32,7 @@ NBINS = 15
 # create model graph
 G, A, D = biophysical_model(N=bc.num_brain_nodes,
                             N_edges=bc.num_brain_edges_directed,
-                            L=.75,
+                            L=.725,
                             gamma=1.)
 
 # Get in & out degree
