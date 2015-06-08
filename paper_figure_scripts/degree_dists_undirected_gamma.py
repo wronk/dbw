@@ -3,6 +3,8 @@ Created on Fri May 15th 2015
 
 @author: wronk
 
+degree_dists_undirected_gamma.py
+
 Plot undirected degree dists for undirected model with different gammas
 """
 
@@ -40,7 +42,7 @@ plt.rcParams['ps.fonttype'] = 42  # For adobe illustrator
 plt.rcParams['pdf.fonttype'] = 42
 
 n_bins = 50
-repeats = 1
+repeats = 100
 
 ###############################################
 # Histogram plot function
@@ -101,7 +103,7 @@ lin_bins = np.linspace(0, 150, n_bins)
 
 for ax_i, ax in enumerate(axs):
     ax.hist(brain_degree, lin_bins, color=BRAIN_COLOR, normed=True,
-            label='Mouse\nConnectome', lw=0, alpha=.4, histtype='stepfilled')
+            label='Mouse\nConnectome', lw=0, alpha=.5, histtype='stepfilled')
     #hist_plot(ax, gamma_dists, ['c'] * 4, GAMMAS, alphas, lin_bins)
     hist_plot(ax, gamma_dists, colors, GAMMAS, [1] * 4, lin_bins)
 
