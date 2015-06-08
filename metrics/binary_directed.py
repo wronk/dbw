@@ -40,8 +40,6 @@ def efficiency_matrix(G):
     efficiencty : ndarray, shape(G.number_of_nodes(), G.number_of_nodes()
         Matrix containing pairwise efficiency calculations"""
 
-    assert G.is_directed is False, 'Graph can\'t be directed'
-
     shortest_path_lengths = nx.shortest_path_length(G)
 
     # Initialize to nan so that errors are easier to spot
@@ -57,42 +55,3 @@ def efficiency_matrix(G):
     assert np.is_nan(efficiency).any() is False, 'NaN in efficiency matrix'
 
     return efficiency
-
-
-def local_efficiency(G):
-    """Calculate local efficiency for a graph. Local efficiency is the
-    average efficiency of all neighbors of the given node.
-
-    Parameters
-    ----------
-    G : networkX graph
-
-    Returns
-    -------
-    float : avg local efficiency of the graph
-    """
-
-    assert G.is_directed is False, 'Graph can\'t be directed'
-
-    return sum(global_efficiency(G.subgraph[v]) for v in G) / len(G)
-
-
-def global_efficiency(G):
-    """Calculate global efficiency for a graph. Global efficiency is the
-    average efficiency of all neighbors of the given node.
-
-    Parameters
-    ----------
-    G : networkX graph
-
-    Returns
-    -------
-    float : avg global efficiency of the graph
-    """
-
-    assert G.is_directed is False, 'Graph can\'t be directed'
-
-    n_nodes = G.number_of_nodes()
-    den = n_nodes * (n_nodes - 1)
-
-    return np.sum(efficiency_matrix(G)) / den
