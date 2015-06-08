@@ -13,6 +13,7 @@ import networkx as nx
 import extract.brain_graph
 import random_graph.binary_undirected as bio_und
 from random_graph import binary_undirected
+from metrics import binary_undirected as und_metrics
 
 ###############################
 # Parameters
@@ -23,7 +24,8 @@ save_dir = '/home/wronk/Documents/dbw_figs/'
 
 repeats = 2
 graph_names = ['Mouse Connectome', 'Random', 'Small-World', 'Scale-Free']
-metrics = [nx.average_clustering, nx.average_shortest_path_length]
+metrics = [nx.average_clustering, nx.average_shortest_path_length,
+           und_metrics.global_efficiency, und_metrics.local_efficiency]
 brain_size = [7., 7., 7.]
 
 # Initialize matrix to store metric values
@@ -59,9 +61,9 @@ for met_i, bm in enumerate(metrics):
     met_arr[graph_names.index('Mouse Connectome'), :, met_i] = bm(G_brain)
 
 for rep in np.arange(repeats):
-    # Amplified pref attachment model using gamma 0f 1.67
+    # Amplified pref attachment model using gamma 0f 1.75
     if 'Amplified Pref. Attachment' in graph_names:
-        G_Bio, _, _ = bio_und(n_nodes, n_edges, np.info, 1.67, brain_size)
+        G_Bio, _, _ = bio_und(n_nodes, n_edges, np.info, 1.75, brain_size)
         met_arr[graph_names.index('Amplified Pref. Attachment'), rep, :] = \
             calc_metrics(G_Bio, metrics)
 
