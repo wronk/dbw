@@ -13,20 +13,21 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import extract.brain_graph
 import random_graph.binary_undirected as rg
+import config
 
 from network_plot.change_settings import set_all_text_fontsizes, set_all_colors
 
 assert mpl.__version__ == '1.4.3', 'Wrong matplotlib version, need 1.4.3'
 
 # PLOTTING PARAMETERS
-FACECOLOR = 'w'
+FACE_COLOR = config.FACE_COLOR
 FIGSIZE = (12.5, 4.5)
 TEXTCOLOR = 'k'
-FONTSIZE = 20
+FONT_SIZE = config.FONT_SIZE
 DEG_MAX = 150
 DEG_TICKS = [0, 50, 100, DEG_MAX]
 CC_TICKS = [0, .2, .4, .6, .8, 1.0]
-ax_labels = ['a', 'b', 'c']
+ax_labels = ['c', 'd', 'e']
 
 GAMMAS = [1.5, 1.75, 2.0]  # Preferential attachment parameters
 LS = [np.inf] * len(GAMMAS)  # Length scale parameters all infinite
@@ -60,7 +61,7 @@ plt.close('all')
 plt.rcParams['ps.fonttype'] = 42  # Set for text in Adobe Illustrator
 plt.rcParams['pdf.fonttype'] = 42
 
-fig, axs = plt.subplots(1, len(GAMMAS), facecolor=FACECOLOR, figsize=FIGSIZE,
+fig, axs = plt.subplots(1, len(GAMMAS), facecolor=FACE_COLOR, figsize=FIGSIZE,
                         sharey=True, tight_layout=True)
 
 # Convert to list if not 1 x n
@@ -81,16 +82,15 @@ for ax_ind, (ax, label) in enumerate(zip(axs, ax_labels)):
     ax.set_xticks(DEG_TICKS)
     ax.set_yticks(CC_TICKS)
 
-    ax.text(20, .87, label, color=TEXTCOLOR, fontsize=FONTSIZE - 2,
+    ax.text(20, .87, label, color=TEXTCOLOR, fontsize=FONT_SIZE,
             fontweight='bold')
 
-    set_all_text_fontsizes(ax, FONTSIZE)
+    set_all_text_fontsizes(ax, FONT_SIZE)
     set_all_colors(ax, TEXTCOLOR)
 
     # Set titles/labels
     ax.set_xlabel('Degree')
-    ax.set_title(r'$\gamma$ = %.2f' % GAMMAS[ax_ind],
-                 fontsize=FONTSIZE)
+    ax.set_title(r'$\gamma$ = %.2f' % GAMMAS[ax_ind], fontsize=FONT_SIZE)
 
 axs[0].set_ylabel('Clustering\ncoefficient')
 
