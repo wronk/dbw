@@ -27,7 +27,7 @@ def ER_distance(N=426, p=.043, brain_size=[7., 7., 7.]):
     return G, A.todense(), D
 
 
-def biophysical(N=426, N_edges=8820, L=np.inf, gamma=1.7,
+def biophysical(N=426, N_edges=8820, L=np.inf, gamma=1.75,
                 brain_size=[7., 7., 7.]):
     """Create a biophysically inspired graph. Connection probabilities depend
     on distance & degree.
@@ -103,7 +103,7 @@ def biophysical(N=426, N_edges=8820, L=np.inf, gamma=1.7,
     return G, A, D
 
 
-def biophysical_reverse(N=426, N_edges=8820, L=np.inf, gamma=1.7,
+def biophysical_reverse(N=426, N_edges=8820, L=np.inf, gamma=1.75,
                         brain_size=[7., 7., 7.]):
     """Create a biophysically inspired graph. Connection probabilities depend
     on distance & degree.
@@ -297,7 +297,7 @@ def biophysical_reverse_outdegree(N=426, N_edges=8820, L=np.inf, gamma=1., brain
         # Update degree list & degree-related probability vector
         outdegs = A.sum(1).astype(float)
         outdegs_prob = outdegs.copy()
-                
+
         # Calculate source node probability
         P = outdegs_prob ** gamma
         # On the off chance that P == 0, skip
@@ -317,7 +317,7 @@ def biophysical_reverse_outdegree(N=426, N_edges=8820, L=np.inf, gamma=1., brain
 
         # Set self-connection probability to 0
         D_src[src_idx] = 0
-        
+
         D_src /= float(D_src.sum())
 
         # Pick random node to draw edge to

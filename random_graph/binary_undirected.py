@@ -28,7 +28,7 @@ def ER_distance(N=426, p=.086, brain_size=[7., 7., 7.]):
     return G, A, D
 
 
-def biophysical(N=426, N_edges=7804, L=2.2, gamma=1.67,
+def biophysical(N=426, N_edges=7804, L=2.2, gamma=1.75,
                 brain_size=[7., 7., 7.]):
     """Create a biophysically inspired graph. Connection probabilities depend
     on distance & degree.
@@ -104,7 +104,7 @@ def biophysical(N=426, N_edges=7804, L=2.2, gamma=1.67,
 
 
 def undirected_biophysical_reverse_outdegree(N=426, N_directed_edges=8820,
-                                             L=np.inf, gamma=1.7,
+                                             L=np.inf, gamma=1.75,
                                              brain_size=[7., 7., 7.]):
     """Identical to the biophysical reverse outdegree model, except that
     adjacency matrix is symmetrized so that reciprocal edges merge into one."""
