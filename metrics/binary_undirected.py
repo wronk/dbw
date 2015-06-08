@@ -10,9 +10,11 @@ import numpy as np
 import scipy.stats as stats
 import networkx as nx
 from itertools import combinations
+import copy
 
 import auxiliary as aux
 import warnings
+warnings.simplefilter('always')  # Continually warn if problem
 
 
 def cxn_length_scale(A, D, bins=50, no_self_cxns=True):
@@ -140,30 +142,10 @@ def efficiency(G, n1, n2):
     float
         efficiency between the node u and v"""
 
-    if G.is_directed() is False:
+    if G.is_directed() is True:
         warnings.warn("Graph shouldn't be directed", Warning)
 
     return 1. / nx.shortest_path_length(G, n1, n2)
-
-
-def local_efficiency(G):
-    """Calculate local efficiency for a graph. Local efficiency is the
-    average efficiency of all neighbors of the given node.
-
-    Parameters
-    ----------
-    G : networkX graph
-
-    Returns
-    -------
-    float : avg local efficiency of the graph
-    """
-
-    if G.is_directed() is False:
-        warnings.warn("Graph shouldn't be directed", Warning)
-
-    return sum(global_efficiency(G.subgraph[v]) for v in G) / \
-        np.float(G.order())
 
 
 def global_efficiency(G):
@@ -179,10 +161,30 @@ def global_efficiency(G):
     float : avg global efficiency of the graph
     """
 
-    if G.is_directed() is False:
+    if G.is_directed() is True:
         warnings.warn("Graph shouldn't be directed", Warning)
 
     n_nodes = G.number_of_nodes()
     den = np.float(n_nodes * (n_nodes - 1))
 
-    return sum(efficiency(G, n1, n2) for n1, n2 in combinations(G, 2)) / den
+    return sum(efficiency(G.copy(), n1, n2) for n1, n2 in combinations(G, 2)) / den
+
+
+def local_efficiency(G):
+    """Calculate local efficiency for a graph. Local efficiency is the
+    average efficiency of all neighbors of the given node.
+
+    Parameters
+    ----------
+    G : networkX graph
+
+    Returns
+    -------
+    float : avg local efficiency of the graph
+    """
+
+    if G.is_directed() is True:
+        warnings.warn("Graph shouldn't be directed", Warning)
+
+    return sum(global_efficiency(G.subgraph(G[v]).copy()) for v in G) / \
+        np.float(G.order())
