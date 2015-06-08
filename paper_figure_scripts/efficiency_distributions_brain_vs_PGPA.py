@@ -27,7 +27,7 @@ G_er = nx.erdos_renyi_graph(bc.num_brain_nodes,
 
 # create pgpa graph
 print('generating model...')
-G_pgpa, _, _ = pgpa(N=bc.num_brain_nodes, N_edges=bc.num_brain_edges_directed, L=.75)
+G_pgpa, _, _ = pgpa(N=bc.num_brain_nodes, N_edges=bc.num_brain_edges_directed, L=.725)
 
 print('calculating efficiencies')
 # calculate local efficiency distribution
