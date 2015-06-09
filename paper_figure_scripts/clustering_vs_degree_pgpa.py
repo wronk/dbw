@@ -9,6 +9,8 @@ from random_graph.binary_directed import biophysical_reverse_outdegree as pgpa
 from network_plot import change_settings
 
 import brain_constants as bc
+from config.graph_parameters import LENGTH_SCALE
+
 from config import COLORS, FACE_COLOR, AX_COLOR, FONT_SIZE
 
 # parameters for this particular plot
@@ -24,7 +26,7 @@ print('generating model...')
 G_pgpa_L_inf, _, _ = pgpa(N=bc.num_brain_nodes, N_edges=bc.num_brain_edges_directed, L=np.inf)
 
 print('generating model...')
-G_pgpa, _, _ = pgpa(N=bc.num_brain_nodes, N_edges=bc.num_brain_edges_directed, L=.725)
+G_pgpa, _, _ = pgpa(N=bc.num_brain_nodes, N_edges=bc.num_brain_edges_directed, L=LENGTH_SCALE)
 
 # cast both models to undirected graphs
 

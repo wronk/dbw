@@ -14,6 +14,7 @@ from random_graph.binary_directed import biophysical_reverse_outdegree as biophy
 from network_plot.change_settings import set_all_text_fontsizes, set_all_colors
 
 import brain_constants as bc
+from config.graph_parameters import LENGTH_SCALE
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from network_plot.network_viz import plot_scatterAndMarginal
@@ -32,7 +33,7 @@ NBINS = 15
 # create model graph
 G, A, D = biophysical_model(N=bc.num_brain_nodes,
                             N_edges=bc.num_brain_edges_directed,
-                            L=.725,
+                            L=LENGTH_SCALE,
                             gamma=1.)
 
 # Get in & out degree

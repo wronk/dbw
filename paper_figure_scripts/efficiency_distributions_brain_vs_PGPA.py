@@ -10,6 +10,7 @@ from metrics import binary_directed as metrics
 from network_plot import change_settings
 
 import brain_constants as bc
+from config.graph_parameters import LENGTH_SCALE
 from config import COLORS, FACE_COLOR, AX_COLOR, FONT_SIZE
 
 # parameters for this particular plot
@@ -27,7 +28,7 @@ G_er = nx.erdos_renyi_graph(bc.num_brain_nodes,
 
 # create pgpa graph
 print('generating model...')
-G_pgpa, _, _ = pgpa(N=bc.num_brain_nodes, N_edges=bc.num_brain_edges_directed, L=.725)
+G_pgpa, _, _ = pgpa(N=bc.num_brain_nodes, N_edges=bc.num_brain_edges_directed, L=LENGTH_SCALE)
 
 print('calculating efficiencies')
 # calculate local efficiency distribution
@@ -56,8 +57,8 @@ axs[0].set_xlabel('efficiency')
 axs[0].set_ylabel('probability')
 axs[1].set_xlabel('efficiency')
 
-axs[0].set_title('all efficiencies')
-axs[1].set_title('average local efficiencies')
+axs[0].set_title('efficiencies for all node pairs')
+axs[1].set_title('local efficiencies')
 
 for ax in axs:
     change_settings.set_all_colors(ax, AX_COLOR)
