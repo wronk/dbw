@@ -2,6 +2,7 @@
 Created on Mon Nov 24 09:17:11 2014
 
 @author: rkp, wronk
+clustering_vs_degree_brain_standard_graph.py
 
 Plot clustering vs. degree for mouse connectome and standard random graphs.
 """
@@ -45,7 +46,7 @@ brain_degree_mean = np.mean(brain_degree)
 
 # Build standard graphs & get their degree & clustering coefficient
 # Configuration model (random with fixed degree sequence)
-G_CM = nx.random_degree_sequence_graph(sequence=brain_degree, tries=100)
+G_CM, _, _ = nx.random_degree_sequence_graph(brain_degree, tries=100)
 CM_degree = nx.degree(G_CM).values()
 CM_clustering = nx.clustering(G_CM).values()
 
