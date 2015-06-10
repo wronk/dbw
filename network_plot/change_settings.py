@@ -9,6 +9,7 @@ Code for quickly changing graphical settings.
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def set_all_text_fontsizes(ax, fontsize=16):
     """Set fontsize of all text elements in an axis."""
 
@@ -19,6 +20,7 @@ def set_all_text_fontsizes(ax, fontsize=16):
 
     for text in text_items:
         text.set_fontsize(fontsize)
+
 
 def set_all_colors(ax, color):
     """Set colors on all parts of axis."""
