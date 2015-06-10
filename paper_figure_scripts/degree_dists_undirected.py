@@ -2,6 +2,7 @@
 Created on Wed May 13th 2015
 
 @author: wronk
+degree_dists_undirected.py
 
 Plot undirected degree distributions for brain and standard graphs
 """
@@ -25,7 +26,7 @@ FACECOLOR = config.FACE_COLOR
 FONT_SIZE = config.FONT_SIZE
 
 BRAIN_COLOR = config.COLORS['brain']
-ER_COLOR = config.COLORS['configuration']
+RAND_COLOR = config.COLORS['configuration']
 WS_COLOR = config.COLORS['small-world']
 BA_COLOR = config.COLORS['scale-free']
 labels = ['a', 'b']
@@ -46,10 +47,12 @@ hist_brain = True  # Plot brain as histogram bars? Otherwise, as line
 # reused for similar plots that will have just a change in x or y scale (log)
 
 
-def hist_plot(ax, deg_dists, colors, graph_names):
-    for deg, col, lab in zip(deg_dists, colors, graph_names):
+def hist_plot(ax, deg_dists, colors, graph_names, graph_ls):
+
+    # Loop through all desired graphs
+    for deg, col, lab, ls in zip(deg_dists, colors, graph_names, graph_ls):
         hist, plt_bins = np.histogram(deg, lin_bins, normed=True)
-        ax.plot(plt_bins[:-1], hist, lw=3, color=col, label=lab)
+        ax.plot(plt_bins[:-1], hist, ls=ls, lw=3, color=col, label=lab)
 
     # Set axis limits and ticks, and label subplots
     ax.set_xlim([0, 150])
@@ -83,12 +86,16 @@ brain_degree_mean = np.mean(brain_degree)
 
 # Initialize repetition matrices for standard graphs
 ER_deg_mat = -1 * np.ones((repeats, n_nodes))
+RAND_deg_mat = -1 * np.ones((repeats, n_nodes))
 WS_deg_mat = -1 * np.ones((repeats, n_nodes))
 BA_deg_mat = -1 * np.ones((repeats, n_nodes))
 
 for r in np.arange(repeats):
     # Erdos-Renyi
     ER_deg_mat[r, :] = er(n_nodes, edge_density).degree().values()
+
+    RAND_deg_mat[r, :] = nx.random_degree_sequence_graph(
+        brain_degree, tries=100).degree().values()
 
     # Watts-Strogatz
     WS_deg_mat[r, :] = ws(n_nodes, int(round(brain_degree_mean)),
@@ -99,9 +106,11 @@ for r in np.arange(repeats):
                           int(round(brain_degree_mean / 2.))).degree().values()
     print 'Finished repeat: ' + str(r)
 
-deg_dists = [WS_deg_mat.flatten(), ER_deg_mat.flatten(), BA_deg_mat.flatten()]
-colors = [WS_COLOR, ER_COLOR, BA_COLOR]
-graph_names = ['Small-world', 'Random', 'Scale-free']
+deg_dists = [ER_deg_mat.flatten(), RAND_deg_mat.flatten(),
+             WS_deg_mat.flatten(), BA_deg_mat.flatten()]
+colors = [RAND_COLOR, RAND_COLOR, WS_COLOR, BA_COLOR]
+graph_names = ['ER Random', 'Random', 'Small-world', 'Scale-free']
+graph_ls = ['--', '-', '-', '-']
 
 brain_label = 'Mouse\nConnectome'
 brain_lw = 0.5
@@ -115,13 +124,17 @@ figsize = (12, 5)
 fig, axs = plt.subplots(1, 2, figsize=figsize)
 
 for ax_i, ax in enumerate(axs):
-    hist_plot(ax, deg_dists, colors, graph_names)
 
+    # Plot brain histogram depending on if hist bars are wanted or not
     if hist_brain:
         ax.hist(brain_degree, lin_bins, normed=True, lw=brain_lw,
-                color=BRAIN_COLOR, label=brain_label, alpha=brain_alpha)
+                color=BRAIN_COLOR, label=brain_label,
+                alpha=brain_alpha)
     else:
         hist_plot(ax, [brain_degree], [BRAIN_COLOR], [brain_label])
+
+    # Plot all std graphs
+    hist_plot(ax, deg_dists, colors, graph_names, graph_ls)
 
     ax.legend(loc='best', fontsize=FONT_SIZE - 6)
     ax.text(.04, .92, labels[ax_i], color='k', fontsize=FONT_SIZE,
@@ -137,6 +150,10 @@ axs[0].locator_params(axis='y', nbins=5)
 axs[1].set_ylim([10E-4, 1])
 axs[1].set_yscale('log')
 axs[1].legend_.remove()
+
+# Put mouse connectome legend entry on top
+handles, legends = axs[0].get_legend_handles_labels()
+axs[0].legend(handles[::-1], legends[::-1])
 
 '''
 # Plot on log scale (looking for power-law solutions)
