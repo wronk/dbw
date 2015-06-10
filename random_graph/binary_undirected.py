@@ -119,8 +119,8 @@ def undirected_biophysical_reverse_outdegree(N=426, N_directed_edges=8820,
     return G, A, D
 
 
-def random_simple_deg_seq(sequence, brain_size=[7., 7., 7.],
-                          seed=None, tries=10):
+def random_simple_deg_seq(sequence, brain_size=[7., 7., 7.], seed=None,
+                          tries=10):
     '''Wrapper function to get a SIMPLE (no parallel or self-loop edges) graph
     that has a given degree sequence.
 
