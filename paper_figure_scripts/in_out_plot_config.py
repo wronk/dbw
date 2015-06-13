@@ -25,5 +25,5 @@ AX1_COLSPAN = 1
 IN_OUT_SCATTER_XLIM = (0,55)
 IN_OUT_SCATTER_YLIM = (0,150)
 
-INDEGREE_BINS = np.linspace(0, 55, 20)
-OUTDEGREE_BINS = np.linspace(0, 150, 20)
+INDEGREE_BINS = np.linspace(0, 150, 41)
+OUTDEGREE_BINS = np.linspace(0, 150, 41)
