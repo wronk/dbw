@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from random_graph.binary_directed import biophysical_indegree, biophysical_reverse_outdegree
 
 from network_plot.change_settings import set_all_text_fontsizes, set_all_colors
 
@@ -11,6 +12,8 @@ import brain_constants as bc
 
 import color_scheme
 import in_out_plot_config as cf
+
+# Initialize the figure and axes objects
 
 fig = plt.figure(figsize=cf.FIGSIZE,facecolor='w')
 plt.subplots_adjust(bottom=0.15,hspace=0.45,wspace=0.55)
@@ -27,6 +30,7 @@ top_margin_ax = plt.subplot2grid(cf.subplot_divisions,cf.top_margin_location,row
 right_margin_ax = plt.subplot2grid(cf.subplot_divisions,cf.right_margin_location,rowspan=cf.right_margin_rowspan,\
                                  colspan=cf.right_margin_colspan,sharey=left_main_ax)
 
+
 # To get the log axes we need to create another axis on top of our existing ones
 top_dummy_ax = top_margin_ax.twinx()
 right_dummy_ax = right_margin_ax.twiny()
@@ -36,7 +40,9 @@ right_dummy_ax = right_margin_ax.twiny()
 #                                 colspan=right_margin_colspan,sharey=left_main_ax,frameon=False)
 
 # create attachment and growht models
-G, _, _ = binary_directed()          
+G, _, _ = biophysical_reverse_outdegree(N=bc.num_brain_nodes,
+                                              N_edges=bc.num_brain_edges_directed,
+                                              L=0.725, gamma=1.)
 
 # Get in- & out-degree
 indeg = np.array([G.in_degree()[node]
@@ -53,7 +59,7 @@ a1 = 1.0
 
 
 # Left main plot (in vs out degree)
-left_main_ax.scatter(indeg,outdeg,c=color_scheme.ATLAS,\
+left_main_ax.scatter(indeg,outdeg,c=color_scheme.PGPA,\
                      s=cf.MARKERSIZE,lw=0)
 
 left_main_ax.set_xlabel('In-degree')
@@ -69,7 +75,7 @@ left_main_ax.legend(loc='best')
 
 # Top marginal (in-degree)
 top_margin_ax.hist(indeg,bins=cf.OUTDEGREE_BINS,histtype='stepfilled',\
-                     color=color_scheme.ATLAS,normed=True,stacked=True)
+                     color=color_scheme.PGPA,normed=True,stacked=True)
 #top_margin_ax.plot(indeg_x,indeg_y,linestyle='-',lw=4,color='k')
 
 # This is for the log-axis
@@ -89,7 +95,7 @@ top_margin_ax.set_ylim([0,1.0])
 
 # Right marginal (out-degree)
 right_margin_ax.hist(outdeg,bins=cf.OUTDEGREE_BINS,histtype='stepfilled',\
-                     color=color_scheme.ATLAS,orientation='horizontal',normed=True,stacked=True)
+                     color=color_scheme.PGPA,orientation='horizontal',normed=True,stacked=True)
 
 # This is for the log-axis
 outdeg_hist = np.histogram(outdeg,bins=cf.OUTDEGREE_BINS)
@@ -114,7 +120,7 @@ right_margin_ax.set_xlim([0,0.08])
 
 # Right main plot (proportion in vs total degree)
 right_main_ax.scatter(deg, percent_indeg, s=cf.MARKERSIZE, lw=0,
-            c=color_scheme.ATLAS)
+            c=color_scheme.PGPA)
 
 right_main_ax.set_xlabel('Total degree (in + out)')
 right_main_ax.set_ylabel('Proportion in-degree')

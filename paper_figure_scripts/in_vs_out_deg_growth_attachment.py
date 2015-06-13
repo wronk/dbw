@@ -12,44 +12,20 @@ import color_scheme
 import in_out_plot_config as cf
 
 
-### Set up parameters for the subplots
-subplot_divisions = (4,8)
+fig = plt.figure(figsize=cf.FIGSIZE,facecolor='w')
+plt.subplots_adjust(bottom=0.15,hspace=0.45,wspace=0.55)
 
-top_margin_colspan = 3
-top_margin_rowspan = 1
-top_margin_location = (0,0)
+left_main_ax = plt.subplot2grid(cf.subplot_divisions,cf.left_main_location,rowspan=cf.left_main_rowspan,\
+                                 colspan=cf.left_main_colspan)
 
-right_margin_colspan = 1
-right_margin_rowspan = 3
-right_margin_location = (1,3)
+right_main_ax = plt.subplot2grid(cf.subplot_divisions,cf.right_main_location,rowspan=cf.right_main_rowspan,\
+                                 colspan=cf.right_main_colspan)
 
-left_main_colspan = 3
-left_main_rowspan = 3
-left_main_location = (1,0)
+top_margin_ax = plt.subplot2grid(cf.subplot_divisions,cf.top_margin_location,rowspan=cf.top_margin_rowspan,\
+                                 colspan=cf.top_margin_colspan,sharex=left_main_ax)
 
-right_main_colspan = 3
-right_main_rowspan = 3
-right_main_location = (1,5)
-
-
-# Initialize the figure and axes objects
-k = 1.25
-fig = plt.figure(figsize=(10*k,4*k),facecolor='w')
-plt.subplots_adjust(bottom=0.15,hspace=0.45,wspace=0.45)
-
-left_main_ax = plt.subplot2grid(subplot_divisions,left_main_location,rowspan=left_main_rowspan,\
-                                 colspan=left_main_colspan)
-
-right_main_ax = plt.subplot2grid(subplot_divisions,right_main_location,rowspan=right_main_rowspan,\
-                                 colspan=right_main_colspan)
-
-top_margin_ax = plt.subplot2grid(subplot_divisions,top_margin_location,rowspan=top_margin_rowspan,\
-                                 colspan=top_margin_colspan,sharex=left_main_ax)
-
-right_margin_ax = plt.subplot2grid(subplot_divisions,right_margin_location,rowspan=right_margin_rowspan,\
-                                 colspan=right_margin_colspan,sharey=left_main_ax)
-
-
+right_margin_ax = plt.subplot2grid(cf.subplot_divisions,cf.right_margin_location,rowspan=cf.right_margin_rowspan,\
+                                 colspan=cf.right_margin_colspan,sharey=left_main_ax)
 
 # create attachment and growht models
 Gattachment, _, _ = biophysical_indegree(N=bc.num_brain_nodes,
@@ -96,30 +72,37 @@ left_main_ax.set_yticks(np.arange(0, 101, 25))
 
 # Top marginal (in-degree)
 top_margin_ax.hist(indeg_attachment,bins=cf.OUTDEGREE_BINS,histtype='stepfilled',\
-                     color=color_scheme.PREFATTACHMENT,alpha=a1,label='Preferential attachment')
+                   color=color_scheme.PREFATTACHMENT,alpha=a1,label='Preferential attachment',\
+                   normed=True,stacked=True)
 top_margin_ax.hist(indeg_growth,bins=cf.OUTDEGREE_BINS,histtype='stepfilled',\
-                     color=color_scheme.PREFGROWTH,alpha=a1,label='Preferential growth')
-leg=top_margin_ax.legend(loc='upper right')
+                   color=color_scheme.PREFGROWTH,alpha=a1,label='Preferential growth',\
+                   normed=True,stacked=True)
+leg=top_margin_ax.legend(loc='upper right',prop={'size':25})
 
 # Right marginal (out-degree)
 right_margin_ax.hist(outdeg_attachment,bins=cf.OUTDEGREE_BINS,histtype='stepfilled',\
-                     color=color_scheme.PREFATTACHMENT,alpha=a1,orientation='horizontal')
+                     color=color_scheme.PREFATTACHMENT,alpha=a1,orientation='horizontal',\
+                     normed=True,stacked=True)
 right_margin_ax.hist(outdeg_growth,bins=cf.OUTDEGREE_BINS,histtype='stepfilled',\
-                     color=color_scheme.PREFGROWTH,alpha=a1,orientation='horizontal')
+                     color=color_scheme.PREFGROWTH,alpha=a1,orientation='horizontal',\
+                     normed=True,stacked=True)
 
 plt.setp(right_margin_ax.get_yticklabels() + top_margin_ax.get_xticklabels(),visible=False)
 
-top_margin_ax.set_yticks([0,60,120])
-top_margin_ax.set_ylim([0,120])
-right_margin_ax.set_xticks([0,60,120])
-right_margin_ax.set_xlim([0,120])
+top_margin_ax.set_yticks([0,0.05,0.1])
+top_margin_ax.set_ylim([0,0.1])
+right_margin_ax.set_xticks([0,0.05,0.1])
+right_margin_ax.set_xlim([0,0.1])
+
+top_margin_ax.set_ylabel('$P(K_\mathrm{in} = k)$')
+right_margin_ax.set_xlabel('$P(K_\mathrm{out} = k)$')
 
 
 # Right main plot (proportion in vs total degree)
 right_main_ax.scatter(deg_attachment, percent_indeg_attachment, s=cf.MARKERSIZE, lw=0,
-            c=color_scheme.PREFATTACHMENT, alpha=al)
+            c=color_scheme.PREFATTACHMENT, alpha=a1)
 right_main_ax.scatter(deg_growth, percent_indeg_growth, s=cf.MARKERSIZE, lw=0,
-            c=color_scheme.PREFGROWTH, alpha=al)
+            c=color_scheme.PREFGROWTH, alpha=a1)
 right_main_ax.set_xlabel('Total degree (in + out)')
 right_main_ax.set_ylabel('Proportion in-degree')
 right_main_ax.xaxis.set_major_locator(plt.MaxNLocator(4))
@@ -135,4 +118,9 @@ for temp_ax in [left_main_ax, right_main_ax, top_margin_ax, right_margin_ax]:
     temp_ax.tick_params(width=cf.TICKSIZE)
 
 
+right_tick_labels = right_margin_ax.get_xticklabels()
+for tick in right_tick_labels:
+    tick.set_rotation(270)
+
+    
 plt.show(block=False)
