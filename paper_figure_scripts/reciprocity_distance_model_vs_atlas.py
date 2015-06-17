@@ -18,11 +18,9 @@ from network_compute import reciprocity
 
 # load brain graph, adjacency matrix, and labels
 
-
 labelsize = 24
 ticksize = 20
 legendsize = 18
-
 
 ### First we do stuff for the brain
 # load brain graph, adjacency matrix, and labels
@@ -31,7 +29,8 @@ label_mapping = {k:labels[k] for k in range(len(labels))}
 G = nx.relabel_nodes(G,label_mapping)
 
 centroidsUncorrected = aux_random_graphs.get_coords()
-centroids = {k:centroidsUncorrected[k]/10 for k in centroidsUncorrected} # This is because the coordinates are off by a factor of 10
+# This is because the coordinates are off by a factor of 10
+centroids = {k:centroidsUncorrected[k]/10. for k in centroidsUncorrected}
 
 # get in & out degree
 indeg = np.array([G.in_degree()[node] for node in G])
@@ -80,9 +79,6 @@ axs[0].set_xlabel('Distance (mm)', fontsize=labelsize)
 axs[0].set_ylabel('Density', fontsize=labelsize)
 axs[0].set_xlim([0,max(bins)])
 #axs[0].legend(['Reciprocal edges', 'All edges'],prop={'size':24})
-
-
-
 
 ### Now for the model...
 G, A, labels = biophysical_model(N=num_brain_nodes,
