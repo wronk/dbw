@@ -15,7 +15,7 @@ import config
 
 from network_plot.change_settings import set_all_text_fontsizes
 
-from networkx import erdos_renyi_graph as er
+#from networkx import erdos_renyi_graph as er
 from networkx import barabasi_albert_graph as ba
 from networkx import watts_strogatz_graph as ws
 
@@ -85,15 +85,16 @@ brain_degree = nx.degree(G_brain).values()
 brain_degree_mean = np.mean(brain_degree)
 
 # Initialize repetition matrices for standard graphs
-ER_deg_mat = -1 * np.ones((repeats, n_nodes))
+#ER_deg_mat = -1 * np.ones((repeats, n_nodes))
 RAND_deg_mat = -1 * np.ones((repeats, n_nodes))
 WS_deg_mat = -1 * np.ones((repeats, n_nodes))
 BA_deg_mat = -1 * np.ones((repeats, n_nodes))
 
 for r in np.arange(repeats):
-    # Erdos-Renyi
-    ER_deg_mat[r, :] = er(n_nodes, edge_density).degree().values()
+    # Erdos-Renyi (pure random)
+    #ER_deg_mat[r, :] = er(n_nodes, edge_density).degree().values()
 
+    # Degree controlled random
     RAND_deg_mat[r, :] = nx.random_degree_sequence_graph(
         brain_degree, tries=100).degree().values()
 
@@ -106,11 +107,11 @@ for r in np.arange(repeats):
                           int(round(brain_degree_mean / 2.))).degree().values()
     print 'Finished repeat: ' + str(r)
 
-deg_dists = [ER_deg_mat.flatten(), RAND_deg_mat.flatten(),
-             WS_deg_mat.flatten(), BA_deg_mat.flatten()]
-colors = [RAND_COLOR, RAND_COLOR, WS_COLOR, BA_COLOR]
-graph_names = ['ER Random', 'Random', 'Small-world', 'Scale-free']
-graph_ls = ['--', '-', '-', '-']
+deg_dists = [RAND_deg_mat.flatten(), WS_deg_mat.flatten(),
+             BA_deg_mat.flatten()]
+colors = [RAND_COLOR, WS_COLOR, BA_COLOR]
+graph_names = ['Random', 'Small-world', 'Scale-free']
+graph_ls = ['-', '-', '-']
 
 brain_label = 'Mouse\nConnectome'
 brain_lw = 0.5
