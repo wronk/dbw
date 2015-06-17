@@ -10,7 +10,6 @@ import numpy as np
 import scipy.stats as stats
 import networkx as nx
 from itertools import combinations
-import copy
 
 import auxiliary as aux
 import warnings
@@ -150,7 +149,7 @@ def efficiency(G, n1, n2):
 
 def global_efficiency(G):
     """Calculate global efficiency for a graph. Global efficiency is the
-    average efficiency of all neighbors of the given node.
+    average efficiency of all nodes in the graph.
 
     Parameters
     ----------
@@ -167,7 +166,7 @@ def global_efficiency(G):
     n_nodes = G.number_of_nodes()
     den = np.float(n_nodes * (n_nodes - 1))
 
-    return sum(efficiency(G.copy(), n1, n2) for n1, n2 in combinations(G, 2)) / den
+    return sum(efficiency(G, n1, n2) for n1, n2 in combinations(G, 2)) / den
 
 
 def local_efficiency(G):
@@ -186,5 +185,8 @@ def local_efficiency(G):
     if G.is_directed() is True:
         warnings.warn("Graph shouldn't be directed", Warning)
 
-    return sum(global_efficiency(G.subgraph(G[v]).copy()) for v in G) / \
-        np.float(G.order())
+    return sum([global_efficiency(G.subgraph(G[v]).copy()) / np.float(G.order()) for v in G])
+'''
+    return sum(global_efficiency(G.subgraph(G[v]).copy()) for v in G) \
+            / np.float(G.order()
+'''

@@ -6,6 +6,7 @@ Created Sat May 23 14:11:50 2015
 Create a table of useful metrics for undirected standard graphs and model
 """
 
+import os
 import os.path as op
 import numpy as np
 import networkx as nx
@@ -14,22 +15,6 @@ import extract.brain_graph
 import random_graph.binary_undirected as bio_und
 from random_graph import binary_undirected
 from metrics import binary_undirected as und_metrics
-
-###############################
-# Parameters
-###############################
-
-# SET YOUR SAVE DIRECTORY
-save_dir = '/home/wronk/Documents/dbw_figs/'
-
-repeats = 2
-graph_names = ['Mouse Connectome', 'Random', 'Small-World', 'Scale-Free']
-metrics = [nx.average_clustering, nx.average_shortest_path_length,
-           und_metrics.global_efficiency, und_metrics.local_efficiency]
-brain_size = [7., 7., 7.]
-
-# Initialize matrix to store metric values
-met_arr = -1 * np.ones((len(graph_names), repeats, len(metrics)))
 
 
 def calc_metrics(G, metrics):
@@ -41,14 +26,35 @@ def calc_metrics(G, metrics):
     return metric_vals
 
 ###############################
+# Parameters
+###############################
+
+# SET YOUR SAVE DIRECTORY
+save_dir = os.environ['DBW_SAVE_CACHE']
+
+repeats = 1
+
+# Set the graphs and metrics you wisht to include
+#graph_names = ['Mouse Connectome', 'Random', 'Small-World', 'Scale-Free']
+graph_names = ['Small-World']
+metrics = [und_metrics.local_efficiency, und_metrics.global_efficiency]
+#metrics = [nx.clustering, nx.average_shortest_path_length,
+#           und_metrics.global_efficiency, und_metrics.local_efficiency]
+brain_size = [7., 7., 7.]
+
+###############################
 # Create graph/ compute metrics
 ###############################
 #TODO: consider using a dict instead of checking for each graph type
+
+# Initialize matrix to store metric values
+met_arr = -1 * np.ones((len(graph_names), repeats, len(metrics)))
 
 # Load mouse connectivity graph
 G_brain, _, _ = extract.brain_graph.binary_undirected()
 n_nodes = G_brain.number_of_nodes()
 n_edges = G_brain.number_of_edges()
+G_brain_copy = G_brain.copy()
 
 # Calculate degree & clustering coefficient distribution
 brain_degree = nx.degree(G_brain).values()
