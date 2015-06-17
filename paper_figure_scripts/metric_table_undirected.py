@@ -12,11 +12,16 @@ import numpy as np
 import networkx as nx
 
 import extract.brain_graph
-import random_graph.binary_undirected as bio_und
 from random_graph import binary_undirected
+from random_graph.binary_undirected import \
+    undirected_biophysical_reverse_outdegree as pgpa_und
+from random_graph.binary_directed import biophysical_reverse_outdegree as pgpa_dir
 from metrics import binary_undirected as und_metrics
 reload(und_metrics)
 import pickle
+import brain_constants as bc
+
+from config.graph_parameters import LENGTH_SCALE
 
 
 def calc_metrics(G, metrics):
@@ -37,7 +42,8 @@ save_dir = os.environ['DBW_SAVE_CACHE']
 repeats = 100
 
 # Set the graphs and metrics you wisht to include
-graph_names = ['Mouse Connectome', 'Random', 'Small-World', 'Scale-Free']
+graph_names = ['Mouse Connectome', 'Random', 'Small-World', 'Scale-Free',
+               'PGPA']
 #graph_names = ['Mouse Connectome', 'Small-World']
 #metrics = [und_metrics.local_efficiency, und_metrics.global_efficiency]
 metrics = [nx.average_clustering, nx.average_shortest_path_length,
@@ -69,11 +75,12 @@ for met_i, bm in enumerate(metrics):
     met_arr[graph_names.index('Mouse Connectome'), :, met_i] = bm(G_brain)
 
 for rep in np.arange(repeats):
-    # Amplified pref attachment model using gamma 0f 1.75
-    if 'Amplified Pref. Attachment' in graph_names:
-        G_Bio, _, _ = bio_und(n_nodes, n_edges, np.info, 1.75, brain_size)
-        met_arr[graph_names.index('Amplified Pref. Attachment'), rep, :] = \
-            calc_metrics(G_Bio, metrics)
+    # PGPA model
+    if 'PGPA' in graph_names:
+        G_PGPA, _, _ = pgpa_dir(bc.num_brain_nodes,
+                                L=LENGTH_SCALE)
+        met_arr[graph_names.index('PGPA'), rep, :] = \
+            calc_metrics(G_PGPA.to_undirected(), metrics)
 
     # Random Configuration model (random with fixed degree sequence)
     if 'Random' in graph_names:
