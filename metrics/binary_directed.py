@@ -13,15 +13,15 @@ import networkx as nx
 
 def reciprocity(G):
     """Calculate the reciprocity coefficient of a directed graph.
-    
+
     Reciprocity is defined as (Ndirected - Nundirected)/Nundirected"""
-    
+
     # get number of directed edges
     Ndirected = len(G.edges())
-    
+
     # get number of undirected edges
     Nundirected = len(G.to_undirected().edges())
-    
+
     # return reciprocity
     return (Ndirected - Nundirected) / float(Nundirected)
 
@@ -47,6 +47,6 @@ def efficiency_matrix(G):
     for src in shortest_path_lengths.keys():
         for targ in shortest_path_lengths[src].keys():
             if src is not targ:
-                efficiency[src, targ] = 1 / shortest_path_lengths[src][targ]
+                efficiency[src, targ] = 1. / shortest_path_lengths[src][targ]
 
     return efficiency
