@@ -15,6 +15,8 @@ import extract.brain_graph
 import random_graph.binary_undirected as bio_und
 from random_graph import binary_undirected
 from metrics import binary_undirected as und_metrics
+reload(und_metrics)
+import pickle
 
 
 def calc_metrics(G, metrics):
@@ -32,14 +34,14 @@ def calc_metrics(G, metrics):
 # SET YOUR SAVE DIRECTORY
 save_dir = os.environ['DBW_SAVE_CACHE']
 
-repeats = 1
+repeats = 100
 
 # Set the graphs and metrics you wisht to include
-#graph_names = ['Mouse Connectome', 'Random', 'Small-World', 'Scale-Free']
-graph_names = ['Small-World']
-metrics = [und_metrics.local_efficiency, und_metrics.global_efficiency]
-#metrics = [nx.clustering, nx.average_shortest_path_length,
-#           und_metrics.global_efficiency, und_metrics.local_efficiency]
+graph_names = ['Mouse Connectome', 'Random', 'Small-World', 'Scale-Free']
+#graph_names = ['Mouse Connectome', 'Small-World']
+#metrics = [und_metrics.local_efficiency, und_metrics.global_efficiency]
+metrics = [nx.average_clustering, nx.average_shortest_path_length,
+           und_metrics.global_efficiency, und_metrics.local_efficiency]
 brain_size = [7., 7., 7.]
 
 ###############################
@@ -95,12 +97,21 @@ for rep in np.arange(repeats):
         met_arr[graph_names.index('Scale-Free'), rep, :] = \
             calc_metrics(G_SF, metrics)
 
+    print 'Completed repeat: ' + str(rep)
+
 ##########################
 # Save metrics
 ##########################
+save_dict = dict(met_arr=met_arr, metrics=metrics, graph_names=graph_names)
 
-# Save original array and version averaged across repeats
-fname = op.join(save_dir, 'undirected_metrics')
-np.save(fname + '_orig.npy', met_arr)
-np.savetxt(fname + '_averaged.csv', met_arr.mean(1), fmt='%10.3f',
+# Save original array/information and csv version averaged across repeats
+f_name = op.join(save_dir, 'undirected_metrics')
+
+# Save all original info in pickled dict (for potential plotting later)
+outfile = open(f_name + '.pkl', 'wb')
+pickle.dump(save_dict, outfile)
+outfile.close()
+
+# Save csvs for easy table creation
+np.savetxt(f_name + '_averaged.csv', met_arr.mean(1), fmt='%10.3f',
            delimiter=',')
