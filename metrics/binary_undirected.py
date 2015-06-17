@@ -6,6 +6,7 @@ Created on Wed Nov 12 12:11:43 2014
 Graph-theory metrics for binary undirected graphs.
 """
 
+from __future__ import division
 import numpy as np
 import scipy.stats as stats
 import networkx as nx
@@ -144,7 +145,10 @@ def efficiency(G, n1, n2):
     if G.is_directed() is True:
         warnings.warn("Graph shouldn't be directed", Warning)
 
-    return 1. / nx.shortest_path_length(G, n1, n2)
+    if nx.has_path(G, n1, n2):
+        return 1. / nx.shortest_path_length(G, n1, n2)
+    else:
+        return 0.
 
 
 def global_efficiency(G):
@@ -185,8 +189,15 @@ def local_efficiency(G):
     if G.is_directed() is True:
         warnings.warn("Graph shouldn't be directed", Warning)
 
-    return sum([global_efficiency(G.subgraph(G[v]).copy()) / np.float(G.order()) for v in G])
-'''
-    return sum(global_efficiency(G.subgraph(G[v]).copy()) for v in G) \
-            / np.float(G.order()
-'''
+    '''
+    node_loc_eff = []
+    for node_ctr in G.nodes():
+        neighbors = G.neighbors(node_ctr)
+        subgraph = G.subgraph(neighbors)
+
+        node_loc_eff.append(global_efficiency(subgraph))
+
+    return np.array(node_loc_eff).mean()
+    '''
+
+    return sum([global_efficiency(G.subgraph(G[v])) for v in G]) / G.order()
