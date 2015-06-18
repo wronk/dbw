@@ -47,6 +47,9 @@ def efficiency_matrix(G):
     for src in shortest_path_lengths.keys():
         for targ in shortest_path_lengths[src].keys():
             if src is not targ:
-                efficiency[src, targ] = 1. / shortest_path_lengths[src][targ]
+                if nx.has_path(G, src, targ):
+                    efficiency[src, targ] = 1. / shortest_path_lengths[src][targ]
+                else:
+                    efficiency[src, targ] = 0.
 
     return efficiency
