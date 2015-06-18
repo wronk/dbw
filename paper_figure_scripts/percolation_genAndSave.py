@@ -16,9 +16,9 @@ from extract import brain_graph
 from metrics import percolation as perc
 reload(perc)
 import brain_constants as bc
-#from random_graph.binary_undirected import undirected_biophysical_reverse_outdegree as pgpa_und
 from random_graph.binary_directed import biophysical_reverse_outdegree as pgpa_dir
-from metrics import binary_undirected
+from metrics import binary_undirected as und_metrics
+from random_graph import binary_undirected as und_graphs
 
 from config.graph_parameters import LENGTH_SCALE
 
@@ -28,11 +28,10 @@ lesion_list = np.arange(0, 426, 10)
 node_order = 426
 brain_size = [7., 7., 7.]
 
-linear_model_path = op.join('home', os.environ['USER'],
-                            'Builds/friday-harbor/linear_model')
-save_dir = op.join('/home', os.environ['USER'], 'Builds/dbw/cache')
-save_files = True
-gen_directed = True
+save_dir = os.environ['DBW_SAVE_CACHE']
+#data_dir = os.environ['DBW_DATA_DIRECTORY']
+save_files = False
+gen_directed = False
 ##############################################################################
 
 
@@ -55,7 +54,7 @@ def construct_graph_list_und(graphs_to_const):
 
     # Construct degree controlled random
     if graph_check[1] in graphs_to_const:
-        G_RAND, _, _ = binary_undirected.random_simple_deg_seq(
+        G_RAND, _, _ = und_graphs.random_simple_deg_seq(
             sequence=brain_degree, brain_size=brain_size, tries=100)
         graph_list.append(G_RAND)
 
@@ -92,7 +91,7 @@ def construct_graph_list_dir(graphs_to_const):
     graph_list = []
 
     # Always construct and add Allen Institute mouse brain to list
-    G_AL, _, _ = brain_graph.binary_directed()
+    G_AL, _, _ = brain_graph.und_graphs()
     graph_list.append(G_AL)
 
     # Calculate degree & clustering coefficient distribution
@@ -112,17 +111,20 @@ def construct_graph_list_dir(graphs_to_const):
     # Construct pgpa graph
     if graph_check[1] in graphs_to_const:
         G_PGPA, _, _ = pgpa(bc.num_brain_nodes, bc.num_brain_edges_directed,
-			    L=LENGTH_SCALE)
+                            L=LENGTH_SCALE)
         graph_list.append(G_PGPA)
 
     # Error check that we created correct number of graphs
-    assert len(graph_list) == len(graphs_to_const), 'Graph list/names don\'t match'
+    assert (len(graph_list) == len(graphs_to_const),
+            'Graph list/names don\'t match')
 
     return graph_list
 '''
 
-##############################################################################
-### Construct graphs
+##################
+# Construct graphs
+##################
+
 if gen_directed:
     graph_names = ['Mouse', 'Random', 'Biophysical']
 else:
@@ -141,10 +143,12 @@ if gen_directed:
 # Undirected
 else:
     func_list = [(perc.lesion_met_largest_component, 'Largest Component'),
-                 (binary_undirected.global_efficiency, 'Global Efficiency')]
+                 (und_metrics.global_efficiency, 'Global Efficiency')]
 
-##############################################################################
-### Do percolation
+#################
+# Do percolation
+#################
+
 print 'Building percolation data...'
 print 'Graphs: ' + str(graph_names)
 print 'Directed: ' + str(gen_directed) + '\n'
@@ -154,9 +158,9 @@ targ = np.zeros((len(graph_names), len(func_list), len(lesion_list), repeats))
 
 # Percolation
 for ri in np.arange(repeats):
-    print 'Lesion graphs, repeat ' + str(ri + 1) + ' of ' + str(repeats)
-    # Construct undirected or directed graphs
+    print 'Lesioning; repeat ' + str(ri + 1) + ' of ' + str(repeats)
     '''
+    # Construct undirected or directed graphs
     if gen_directed:
         graph_list = construct_graph_list_dir(graph_names)
     else:
@@ -168,12 +172,16 @@ for ri in np.arange(repeats):
     for gi, G in enumerate(graph_list):
         print '\tLesioning: ' + graph_names[gi],
         for fi, (func, func_label) in enumerate(func_list):
-            rand[gi, fi, :, ri] = perc.percolate_random(G, prop_rm, func)
-            targ[gi, fi, :, ri] = perc.percolate_degree(G, lesion_list, func)
+            rand[gi, fi, :, ri] = perc.percolate_random(G.copy(), prop_rm,
+                                                        func)
+            targ[gi, fi, :, ri] = perc.percolate_degree(G.copy(), lesion_list,
+                                                        func)
         print ' ... Done'
 
-##############################################################################
-### Save results
+###############
+# Save results
+###############
+
 if save_files:
     print 'Saving data for: '
     for gi, G in enumerate(graph_list):
