@@ -174,7 +174,7 @@ def global_efficiency(G):
 
 
 def local_efficiency(G):
-    """Calculate local efficiency for a graph. Local efficiency is the
+    """Calculate average local efficiency for a graph. Local efficiency is the
     average efficiency of all neighbors of the given node.
 
     Parameters
@@ -188,16 +188,5 @@ def local_efficiency(G):
 
     if G.is_directed() is True:
         warnings.warn("Graph shouldn't be directed", Warning)
-
-    '''
-    node_loc_eff = []
-    for node_ctr in G.nodes():
-        neighbors = G.neighbors(node_ctr)
-        subgraph = G.subgraph(neighbors)
-
-        node_loc_eff.append(global_efficiency(subgraph))
-
-    return np.array(node_loc_eff).mean()
-    '''
 
     return sum([global_efficiency(G.subgraph(G[v])) for v in G]) / G.order()
