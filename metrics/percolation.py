@@ -14,8 +14,7 @@ reload(aux)
 
 
 def percolate_random(graph, prop_removed, func, func_kwargs=dict()):
-    """ Get some metrics after randomly removing some proportion
-    of nodes.
+    """ Get some metrics after randomly removing some proportion of nodes.
 
     Parameters
     ----------
