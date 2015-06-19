@@ -69,7 +69,7 @@ else:
 
             G.efficiency_matrix = metrics_bd.efficiency_matrix(G)
             # naispl stands for node-averaged inverse shortest path length
-            naispl = np.sum(G.efficiency_matrix, axis=1) / len(G.nodes() - 1)
+            naispl = np.sum(G.efficiency_matrix, axis=1) / (len(G.nodes()) - 1)
             G.counts_naispl = np.histogram(naispl, bins=BINS_NAISPL)[0]
 
             if label == 'er':
