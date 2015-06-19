@@ -69,7 +69,7 @@ else:
 
             G.efficiency_matrix = metrics_bd.efficiency_matrix(G)
             # naispl stands for node-averaged inverse shortest path length
-            naispl = np.sum(G.efficiency_matrix, axis=1) / len(G.nodes())
+            naispl = np.sum(G.efficiency_matrix, axis=1) / len(G.nodes() - 1)
             G.counts_naispl = np.histogram(naispl, bins=BINS_NAISPL)[0]
 
             if label == 'er':
@@ -120,16 +120,16 @@ for a_ctr, ax in enumerate(axs):
 
     if a_ctr == 0:
         # er
-        ax.plot(BINCS_BTWN, counts_betweenness_mean_er, color=COLORS['er'], lw=2)
+        ax.plot(BINCS_BTWN, counts_betweenness_mean_er, color=COLORS['er'], lw=3)
         ax.fill_between(BINCS_BTWN, counts_betweenness_mean_er - counts_betweenness_std_er,
                         counts_betweenness_mean_er + counts_betweenness_std_er,
-                        color=COLORS['er'], alpha=0.3)
+                        color=COLORS['er'], alpha=0.5)
 
         # pgpa
-        ax.plot(BINCS_BTWN, counts_betweenness_mean_pgpa, color=COLORS['pgpa'], lw=2)
+        ax.plot(BINCS_BTWN, counts_betweenness_mean_pgpa, color=COLORS['pgpa'], lw=3)
         ax.fill_between(BINCS_BTWN, counts_betweenness_mean_pgpa - counts_betweenness_std_pgpa,
                         counts_betweenness_mean_pgpa + counts_betweenness_std_pgpa,
-                        color=COLORS['pgpa'], alpha=0.3)
+                        color=COLORS['pgpa'], alpha=0.5)
 
         ax.set_xlim(0, 0.03)
         ax.set_ylim(0, 270)
@@ -137,24 +137,28 @@ for a_ctr, ax in enumerate(axs):
         ax.set_xlabel('node betweenness')
         ax.set_ylabel('counts')
 
+        ax.legend(['Directed ER', 'PGPA', 'Connectome'], fontsize=FONT_SIZE)
+
     elif a_ctr == 1:
         # er
-        ax.plot(BINCS_NAISPL, counts_naispl_mean_er, color=COLORS['er'], lw=2)
+        ax.plot(BINCS_NAISPL, counts_naispl_mean_er, color=COLORS['er'], lw=3)
         ax.fill_between(BINCS_NAISPL, counts_naispl_mean_er - counts_naispl_std_er,
                         counts_naispl_mean_er + counts_naispl_std_er,
-                        color=COLORS['er'], alpha=0.3)
+                        color=COLORS['er'], alpha=0.5)
 
         # pgpa
-        ax.plot(BINCS_NAISPL, counts_naispl_mean_pgpa, color=COLORS['pgpa'], lw=2)
+        ax.plot(BINCS_NAISPL, counts_naispl_mean_pgpa, color=COLORS['pgpa'], lw=3)
         ax.fill_between(BINCS_NAISPL, counts_naispl_mean_pgpa - counts_naispl_std_pgpa,
                         counts_naispl_mean_pgpa + counts_naispl_std_pgpa,
-                        color=COLORS['pgpa'], alpha=0.3)
+                        color=COLORS['pgpa'], alpha=0.5)
 
         ax.set_xlim(0, 1)
         ax.set_ylim(0, 270)
 
         ax.set_xlabel('node-averaged inverse shortest path length')
         ax.set_ylabel('counts')
+
+        ax.legend()
 
 for ax in axs:
     change_settings.set_all_colors(ax, AX_COLOR)
