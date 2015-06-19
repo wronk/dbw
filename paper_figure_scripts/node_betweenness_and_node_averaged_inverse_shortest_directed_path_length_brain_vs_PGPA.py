@@ -106,7 +106,7 @@ G_brain, _, _ = brain_graph.binary_directed()
 # calculate betweenness and naispl for brain
 G_brain.betweenness = nx.betweenness_centrality(G_brain)
 G_brain.efficiency_matrix = metrics_bd.efficiency_matrix(G_brain)
-G_brain.naispl = np.sum(G_brain.efficiency_matrix, axis=1) / len(G_brain.nodes())
+G_brain.naispl = np.sum(G_brain.efficiency_matrix, axis=1) / (len(G_brain.nodes()) - 1)
 
 # plot histograms of all three betweenness and naispl distributions
 fig, axs = plt.subplots(1, 2, facecolor=FACE_COLOR, figsize=FIG_SIZE, tight_layout=True)
