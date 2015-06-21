@@ -170,7 +170,10 @@ def biophysical_graph(N=426,N_edges=7804,L=1.,power=1.5,dims=[10.,10,10],mode=0,
     return G,A,D
 
 def get_coords():
-    A = scio.loadmat('Structure_coordinates_and_distances.mat')
+    import os
+    
+    data_dir = os.getenv('DBW_DATA_DIRECTORY')
+    A = scio.loadmat(data_dir+'/Structure_coordinates_and_distances.mat')
     contra_coords = A['cntrltrl_coordnt_dctnry']
     contra_type = contra_coords.dtype
     contra_names = contra_type.names
