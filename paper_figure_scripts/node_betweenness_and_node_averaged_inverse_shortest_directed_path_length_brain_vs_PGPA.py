@@ -12,6 +12,7 @@ plt.ion()
 
 from extract import brain_graph
 from random_graph.binary_directed import biophysical_reverse_outdegree as pgpa
+from random_graph.binary_directed import biophysical_indegree as pa
 from metrics import binary_directed as metrics_bd
 from network_plot import change_settings
 
@@ -42,6 +43,8 @@ if os.path.isfile(save_file_path):
             data = pickle.load(f)
             graphs_er = data['graphs_er']
             graphs_pgpa = data['graphs_pgpa']
+            graphs_pg = data['graphs_pg']
+            graphs_pa = data['graphs_pa']
     except Exception, e:
         raise IOError('Error loading data from file "{}"'.format(SAVE_FILE_NAME))
     else:
@@ -51,6 +54,8 @@ else:
 
     graphs_er = []
     graphs_pgpa = []
+    graphs_pg = []
+    graphs_pa = []
 
     for g_ctr in range(N_GRAPH_SAMPLES):
 
@@ -62,8 +67,14 @@ else:
         # create pgpa graph
         G_pgpa, _, _ = pgpa(N=bc.num_brain_nodes, N_edges=bc.num_brain_edges_directed, L=LENGTH_SCALE)
 
+        # create preferential growth only graph
+        G_pg, _, _ = pgpa(N=bc.num_brain_nodes, N_edges=bc.num_brain_edges_directed, L=np.inf)
+
+        # create preferential attachment graph
+        G_pa, _, _ = pa(N=bc.num_brain_nodes, N_edges=bc.num_brain_edges_directed, L=np.inf)
+
         # calculate things for both types of graph
-        for label, G in zip(['er', 'pgpa'], [G_er, G_pgpa]):
+        for label, G in zip(['er', 'pgpa', 'pref-growth', 'pref-attachment'], [G_er, G_pgpa, G_pg, G_pa]):
             G.betweenness = nx.betweenness_centrality(G)
             G.counts_betweenness = np.histogram(G.betweenness.values(), bins=BINS_BTWN)[0]
 
@@ -76,6 +87,10 @@ else:
                 graphs_er += [G]
             elif label == 'pgpa':
                 graphs_pgpa += [G]
+            elif label == 'pref-growth':
+                graphs_pg += [G]
+            elif label == 'pref-attachment':
+                graphs_pa += [G]
 
         if (g_ctr + 1) % 1 == 0:
             print('{} of {} samples completed.'.format(g_ctr + 1, N_GRAPH_SAMPLES))
@@ -83,7 +98,11 @@ else:
     # save file so that we don't have to remake everything
     print('Saving file to disk...')
     with open(save_file_path, 'wb') as f:
-        pickle.dump({'graphs_er': graphs_er, 'graphs_pgpa': graphs_pgpa}, f)
+        save_dict = {'graphs_er': graphs_er,
+                     'graphs_pgpa': graphs_pgpa,
+                     'graphs_pg': graphs_pg,
+                     'graphs_pa': graphs_pa}
+        pickle.dump(save_dict, f)
     print('File "{}" saved successfully in directory "{}"'.format(SAVE_FILE_NAME, data_dir))
 
 print('Taking averages and generating plots...')
@@ -93,12 +112,20 @@ counts_betweenness_mean_er = np.array([G.counts_betweenness for G in graphs_er])
 counts_betweenness_std_er = np.array([G.counts_betweenness for G in graphs_er]).std(axis=0)
 counts_betweenness_mean_pgpa = np.array([G.counts_betweenness for G in graphs_pgpa]).mean(axis=0)
 counts_betweenness_std_pgpa = np.array([G.counts_betweenness for G in graphs_pgpa]).std(axis=0)
+counts_betweenness_mean_pg = np.array([G.counts_betweenness for G in graphs_pg]).mean(axis=0)
+counts_betweenness_std_pg = np.array([G.counts_betweenness for G in graphs_pg]).std(axis=0)
+counts_betweenness_mean_pa = np.array([G.counts_betweenness for G in graphs_pa]).mean(axis=0)
+counts_betweenness_std_pa = np.array([G.counts_betweenness for G in graphs_pa]).std(axis=0)
 
 # calculate mean and std of naispl
 counts_naispl_mean_er = np.array([G.counts_naispl for G in graphs_er]).mean(axis=0)
 counts_naispl_std_er = np.array([G.counts_naispl for G in graphs_er]).std(axis=0)
 counts_naispl_mean_pgpa = np.array([G.counts_naispl for G in graphs_pgpa]).mean(axis=0)
 counts_naispl_std_pgpa = np.array([G.counts_naispl for G in graphs_pgpa]).std(axis=0)
+counts_naispl_mean_pg = np.array([G.counts_naispl for G in graphs_pg]).mean(axis=0)
+counts_naispl_std_pg = np.array([G.counts_naispl for G in graphs_pg]).std(axis=0)
+counts_naispl_mean_pa = np.array([G.counts_naispl for G in graphs_pa]).mean(axis=0)
+counts_naispl_std_pa = np.array([G.counts_naispl for G in graphs_pa]).std(axis=0)
 
 # load brain graph
 G_brain, _, _ = brain_graph.binary_directed()
@@ -131,13 +158,25 @@ for a_ctr, ax in enumerate(axs):
                         counts_betweenness_mean_pgpa + counts_betweenness_std_pgpa,
                         color=COLORS['pgpa'], alpha=0.5)
 
+        # pref-growth
+        ax.plot(BINCS_BTWN, counts_betweenness_mean_pg, color=COLORS['pref-growth'], lw=3)
+        ax.fill_between(BINCS_BTWN, counts_betweenness_mean_pg - counts_betweenness_std_pg,
+                        counts_betweenness_mean_pg + counts_betweenness_std_pg,
+                        color=COLORS['pref-growth'], alpha=0.5)
+
+        # pref-attach
+        ax.plot(BINCS_BTWN, counts_betweenness_mean_pa, color=COLORS['pref-attachment'], lw=3)
+        ax.fill_between(BINCS_BTWN, counts_betweenness_mean_pa - counts_betweenness_std_pa,
+                        counts_betweenness_mean_pa + counts_betweenness_std_pa,
+                        color=COLORS['pref-attachment'], alpha=0.5)
+
         ax.set_xlim(0, 0.03)
         ax.set_ylim(0, 270)
 
         ax.set_xlabel('node betweenness')
         ax.set_ylabel('counts')
 
-        ax.legend(['Directed ER', 'PGPA', 'Connectome'], fontsize=FONT_SIZE)
+        ax.legend(['Directed ER', 'PGPA', 'Pref-growth', 'Pref-attach', 'Connectome'], fontsize=FONT_SIZE)
 
     elif a_ctr == 1:
         # er
@@ -151,6 +190,18 @@ for a_ctr, ax in enumerate(axs):
         ax.fill_between(BINCS_NAISPL, counts_naispl_mean_pgpa - counts_naispl_std_pgpa,
                         counts_naispl_mean_pgpa + counts_naispl_std_pgpa,
                         color=COLORS['pgpa'], alpha=0.5)
+
+        # pref-growth
+        ax.plot(BINCS_NAISPL, counts_naispl_mean_pg, color=COLORS['pref-growth'], lw=3)
+        ax.fill_between(BINCS_NAISPL, counts_naispl_mean_pg - counts_naispl_std_pg,
+                        counts_naispl_mean_pg + counts_naispl_std_pg,
+                        color=COLORS['pref-growth'], alpha=0.5)
+
+        # pref-attach
+        ax.plot(BINCS_NAISPL, counts_naispl_mean_pa, color=COLORS['pref-attachment'], lw=3)
+        ax.fill_between(BINCS_NAISPL, counts_naispl_mean_pa - counts_naispl_std_pa,
+                        counts_naispl_mean_pa + counts_naispl_std_pa,
+                        color=COLORS['pref-attachment'], alpha=0.5)
 
         ax.set_xlim(0, 1)
         ax.set_ylim(0, 270)
