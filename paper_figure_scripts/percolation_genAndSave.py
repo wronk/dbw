@@ -22,7 +22,7 @@ from random_graph import binary_undirected as und_graphs
 
 from config.graph_parameters import LENGTH_SCALE
 
-repeats = 1  # Number of times to repeat percolation
+repeats = 100  # Number of times to repeat percolation
 prop_rm = np.arange(0., 1.00, 0.05)
 lesion_list = np.arange(0, 426, 10)
 node_order = 426
@@ -39,7 +39,7 @@ def construct_graph_list_und(graphs_to_const):
     """Construct and return a list of graphs so graph construction is easily
     repeatable"""
 
-    graph_check = ['Random', 'Small-World', 'Scale-Free', 'PGPA']
+    graph_check = ['Random', 'Small-world', 'Scale-free', 'PGPA']
     graph_list = []
 
     # Always construct and add Allen Institute mouse brain to list
@@ -53,7 +53,7 @@ def construct_graph_list_und(graphs_to_const):
     brain_degree_mean = np.mean(brain_degree)
 
     # Construct degree controlled random
-    if graph_check[1] in graphs_to_const:
+    if graph_check[0] in graphs_to_const:
         G_RAND, _, _ = und_graphs.random_simple_deg_seq(
             sequence=brain_degree, brain_size=brain_size, tries=100)
         graph_list.append(G_RAND)
@@ -70,7 +70,8 @@ def construct_graph_list_und(graphs_to_const):
 
     # Construct PGPA graph
     if graph_check[3] in graphs_to_const:
-        G_PGPA, _, _ = pgpa_dir(bc.num_brain_nodes, bc.num_edges_directed,
+        G_PGPA, _, _ = pgpa_dir(bc.num_brain_nodes,
+                                bc.num_brain_edges_directed,
                                 L=LENGTH_SCALE)
         graph_list.append(G_PGPA.to_undirected())
 
@@ -126,10 +127,10 @@ def construct_graph_list_dir(graphs_to_const):
 ##################
 
 if gen_directed:
-    graph_names = ['Mouse', 'Random', 'Biophysical']
+    graph_names = ['Mouse', 'Random', 'PGPA']
 else:
-    graph_names = ['Mouse', 'Random', 'Small-World', 'Scale-Free',
-                   'Biophysical']
+    graph_names = ['Mouse', 'Random', 'Small-world', 'Scale-free',
+                   'PGPA']
 
 # Directed
 if gen_directed:
@@ -185,12 +186,15 @@ for ri in np.arange(repeats):
 if save_files:
     print 'Saving data for: '
     for gi, G in enumerate(graph_list):
-        print '\tLesioning: ' + graph_names[gi]
+        print '\tSaving: ' + graph_names[gi]
 
+        '''
         if gen_directed:
             save_fname = op.join(save_dir, graph_names[gi] + '_directed.pkl')
         else:
             save_fname = op.join(save_dir, graph_names[gi] + '_undirected.pkl')
+        '''
+        save_fname = op.join(save_dir, graph_names[gi] + '_undirected.pkl')
 
         outfile = open(save_fname, 'wb')
         pickle.dump({'graph_name': graph_names[gi], 'metrics_list':
@@ -204,4 +208,3 @@ if save_files:
         outfile.close()
 
         print ' ... Done'
-        #f.close()
