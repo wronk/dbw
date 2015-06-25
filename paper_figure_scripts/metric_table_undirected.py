@@ -39,7 +39,7 @@ def calc_metrics(G, metrics):
 # SET YOUR SAVE DIRECTORY
 save_dir = os.environ['DBW_SAVE_CACHE']
 
-repeats = 100
+repeats = 2
 
 # Set the graphs and metrics you wisht to include
 graph_names = ['Mouse Connectome', 'Random', 'Small-World', 'Scale-Free',
@@ -106,10 +106,14 @@ for rep in np.arange(repeats):
 
     print 'Completed repeat: ' + str(rep)
 
+# Calculate the standard deviation
+std_arr = np.std(met_arr, axis=1)
+
 ##########################
 # Save metrics
 ##########################
-save_dict = dict(met_arr=met_arr, metrics=metrics, graph_names=graph_names)
+save_dict = dict(met_arr=met_arr, std_arr=std_arr, metrics=metrics,
+                 graph_names=graph_names)
 
 # Save original array/information and csv version averaged across repeats
 f_name = op.join(save_dir, 'undirected_metrics')
@@ -122,3 +126,4 @@ outfile.close()
 # Save csvs for easy table creation
 np.savetxt(f_name + '_averaged.csv', met_arr.mean(1), fmt='%10.3f',
            delimiter=',')
+np.savetxt(f_name + '_std.csv', std_arr, fmt='%10.6f', delimiter=',')
