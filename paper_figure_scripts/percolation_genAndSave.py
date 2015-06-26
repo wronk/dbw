@@ -30,7 +30,7 @@ brain_size = [7., 7., 7.]
 
 save_dir = os.environ['DBW_SAVE_CACHE']
 #data_dir = os.environ['DBW_DATA_DIRECTORY']
-save_files = False
+save_files = True
 gen_directed = False
 ##############################################################################
 
@@ -153,6 +153,8 @@ else:
 print 'Building percolation data...'
 print 'Graphs: ' + str(graph_names)
 print 'Directed: ' + str(gen_directed) + '\n'
+if not save_files and repeats > 10:
+    '\nAre you sure you don\'t want to save results?\n'
 # Matrices for random and targetted attacks
 rand = np.zeros((len(graph_names), len(func_list), len(prop_rm), repeats))
 targ = np.zeros((len(graph_names), len(func_list), len(lesion_list), repeats))
@@ -186,7 +188,7 @@ for ri in np.arange(repeats):
 if save_files:
     print 'Saving data for: '
     for gi, G in enumerate(graph_list):
-        print '\tSaving: ' + graph_names[gi]
+        print '\tSaving: ' + graph_names[gi],
 
         '''
         if gen_directed:
@@ -194,7 +196,8 @@ if save_files:
         else:
             save_fname = op.join(save_dir, graph_names[gi] + '_undirected.pkl')
         '''
-        save_fname = op.join(save_dir, graph_names[gi] + '_undirected.pkl')
+        save_fname = op.join(save_dir, graph_names[gi] +
+                             '_undirected_perc.pkl')
 
         outfile = open(save_fname, 'wb')
         pickle.dump({'graph_name': graph_names[gi], 'metrics_list':
