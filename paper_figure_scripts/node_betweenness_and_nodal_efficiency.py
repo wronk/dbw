@@ -206,7 +206,7 @@ for a_ctr, ax in enumerate(axs):
         ax.set_xlim(0, 1)
         ax.set_ylim(0, 270)
 
-        ax.set_xlabel('node-averaged inverse shortest path length')
+        ax.set_xlabel('nodal efficiency')
         ax.set_ylabel('counts')
 
         ax.legend()
