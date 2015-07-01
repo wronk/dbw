@@ -21,7 +21,8 @@ for ri in range(N_TRIALS):
                                                            out_sequence,
                                                            simplify=True)
     G_ER = nx.random_graphs.erdos_renyi_graph(G_brain.number_of_nodes(),
-                                              p=0.15, directed=True)
+                                              p=G_brain.number_of_nodes() / G_brain.number_of_edges(),
+                                              directed=True)
 
     n_edges_deg_controlled_random.append(G_RAND.number_of_edges())
     n_edges_ER_random.append(G_ER.number_of_edges())
