@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 
-N_TRIALS = 100
+N_TRIALS = 10
 
 import matplotlib.pyplot as plt
 
