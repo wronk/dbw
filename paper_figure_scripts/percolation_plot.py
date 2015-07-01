@@ -6,22 +6,18 @@ Created on Thu Feb 26 12:29:20 2015
 Create figures showing progressive percolation on standard and brain graphs.
 """
 import numpy as np
-import networkx as nx
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 #import network_gen as ng
 from metrics import percolation as perc
 reload(perc)
-from random_graph import binary_undirected as bu
 import config as cf
 import os
 import os.path as op
 import pickle
-from network_plot.change_settings import (set_all_text_fontsizes,
-                                          set_all_colors)
 
-#node_order = 426
+# Set plots to make
 undirected = True
 directed = False
 
@@ -221,50 +217,67 @@ if directed:
 #####################
 # Combined plot hack
 #####################
-'''
-fig_col = ['m', 'r', 'orange']
-fig5, ax_list5 = plt.subplots(nrows=1, ncols=2, figsize=(9, 3.75),
-                              facecolor=FACECOLOR, tight_layout=True)
+# Targeted attack (undirected, largest component and efficiency)
+# and random (undirected efficiency)
 
-for fi, func_label in enumerate(graph_metrics_dir[0]['metrics_label'][0:2]):
-    for gi, g_dict in enumerate(graph_metrics_dir):
-        if g_dict['graph_name'] == 'Biophysical':
-            g_dict['graph_name'] = 'Model'
+fig5, ax_list5 = plt.subplots(nrows=1, ncols=3, figsize=(12., 4.),
+                              facecolor=FACECOLOR)
+
+metrics = graph_metrics_und[0]['metrics_label'][1] * 2 + \
+    graph_metrics_und[0]['metrics_label'][0]
+
+# Random attack, undirected efficiency
+for gi, g_dict in enumerate(graph_metrics_und):
+    x = g_dict['removed_rand']
+    avg = g_dict['data_rand_avg'][1, :]
+    fill_upper = avg + g_dict['data_rand_std'][fi, :]
+    fill_lower = avg - g_dict['data_rand_std'][fi, :]
+
+    ax_list5[0].plot(x, avg, lw=LW, label=g_dict['graph_name'],
+                     color=graph_col[gi])
+    ax_list5[0].fill_between(x, fill_upper, fill_lower, lw=0,
+                             facecolor=graph_col[gi],
+                             interpolate=True, alpha=.4)
+
+ax_list5[0].set_title('Random Attack', fontsize=FONTSIZE)
+ax_list5[0].set_xlabel('Prop. Nodes Removed', fontsize=FONTSIZE)
+ax_list5[0].set_ylabel(graph_metrics_und[0]['metrics_label'][1],
+                       fontsize=FONTSIZE)
+
+# Targetted attack, undirected efficiency and largest component
+# Roll axis on two data matrices just to reverse order of plot
+metric_labels = np.roll(graph_metrics_und[0]['metrics_label'], shift=1, axis=0)
+for fi, func_label in enumerate(metric_labels):
+    for gi, g_dict in enumerate(graph_metrics_und):
+
+        targ_avg = np.roll(g_dict['data_targ_avg'], shift=1, axis=0)
+        targ_std = np.roll(g_dict['data_targ_std'], shift=1, axis=0)
+
         x = g_dict['removed_targ']
-        avg = g_dict['data_targ_avg'][fi, :]
-        fill_upper = avg + g_dict['data_targ_std'][fi, :]
-        fill_lower = avg - g_dict['data_targ_std'][fi, :]
+        avg = targ_avg[fi, :]
+        fill_upper = avg + targ_std[fi, :]
+        fill_lower = avg - targ_std[fi, :]
 
-        ax_list5[fi].plot(x, avg, lw=LW, label=g_dict['graph_name'],
-                          color=fig_col[gi])
-        ax_list5[fi].fill_between(x, fill_upper, fill_lower, lw=0,
-                                  facecolor=fig_col[gi], interpolate=True,
-                                  alpha=.3)
-    ax_list5[fi].set_title('Targeted Lesion')
-    ax_list5[fi].set_xlabel('# Nodes Removed')
-    ax_list5[fi].set_ylabel(['Largest Strong\nComponent',
-                             'Avg. Shortest Path'][fi])
+        ax_list5[fi + 1].plot(x, avg, lw=LW, label=g_dict['graph_name'],
+                              color=graph_col[gi])
+        ax_list5[fi + 1].fill_between(x, fill_upper, fill_lower, lw=0,
+                                      facecolor=graph_col[gi],
+                                      interpolate=True, alpha=.4)
+    ax_list5[fi + 1].set_title('Targeted Attack', fontsize=FONTSIZE)
+    ax_list5[fi + 1].set_xlabel('Nodes Removed', fontsize=FONTSIZE)
+    if fi is not 0:
+        ax_list5[fi + 1].set_ylabel(func_label, fontsize=FONTSIZE)
 
-#ax_list5[0].set_xlim((0, 400))
-#ax_list5[0].set_ylim((0, 450))
+ax_list5[0].legend(loc='best')
 
-leg = ax_list5[0].legend(loc=1, fontsize=FONTSIZE - 4., labelspacing=0.2,
-                         borderpad=0.15)
-leg.get_frame().set_alpha(0.)
-for text in leg.get_texts():
-    text.set_color(LABELCOLOR)
-#ax_list5[1].set_xlim((0, 350))
-#ax_list5[1].set_ylim((1, 8))
-ax_list5[0].xaxis.set_major_locator(plt.MaxNLocator(4))
-ax_list5[0].yaxis.set_major_locator(plt.MaxNLocator(4))
-ax_list5[1].xaxis.set_major_locator(plt.MaxNLocator(4))
+for ax in ax_list5:
+    ax.locator_params(axis='both', nbins=5)
+    for text in ax.get_xticklabels() + ax.get_yticklabels():
+        text.set_fontsize(FONTSIZE)
+ax_list5[1].set_xlim([0, 426])
+ax_list5[2].set_xlim([0, 426])
+ax_list5[1].set_ylim([0, .3])  # Manually set to prevent lower axis < 0
+plt.tight_layout(w_pad=.18)
+plt.draw()
 
-for temp_ax in ax_list5:
-    set_all_text_fontsizes(temp_ax, FONTSIZE + 2)
-    set_all_colors(temp_ax, LABELCOLOR)
-    #temp_ax.patch.set_facecolor(FACECOLOR)  # Set color of plot area
-    temp_ax.tick_params(width=TICKSIZE)
-
-fig5.savefig('/home/wronk/Builds/lesion_fig_poster.png', transparent=True)
-
-'''
+#fig5.savefig('/home/wronk/Builds/lesion_fig_poster.png', transparent=True)
