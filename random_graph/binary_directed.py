@@ -12,8 +12,10 @@ import networkx as nx
 import graph_tools.auxiliary as aux_tools
 import aux_random_graphs
 
+import brain_constants as bc
 
-def ER_distance(N=426, p=.043, brain_size=[7., 7., 7.]):
+
+def ER_distance(N=bc.num_brain_nodes, p=bc.num_brain_edges_directed, brain_size=[7., 7., 7.]):
     """Create an directed Erdos-Renyi random graph in which each node is
     assigned a position in space, so that relative positions are represented
     by a distance matrix."""
@@ -27,8 +29,8 @@ def ER_distance(N=426, p=.043, brain_size=[7., 7., 7.]):
     return G, A.todense(), D
 
 
-def biophysical(N=426, N_edges=8820, L=np.inf, gamma=1.75,
-                brain_size=[7., 7., 7.]):
+def biophysical(N=bc.num_brain_nodes, N_edges=bc.num_brain_edges_directed,
+                L=np.inf, gamma=1.75, brain_size=[7., 7., 7.]):
     """Create a biophysically inspired graph. Connection probabilities depend
     on distance & degree.
 
@@ -103,8 +105,8 @@ def biophysical(N=426, N_edges=8820, L=np.inf, gamma=1.75,
     return G, A, D
 
 
-def biophysical_reverse(N=426, N_edges=8820, L=np.inf, gamma=1.75,
-                        brain_size=[7., 7., 7.]):
+def biophysical_reverse(N=bc.num_brain_nodes, N_edges=bc.num_brain_edges_directed,
+                        L=np.inf, gamma=1.75, brain_size=[7., 7., 7.]):
     """Create a biophysically inspired graph. Connection probabilities depend
     on distance & degree.
 
@@ -179,8 +181,8 @@ def biophysical_reverse(N=426, N_edges=8820, L=np.inf, gamma=1.75,
     return G, A, D
 
 
-def biophysical_indegree(N=426, N_edges=8820, L=np.inf, gamma=1.,
-                         brain_size=[7., 7., 7.]):
+def biophysical_indegree(N=bc.num_brain_nodes, N_edges=bc.num_brain_edges_directed, L=np.inf,
+                         gamma=1., brain_size=[7., 7., 7.]):
     """Create a biophysically inspired graph. Connection probabilities depend
     on distance & degree.
 
@@ -254,7 +256,8 @@ def biophysical_indegree(N=426, N_edges=8820, L=np.inf, gamma=1.,
     return G, A, D
 
 
-def biophysical_reverse_outdegree(N=426, N_edges=8820, L=np.inf, gamma=1., brain_size=(7., 7., 7.)):
+def biophysical_reverse_outdegree(N=bc.num_brain_nodes, N_edges=bc.num_brain_edges_directed,
+                                  L=np.inf, gamma=1., brain_size=(7., 7., 7.)):
     """Create a biophysically inspired graph. Source probability depends on
     outdegree. Target probability depends on distance.
 
@@ -343,7 +346,8 @@ def biophysical_reverse_outdegree(N=426, N_edges=8820, L=np.inf, gamma=1., brain
     return G, A, D
 
 
-def biophysical_reverse_outdegree_nonspatial(N=426, N_edges=8820, gamma=1.):
+def biophysical_reverse_outdegree_nonspatial(N=bc.num_brain_nodes,
+                                             N_edges=bc.num_brain_edges_directed, gamma=1.):
     """Create a biophysically inspired graph. Source probability depends on
     outdegree. Target probability is uniform at random.
 
@@ -409,8 +413,8 @@ def biophysical_reverse_outdegree_nonspatial(N=426, N_edges=8820, gamma=1.):
     return G
 
 
-def biophysical_reverse_outdegree_reciprocal(N=426, N_edges=8820, gamma=1.,
-                                             reciprocity=10.):
+def biophysical_reverse_outdegree_reciprocal(N=bc.num_brain_nodes, N_edges=bc.num_brain_edges_directed,
+                                             gamma=1., reciprocity=10.):
     """Create a biophysically inspired graph. Source probability depends on
     outdegree. Target probability depends on whether reciprocal connections
     are present.

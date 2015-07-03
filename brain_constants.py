@@ -11,4 +11,4 @@ num_brain_edges_undirected = 7804
 num_brain_edges_directed = 8820
 
 p_brain_edge_undirected = 0.08620822977078155
-p_brain_edge_directed = 0.04860146796270581
+p_brain_edge_directed = 0.04871582435791218
