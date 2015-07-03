@@ -16,7 +16,8 @@ from extract import brain_graph
 from metrics import percolation as perc
 reload(perc)
 import brain_constants as bc
-from random_graph.binary_directed import biophysical_reverse_outdegree as pgpa_dir
+from random_graph.binary_directed import biophysical_reverse_outdegree as \
+    pgpa_dir
 from metrics import binary_undirected as und_metrics
 from random_graph import binary_undirected as und_graphs
 
@@ -66,7 +67,7 @@ def construct_graph_list_und(graphs_to_const):
     # Construct scale-free graph
     if graph_check[2] in graphs_to_const:
         graph_list.append(nx.barabasi_albert_graph(
-            n_nodes, int(round(brain_degree_mean))))
+            n_nodes, int(round(brain_degree_mean / 2.))))
 
     # Construct PGPA graph
     if graph_check[3] in graphs_to_const:
@@ -76,8 +77,8 @@ def construct_graph_list_und(graphs_to_const):
         graph_list.append(G_PGPA.to_undirected())
 
     # Error check that we created correct number of graphs
-    assert (len(graph_list) == len(graphs_to_const),
-            'Graph list/names don\'t match')
+    assert len(graph_list) == len(graphs_to_const), (
+        'Graph list/names don\'t match')
 
     return graph_list
 
