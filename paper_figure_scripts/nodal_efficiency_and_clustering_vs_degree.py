@@ -23,6 +23,8 @@ from config import COLORS, FACE_COLOR, AX_COLOR, FONT_SIZE
 
 # parameters for this particular plot
 FIG_SIZE = (15, 6)
+X_LIM_EFFICIENCY = (0, 0.8)
+Y_LIM_EFFICIENCY = (0, 300)
 ALPHA_DEG_VS_CC = 0.7
 N_GRAPH_SAMPLES = 100
 DEGREE_VS_CLUSTERING_GRAPH_IDX = 0
@@ -152,7 +154,7 @@ for a_ctr, ax in enumerate(axs):
         ax.scatter(deg, cc, lw=0, alpha=ALPHA_DEG_VS_CC, c=COLORS['brain'])
 
     elif a_ctr == 0:
-        ax.hist(G_brain.nodal_efficiency, bins=BINS_NODAL_EFFICIENCY, color=COLORS['brain'], lw=0)
+        hist_connectome = ax.hist(G_brain.nodal_efficiency, bins=BINS_NODAL_EFFICIENCY, color=COLORS['brain'], lw=0)
 
     if a_ctr == 1:
         Gs = [graphs_er[DEGREE_VS_CLUSTERING_GRAPH_IDX],
@@ -175,55 +177,60 @@ for a_ctr, ax in enumerate(axs):
 
         ax.set_xlabel('Degree')
         ax.set_ylabel('Clustering\ncoefficient')
-        ax.legend(['Connectome', 'Directed ER', 'PGPA', 'Pref-growth', 'Pref-attach', 'Configuration'], fontsize=FONT_SIZE)
 
     elif a_ctr == 0:
         # er
-        ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_er, color=COLORS['er'], lw=3)
+        line_er = ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_er, color=COLORS['er'], lw=3)
         ax.fill_between(BINCS_NODAL_EFFICIENCY,
                         counts_nodal_efficiency_mean_er - counts_nodal_efficiency_std_er,
                         counts_nodal_efficiency_mean_er + counts_nodal_efficiency_std_er,
                         color=COLORS['er'], alpha=0.5)
 
         # pgpa
-        ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_pgpa, color=COLORS['pgpa'], lw=3, zorder=100)
+        line_pgpa = ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_pgpa, color=COLORS['pgpa'], lw=3, zorder=100)
         ax.fill_between(BINCS_NODAL_EFFICIENCY,
                         counts_nodal_efficiency_mean_pgpa - counts_nodal_efficiency_std_pgpa,
                         counts_nodal_efficiency_mean_pgpa + counts_nodal_efficiency_std_pgpa,
                         color=COLORS['pgpa'], alpha=0.5, zorder=100)
 
         # pref-growth
-        ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_pg, color=COLORS['pref-growth'], lw=3)
+        line_pg = ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_pg, color=COLORS['pref-growth'], lw=3)
         ax.fill_between(BINCS_NODAL_EFFICIENCY,
                         counts_nodal_efficiency_mean_pg - counts_nodal_efficiency_std_pg,
                         counts_nodal_efficiency_mean_pg + counts_nodal_efficiency_std_pg,
                         color=COLORS['pref-growth'], alpha=0.5)
 
         # pref-attach
-        ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_pa, color=COLORS['pref-attachment'], lw=3)
+        line_pa = ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_pa, color=COLORS['pref-attachment'], lw=3)
         ax.fill_between(BINCS_NODAL_EFFICIENCY,
                         counts_nodal_efficiency_mean_pa - counts_nodal_efficiency_std_pa,
                         counts_nodal_efficiency_mean_pa + counts_nodal_efficiency_std_pa,
                         color=COLORS['pref-attachment'], alpha=0.5)
 
         # deg-controlled rand
-        ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_rand, color=COLORS['configuration'], lw=3)
+        line_rand = ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_rand, color=COLORS['configuration'], lw=3)
         ax.fill_between(BINCS_NODAL_EFFICIENCY,
                         counts_nodal_efficiency_mean_rand - counts_nodal_efficiency_std_rand,
                         counts_nodal_efficiency_mean_rand + counts_nodal_efficiency_std_rand,
                         color=COLORS['configuration'], alpha=0.5)
 
-        ax.set_xlim(0, 1)
-        ax.set_ylim(0, 270)
+        ax.set_xlim(X_LIM_EFFICIENCY)
+        ax.set_ylim(Y_LIM_EFFICIENCY)
 
         ax.set_xlabel('Nodal efficiency')
         ax.set_ylabel('Counts')
 
-        ax.legend()
+lines = [hist_connectome[-1][0], line_er[0], line_pgpa[0], line_pg[0], line_pa[0], line_rand[0]]
+labels = ['Connectome', 'Directed ER', 'PGPA', 'Pref-growth',
+           'Pref-attach', 'Configuration']
+axs[1].legend(lines, labels, fontsize=FONT_SIZE)
 
-for ax in axs:
+labels = ('a', 'b')
+for ax, label in zip(axs, labels):
     change_settings.set_all_colors(ax, AX_COLOR)
     change_settings.set_all_text_fontsizes(ax, FONT_SIZE)
+    ax.text(0.05, 0.95, label, fontsize=20, fontweight='bold',
+            transform=ax.transAxes,  ha='center', va='center')
 
 plt.draw()
 plt.show(block=True)
