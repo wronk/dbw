@@ -220,12 +220,14 @@ if directed:
 # Targeted attack (undirected, largest component and efficiency)
 # and random (undirected efficiency)
 
-fig5, ax_list5 = plt.subplots(nrows=1, ncols=3, figsize=(12., 4.),
+fig5, ax_list5 = plt.subplots(nrows=1, ncols=2, figsize=(10., 5.),
                               facecolor=FACECOLOR)
 
 metrics = graph_metrics_und[0]['metrics_label'][1] * 2 + \
     graph_metrics_und[0]['metrics_label'][0]
+labels = ['a', 'b', 'c']
 
+'''
 # Random attack, undirected efficiency
 for gi, g_dict in enumerate(graph_metrics_und):
     x = g_dict['removed_rand']
@@ -242,7 +244,8 @@ for gi, g_dict in enumerate(graph_metrics_und):
 ax_list5[0].set_title('Random Attack', fontsize=FONTSIZE)
 ax_list5[0].set_xlabel('Prop. Nodes Removed', fontsize=FONTSIZE)
 ax_list5[0].set_ylabel(graph_metrics_und[0]['metrics_label'][1],
-                       fontsize=FONTSIZE)
+                       fontsize=FONTSIZE, va='baseline')
+                       '''
 
 # Targetted attack, undirected efficiency and largest component
 # Roll axis on two data matrices just to reverse order of plot
@@ -258,26 +261,28 @@ for fi, func_label in enumerate(metric_labels):
         fill_upper = avg + targ_std[fi, :]
         fill_lower = avg - targ_std[fi, :]
 
-        ax_list5[fi + 1].plot(x, avg, lw=LW, label=g_dict['graph_name'],
-                              color=graph_col[gi])
-        ax_list5[fi + 1].fill_between(x, fill_upper, fill_lower, lw=0,
-                                      facecolor=graph_col[gi],
-                                      interpolate=True, alpha=.4)
-    ax_list5[fi + 1].set_title('Targeted Attack', fontsize=FONTSIZE)
-    ax_list5[fi + 1].set_xlabel('Nodes Removed', fontsize=FONTSIZE)
-    if fi is not 0:
-        ax_list5[fi + 1].set_ylabel(func_label, fontsize=FONTSIZE)
+        ax_list5[fi].plot(x, avg, lw=LW, label=g_dict['graph_name'],
+                          color=graph_col[gi])
+        ax_list5[fi].fill_between(x, fill_upper, fill_lower, lw=0,
+                                  facecolor=graph_col[gi],
+                                  interpolate=True, alpha=.4)
+    ax_list5[fi].set_title('Targeted Attack', fontsize=FONTSIZE)
+    ax_list5[fi].set_xlabel('Nodes Removed', fontsize=FONTSIZE)
+    ax_list5[fi].set_ylabel(func_label, fontsize=FONTSIZE, va='baseline')
 
-ax_list5[0].legend(loc='best')
+ax_list5[1].legend(loc='best', prop={'size': FONTSIZE - 6})
 
-for ax in ax_list5:
+for ax_i, ax in enumerate(ax_list5):
     ax.locator_params(axis='both', nbins=5)
     for text in ax.get_xticklabels() + ax.get_yticklabels():
         text.set_fontsize(FONTSIZE)
+    ax.text(0.06, .92, labels[ax_i], color='k', fontsize=FONTSIZE,
+            fontweight='bold', transform=ax.transAxes)
+ax_list5[0].set_xlim([0, 426])
 ax_list5[1].set_xlim([0, 426])
-ax_list5[2].set_xlim([0, 426])
-ax_list5[1].set_ylim([0, .3])  # Manually set to prevent lower axis < 0
-plt.tight_layout(w_pad=.18)
+ax_list5[1].set_ylim([0, 450])
+ax_list5[0].set_ylim([0, .3])  # Manually set to prevent lower axis < 0
+plt.tight_layout(w_pad=2)
 plt.draw()
 
 #fig5.savefig('/home/wronk/Builds/lesion_fig_poster.png', transparent=True)
