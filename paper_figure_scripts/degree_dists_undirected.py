@@ -52,7 +52,10 @@ def hist_plot(ax, deg_dists, colors, graph_names, graph_ls):
     # Loop through all desired graphs
     for deg, col, lab, ls in zip(deg_dists, colors, graph_names, graph_ls):
         hist, plt_bins = np.histogram(deg, lin_bins, normed=True)
-        ax.plot(plt_bins[:-1], hist, ls=ls, lw=3, color=col, label=lab)
+        # Correct x-coords to center them on histogram bins
+        plt_bins_mid = plt_bins + np.diff(plt_bins)[0] * 0.5
+
+        ax.plot(plt_bins_mid[:-1], hist, ls=ls, lw=3, color=col, label=lab)
 
     # Set axis limits and ticks, and label subplots
     ax.set_xlim([0, 150])
@@ -165,6 +168,6 @@ axs[2].set_yscale('log')
 axs[2].legend_.remove()
 '''
 
-plt.tight_layout()
+fig.set_tight_layout(True)
 fig.subplots_adjust(top=0.925, bottom=0.17, left=0.12, wspace=0.325)
 plt.draw()
