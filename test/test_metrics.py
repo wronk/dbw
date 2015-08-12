@@ -5,6 +5,7 @@ from __future__ import print_function, division
 import unittest
 import numpy as np
 import networkx as nx
+from metrics import binary_directed as metrics_bd
 
 
 class NetworkXDirectedGraphsTestCase(unittest.TestCase):
@@ -27,6 +28,12 @@ class NetworkXDirectedGraphsTestCase(unittest.TestCase):
 
         # make sure we get back the same adjacency matrix
         np.testing.assert_array_equal(a, nx.adjacency_matrix(G).todense())
+
+    def test_power_law_fit_deg_cc(self):
+
+        G = nx.erdos_renyi_graph(100, .2)
+        fit = metrics_bd.power_law_fit_deg_cc(G)
+        self.assertEqual(len(fit), 5)
 
 
 if __name__ == '__main__':
