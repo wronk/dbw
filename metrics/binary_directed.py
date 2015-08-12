@@ -6,9 +6,9 @@ Created on Wed Nov 12 12:11:43 2014
 Graph-theory metrics for binary undirected graphs.
 """
 from __future__ import division
-
 import numpy as np
 import networkx as nx
+from scipy import stats
 
 
 def reciprocity(G):
@@ -53,3 +53,21 @@ def efficiency_matrix(G):
                     efficiency[src, targ] = 0.
 
     return efficiency
+
+
+def power_law_fit_deg_cc(G):
+    """
+    Fit a power-law model to a graphs clustering (y-axis) vs. degree (x-axis) scatter plot.
+    Fits a line to a log-log plot. Return values are relative to log-log plot.
+    :param G: graph
+    :return: slope, intercept, r-value, p-value, stderr
+    """
+    deg = np.array(nx.degree(G.to_undirected()).values())
+    cc = np.array(nx.clustering(G.to_undirected()).values())
+
+    # remove zero-valued items, as they'll mess up fitting to log plot
+    mask = (deg > 0) * (cc > 0)
+    deg = deg[mask]
+    cc = cc[mask]
+
+    return stats.linregress(np.log(deg), np.log(cc))
