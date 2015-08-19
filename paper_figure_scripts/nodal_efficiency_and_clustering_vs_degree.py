@@ -145,12 +145,17 @@ G_brain.nodal_efficiency = np.sum(G_brain.efficiency_matrix, axis=1) / (len(G_br
 
 # calculate power-law fits for each graph type and brain
 power_law_fits = {}
+fits_r_squared = {}
 for name, graphs in zip(names, graphss):
     gammas = []
+    r_squareds = []
     for graph in graphs:
-        gammas.append(metrics_bd.power_law_fit_deg_cc(graph)[0])
+        fit = metrics_bd.power_law_fit_deg_cc(graph)
+        gammas.append(fit[0])
+        r_squareds.append(fit[2] ** 2)
 
     power_law_fits[name] = np.array(gammas)
+    fits_r_squared[name] = np.array(r_squareds)
 
 power_law_fits['brain'] = metrics_bd.power_law_fit_deg_cc(G_brain)[0]
 
@@ -185,7 +190,7 @@ for a_ctr, ax in enumerate(axs):
         ax.set_yticks((0, 0.2, 0.4, 0.6, 0.8, 1))
 
         ax.set_xlabel('Degree')
-        ax.set_ylabel('Clustering\ncoefficient')
+        ax.set_ylabel('Clustering coefficient')
 
     elif a_ctr == 1:
 
@@ -214,10 +219,10 @@ for a_ctr, ax in enumerate(axs):
         ax.set_ylim(Y_LIM_EFFICIENCY)
 
         ax.set_xlabel('Nodal efficiency')
-        ax.set_ylabel('Counts')
+        ax.set_ylabel('Number of nodes')
 
-lines = [hist_connectome[-1][0], line_pgpa[0], line_pg[0], line_rand[0]]
-labels = ['Connectome', 'PGPA', 'PG', 'Random']
+lines = [line_rand[0], line_pg[0], line_pgpa[0], hist_connectome[-1][0]]
+labels = ['Random', 'PG', 'PGPA', 'Connectome']
 axs[1].legend(lines, labels, fontsize=FONT_SIZE)
 
 labels = ('a', 'b')
@@ -229,24 +234,27 @@ for ax, label in zip(axs, labels):
 
 # add inset with power-law fit bar plot
 ax_inset = fig.add_axes(INSET_COORDINATES)
-bar_names = ('pgpa', 'pref-growth', 'random')
+bar_names = ('random', 'pref-growth', 'pgpa')
 gamma_means = [power_law_fits[name].mean() for name in bar_names]
 gamma_stds = [power_law_fits[name].std() for name in bar_names]
+gamma_median_r_squareds = [np.median(fits_r_squared[name]) for name in names]
 colors = [COLORS[name] for name in bar_names]
 bar_width = .8
-x_pos = np.arange(1, len(bar_names) + 1) - bar_width/2
+x_pos = np.arange(len(bar_names)) - bar_width/2
 error_kw = {'ecolor': 'k', 'elinewidth': 2, 'markeredgewidth': 2, 'capsize': 6}
 
 ax_inset.bar(x_pos, gamma_means, width=bar_width, color=colors, yerr=gamma_stds, error_kw=error_kw)
-ax_inset.bar([-bar_width/2], power_law_fits['brain'], width=bar_width, color=COLORS['brain'])
+ax_inset.bar([-bar_width/2 + 3], power_law_fits['brain'], width=bar_width, color=COLORS['brain'])
 ax_inset.set_xticks(np.arange(len(bar_names) + 1))
-ax_inset.set_xticklabels(['Connectome', 'PGPA', 'PG', 'Random'], rotation='vertical')
+ax_inset.set_xticklabels(['Random', 'PG', 'PGPA', 'Connectome'], rotation='vertical')
 
 ax_inset.set_yticks([0, -0.2, -0.4, -0.6])
 ax_inset.set_ylabel(r'$\gamma$')
 
 change_settings.set_all_colors(ax_inset, AX_COLOR)
 change_settings.set_all_text_fontsizes(ax_inset, FONT_SIZE)
+
+print(zip(names, gamma_median_r_squareds))
 
 plt.draw()
 plt.show(block=True)
