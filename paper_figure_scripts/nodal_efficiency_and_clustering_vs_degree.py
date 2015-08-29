@@ -157,7 +157,9 @@ for name, graphs in zip(names, graphss):
     power_law_fits[name] = np.array(gammas)
     fits_r_squared[name] = np.array(r_squareds)
 
-power_law_fits['brain'] = metrics_bd.power_law_fit_deg_cc(G_brain)[0]
+power_law_fit_brain = metrics_bd.power_law_fit_deg_cc(G_brain)
+power_law_fits['brain'] = power_law_fit_brain[0]
+fits_r_squared['brain'] = power_law_fit_brain[2] ** 2
 
 # plot clustering vs. degree and nodal_efficiencies for brain and three models
 fig, axs = plt.subplots(1, 2, facecolor=FACE_COLOR, figsize=FIG_SIZE, tight_layout=True)
@@ -255,6 +257,7 @@ change_settings.set_all_colors(ax_inset, AX_COLOR)
 change_settings.set_all_text_fontsizes(ax_inset, FONT_SIZE)
 
 print(zip(names, gamma_median_r_squareds))
+print('brain: ', fits_r_squared['brain'])
 
 plt.draw()
 plt.show(block=True)
