@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 Created Sat May 23 14:11:50 2015
 
@@ -18,6 +20,7 @@ from random_graph.binary_undirected import \
 from random_graph.binary_directed import biophysical_reverse_outdegree as pgpa_dir
 from metrics import binary_undirected as und_metrics
 reload(und_metrics)
+import csv
 import pickle
 import brain_constants as bc
 
@@ -39,12 +42,12 @@ def calc_metrics(G, metrics):
 # SET YOUR SAVE DIRECTORY
 save_dir = os.environ['DBW_SAVE_CACHE']
 
-repeats = 2
+repeats = 100
 
 # Set the graphs and metrics you wisht to include
-graph_names = ['Mouse Connectome', 'Random', 'Small-World', 'Scale-Free',
+graph_names = ['Connectome', 'Random', 'Small-world', 'Scale-free',
                'PGPA']
-#graph_names = ['Mouse Connectome', 'Small-World']
+#graph_names = ['Connectome', 'Small-World']
 #metrics = [und_metrics.local_efficiency, und_metrics.global_efficiency]
 metrics = [nx.average_clustering, nx.average_shortest_path_length,
            und_metrics.global_efficiency, und_metrics.local_efficiency]
@@ -72,7 +75,7 @@ brain_degree_mean = np.mean(brain_degree)
 # Calculate metrics specially because no repeats can be done on brain
 brain_metrics = calc_metrics(G_brain, metrics)
 for met_i, bm in enumerate(metrics):
-    met_arr[graph_names.index('Mouse Connectome'), :, met_i] = bm(G_brain)
+    met_arr[graph_names.index('Connectome'), :, met_i] = bm(G_brain)
 
 for rep in np.arange(repeats):
     # PGPA model
@@ -124,6 +127,18 @@ pickle.dump(save_dict, outfile)
 outfile.close()
 
 # Save csvs for easy table creation
-np.savetxt(f_name + '_averaged.csv', met_arr.mean(1), fmt='%10.3f',
+met_mean = met_arr.mean(1)
+csv_out = []
+for mean, std in zip(met_mean, std_arr):
+    csv_out.append(['%10.3f +/- %10.6f' % (m, s) for m, s in zip(mean, std)])
+
+with open(f_name + 'mean_std.csv', 'w') as csv_file:
+    csv_writer = csv.writer(csv_file)
+    csv_writer.writerows(csv_out)
+    csv_file.close()
+
+'''
+np.savetxt(f_name + '_averaged.csv', met_mean, fmt='%10.3f',
            delimiter=',')
 np.savetxt(f_name + '_std.csv', std_arr, fmt='%10.6f', delimiter=',')
+'''

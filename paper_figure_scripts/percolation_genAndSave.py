@@ -128,9 +128,9 @@ def construct_graph_list_dir(graphs_to_const):
 ##################
 
 if gen_directed:
-    graph_names = ['Mouse', 'Random', 'PGPA']
+    graph_names = ['Connectome', 'Random', 'PGPA']
 else:
-    graph_names = ['Mouse', 'Random', 'Small-world', 'Scale-free',
+    graph_names = ['Connectome', 'Random', 'Small-world', 'Scale-free',
                    'PGPA']
 
 # Directed

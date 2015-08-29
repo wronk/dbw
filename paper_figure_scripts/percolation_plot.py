@@ -9,13 +9,12 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-#import network_gen as ng
-from metrics import percolation as perc
-reload(perc)
 import config as cf
 import os
 import os.path as op
 import pickle
+from metrics import percolation as perc
+reload(perc)
 
 # Set plots to make
 undirected = True
@@ -25,14 +24,14 @@ directed = False
 # Load graphs
 ###############
 load_dir = os.environ['DBW_SAVE_CACHE']
-graph_names_und = ['Mouse', 'Random', 'Small-world', 'Scale-free',
+graph_names_und = ['Connectome', 'Random', 'Small-world', 'Scale-free',
                    'PGPA']
-graph_names_dir = ['Mouse', 'Random', 'PGPA']
+graph_names_dir = ['Connectome', 'Random', 'PGPA']
 
 graph_metrics_und = []
 graph_metrics_dir = []
 
-### Metrics arrays are (function/metric x number/prop removed x repeats)
+# Metrics arrays are (function/metric x number/prop removed x repeats)
 
 for g_name in graph_names_und:
     # Load undirected graph metrics
@@ -121,7 +120,7 @@ if undirected:
         ax.locator_params(axis='both', nbins=8)
         for text in ax.get_xticklabels() + ax.get_yticklabels():
             text.set_fontsize(FONTSIZE)
-    plt.tight_layout()
+    fig1.set_tight_layout(True)
 
     ############################################################
     # Targeted attack (undirected) with subplot for each metric
@@ -152,8 +151,7 @@ if undirected:
         for text in ax.get_xticklabels() + ax.get_yticklabels():
             text.set_fontsize(FONTSIZE)
     ax_list2[1].set_ylim([0, .3])  # Manually set to prevent lower axis < 0
-    plt.tight_layout()
-
+    fig2.set_tight_layout(True)
 
 ########################################################
 # Random attack (directed) with subplot for each metric
@@ -183,7 +181,7 @@ if directed:
     for ax in ax_list3:
         for text in ax.get_xticklabels() + ax.get_yticklabels():
             text.set_fontsize(FONTSIZE)
-    plt.tight_layout()
+    fig3.set_tight_layout(True)
 
     ###########################################################
     # Targeted attack (directed) with subplot for each metric
@@ -212,7 +210,7 @@ if directed:
     for ax in ax_list4:
         for text in ax.get_xticklabels() + ax.get_yticklabels():
             text.set_fontsize(FONTSIZE)
-    plt.tight_layout()
+    fig4.set_tight_layout(True)
 
 #####################
 # Combined plot hack
@@ -282,7 +280,7 @@ ax_list5[0].set_xlim([0, 426])
 ax_list5[1].set_xlim([0, 426])
 ax_list5[1].set_ylim([0, 450])
 ax_list5[0].set_ylim([0, .3])  # Manually set to prevent lower axis < 0
-plt.tight_layout(w_pad=2)
+fig5.set_tight_layout(True)
 plt.draw()
 
 #fig5.savefig('/home/wronk/Builds/lesion_fig_poster.png', transparent=True)
