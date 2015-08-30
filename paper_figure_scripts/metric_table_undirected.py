@@ -12,6 +12,8 @@ import os
 import os.path as op
 import numpy as np
 import networkx as nx
+import csv
+import pickle
 
 import extract.brain_graph
 from random_graph import binary_undirected
@@ -19,12 +21,9 @@ from random_graph.binary_undirected import \
     undirected_biophysical_reverse_outdegree as pgpa_und
 from random_graph.binary_directed import biophysical_reverse_outdegree as pgpa_dir
 from metrics import binary_undirected as und_metrics
-reload(und_metrics)
-import csv
-import pickle
 import brain_constants as bc
-
 from config.graph_parameters import LENGTH_SCALE
+reload(und_metrics)
 
 
 def calc_metrics(G, metrics):
@@ -47,7 +46,7 @@ repeats = 100
 # Set the graphs and metrics you wisht to include
 graph_names = ['Connectome', 'Random', 'Small-world', 'Scale-free',
                'PGPA']
-#graph_names = ['Connectome', 'Small-World']
+#graph_names = ['Connectome', 'Small-world']
 #metrics = [und_metrics.local_efficiency, und_metrics.global_efficiency]
 metrics = [nx.average_clustering, nx.average_shortest_path_length,
            und_metrics.global_efficiency, und_metrics.local_efficiency]
@@ -93,18 +92,18 @@ for rep in np.arange(repeats):
         met_arr[graph_names.index('Random'), rep, :] = \
             calc_metrics(G_CM, metrics)
 
-    # Small-World (Watts-Strogatz) model with standard reconnection prob
-    if 'Small-World' in graph_names:
+    # Small-world (Watts-Strogatz) model with standard reconnection prob
+    if 'Small-world' in graph_names:
         G_SW = nx.watts_strogatz_graph(n_nodes, int(round(brain_degree_mean)),
                                        0.159)
-        met_arr[graph_names.index('Small-World'), rep, :] = \
+        met_arr[graph_names.index('Small-world'), rep, :] = \
             calc_metrics(G_SW, metrics)
 
-    # Scale-Free (Barabasi-Albert) graph
-    if 'Scale-Free' in graph_names:
+    # Scale-free (Barabasi-Albert) graph
+    if 'Scale-free' in graph_names:
         G_SF = nx.barabasi_albert_graph(n_nodes,
                                         int(round(brain_degree_mean / 2.)))
-        met_arr[graph_names.index('Scale-Free'), rep, :] = \
+        met_arr[graph_names.index('Scale-free'), rep, :] = \
             calc_metrics(G_SF, metrics)
 
     print 'Completed repeat: ' + str(rep)
@@ -126,19 +125,14 @@ outfile = open(f_name + '.pkl', 'wb')
 pickle.dump(save_dict, outfile)
 outfile.close()
 
-# Save csvs for easy table creation
+# Save csvs for easily dumping data to table
 met_mean = met_arr.mean(1)
 csv_out = []
 for mean, std in zip(met_mean, std_arr):
-    csv_out.append(['%10.3f +/- %10.6f' % (m, s) for m, s in zip(mean, std)])
+    csv_out.append(['%10.3f +/- %10.4f' % (m, s) for m, s in zip(mean, std)])
 
-with open(f_name + 'mean_std.csv', 'w') as csv_file:
+# Open and write csv file. Contains mean and std now
+with open(f_name + '_mean_std.csv', 'w') as csv_file:
     csv_writer = csv.writer(csv_file)
     csv_writer.writerows(csv_out)
     csv_file.close()
-
-'''
-np.savetxt(f_name + '_averaged.csv', met_mean, fmt='%10.3f',
-           delimiter=',')
-np.savetxt(f_name + '_std.csv', std_arr, fmt='%10.6f', delimiter=',')
-'''
