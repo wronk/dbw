@@ -144,8 +144,8 @@ if gen_directed:
 
 # Undirected
 else:
-    func_list = [(perc.lesion_met_largest_component, 'Largest Component'),
-                 (und_metrics.global_efficiency, 'Global Efficiency')]
+    func_list = [(perc.lesion_met_largest_component, 'Largest component'),
+                 (und_metrics.global_efficiency, 'Global efficiency')]
 
 #################
 # Do percolation

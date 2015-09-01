@@ -247,7 +247,10 @@ ax_list5[0].set_ylabel(graph_metrics_und[0]['metrics_label'][1],
 
 # Targetted attack, undirected efficiency and largest component
 # Roll axis on two data matrices just to reverse order of plot
-metric_labels = np.roll(graph_metrics_und[0]['metrics_label'], shift=1, axis=0)
+
+# TODO: Hack; Fix below after rerunning percolation_genAndSave
+#metric_labels = np.roll(graph_metrics_und[0]['metrics_label'], shift=1, axis=0)
+metric_labels = ['Global efficiency', 'Largest component']
 for fi, func_label in enumerate(metric_labels):
     for gi, g_dict in enumerate(graph_metrics_und):
 
@@ -264,8 +267,8 @@ for fi, func_label in enumerate(metric_labels):
         ax_list5[fi].fill_between(x, fill_upper, fill_lower, lw=0,
                                   facecolor=graph_col[gi],
                                   interpolate=True, alpha=.4)
-    ax_list5[fi].set_title('Targeted Attack', fontsize=FONTSIZE)
-    ax_list5[fi].set_xlabel('Nodes Removed', fontsize=FONTSIZE)
+    #ax_list5[fi].set_title('Targeted Attack', fontsize=FONTSIZE)
+    ax_list5[fi].set_xlabel('Nodes removed', fontsize=FONTSIZE)
     ax_list5[fi].set_ylabel(func_label, fontsize=FONTSIZE, va='baseline')
 
 ax_list5[1].legend(loc='best', prop={'size': FONTSIZE - 6})
