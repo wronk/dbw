@@ -45,6 +45,7 @@ Ls = np.linspace(0,2,21)
 data_dir=os.getenv('DBW_DATA_DIRECTORY')
 modelReciprocity = pd.read_csv(data_dir+'/reciprocity2.csv',
                                index_col=0).as_matrix()
+
 meanReciprocity = np.mean(modelReciprocity,axis=1)
 stdReciprocity = np.std(modelReciprocity,axis=1)
 
@@ -72,22 +73,22 @@ for j in range(n_repeats):
 
 # Now plot everything
 # First plot mean reciprocity and fill in +/- 1 SD
-axs[0].plot(Ls[1:],meanReciprocity[1:],linewidth=2,color=color_scheme.PGPA)
-axs[0].fill_between(Ls[1:],meanReciprocity[1:]-stdReciprocity[1:],
+axs[1].plot(Ls[1:],meanReciprocity[1:],linewidth=2,color=color_scheme.PGPA)
+axs[1].fill_between(Ls[1:],meanReciprocity[1:]-stdReciprocity[1:],
                     meanReciprocity[1:]+stdReciprocity[1:],
                     facecolor=color_scheme.PGPA,
                     alpha=0.2,antialiased=True,linewidth=3,linestyle='-',
                     edgecolor=color_scheme.PGPA)
 
 # Plot brain reciprocity
-axs[0].plot([0,2],[brainReciprocity,brainReciprocity],linewidth=4,
+axs[1].plot([0,2],[brainReciprocity,brainReciprocity],linewidth=4,
             color=color_scheme.ATLAS,linestyle='--')
 
 # Plot configuration reciprocity
 configX = [0,2]; configY = [np.mean(configReciprocity),
                             np.mean(configReciprocity)]
-axs[0].plot(configX,configY,linewidth=2,color=color_scheme.CONFIG)
-axs[0].fill_between(configX,configY-np.std(configReciprocity),
+axs[1].plot(configX,configY,linewidth=2,color=color_scheme.CONFIG)
+axs[1].fill_between(configX,configY-np.std(configReciprocity),
                     configY+np.std(configReciprocity),
                     facecolor=color_scheme.CONFIG,alpha=0.2,antialiased=True,
                     linewidth=3,linestyle=':', edgecolor=color_scheme.CONFIG)
@@ -96,15 +97,15 @@ axs[0].fill_between(configX,configY-np.std(configReciprocity),
 # Set ticks, labels, and font sizes
 xticks = np.arange(0,2.5,0.5)
 yticks = [0,0.1,0.2,0.3]
-axs[0].set_xlabel('L (mm)',fontsize=labelsize,color='k')
-axs[0].set_ylabel('Reciprocity coefficient',fontsize=labelsize,color='k')
-axs[0].set_xticks(xticks)
-axs[0].set_yticks(yticks)
-axs[0].set_xticklabels(xticks,fontsize=labelsize,color='k')
-axs[0].set_yticklabels(yticks,fontsize=labelsize,color='k')
-axs[0].set_xlim([Ls[1],2])
-axs[0].set_ylim([0,0.3])
-leg = axs[0].legend(['PGPA model', 'Allen Atlas', 'Shuffled Atlas'],
+axs[1].set_xlabel('L (mm)',fontsize=labelsize,color='k')
+axs[1].set_ylabel('Reciprocity coefficient',fontsize=labelsize,color='k')
+axs[1].set_xticks(xticks)
+axs[1].set_yticks(yticks)
+axs[1].set_xticklabels(xticks,fontsize=labelsize,color='k')
+axs[1].set_yticklabels(yticks,fontsize=labelsize,color='k')
+axs[1].set_xlim([Ls[1],2])
+axs[1].set_ylim([0,0.3])
+leg = axs[1].legend(['PGPA model', 'Connectome', 'Random'],
                     prop={'size':22})
 
 
@@ -138,33 +139,33 @@ recip = A2 * A2.T
 i,j = np.where(recip)
 centroidNames = labels
 recipNames = [tuple([centroidNames[i[k]],centroidNames[j[k]]]) for k in range(len(i))]
+nonRecipNames = list( set(edges.keys()) - set(recipNames) ) # subtract recip edges from all edges
 
+nonRecipDistances = [edges[k] for k in nonRecipNames]
 recipDistances = [edges[k] for k in recipNames]
 
 binnedRecipDistances = np.histogram(recipDistances,bins,normed=True)
 
 dx = bins[1]-bins[0]
 proportionRecip = binnedRecipDistances[0]
-#/(dx*binnedDistances[0]*2)
-#proportionRecip = binnedRecipDistances[0]/(dx*np.sum(binnedRecipDistances[0]))
 
 yticks = [0,0.15,0.3,0.45,0.6,0.75]
 xticks = [0,2.5,5.0,7.5,10.0]
 
+axs[0].hist(nonRecipDistances,bins,normed=True,facecolor='b',alpha=0.5)
+axs[0].hist(recipDistances,bins,normed=True,facecolor='g',alpha=0.5)
 
-#fig.tight_layout(pad=5)
-axs[1].hist(edges.values(),bins,normed=True,facecolor=color_scheme.ATLAS)
-axs[1].plot(bins[0:len(bins)-1],proportionRecip,linewidth=3,color='k',linestyle='-')
+axs[0].set_xticks(xticks)
+axs[0].set_xticklabels(xticks,fontsize=labelsize)
+axs[0].set_yticks(yticks)
+axs[0].set_yticklabels(yticks,fontsize=labelsize)
+axs[0].set_xlabel('Distance (mm)', fontsize=labelsize)
+axs[0].set_ylabel('Probability density', fontsize=labelsize)
+axs[0].set_xlim([0,max(bins)])
+axs[0].set_title('Connectome',fontsize=28)
+axs[0].legend(['Reciprocal edges', 'Nonreciprocal edges'],prop={'size':legendsize})
 
-axs[1].set_xticks(xticks)
-axs[1].set_xticklabels(xticks,fontsize=labelsize)
-axs[1].set_yticks(yticks)
-axs[1].set_yticklabels(yticks,fontsize=labelsize)
-axs[1].set_xlabel('Distance (mm)', fontsize=labelsize)
-axs[1].set_ylabel('Probability density', fontsize=labelsize)
-axs[1].set_xlim([0,max(bins)])
-axs[1].set_title('Connectome Reciprocity')
-axs[1].legend(['Reciprocal edges', 'All edges'],prop={'size':legendsize})
+
 
 ##################################
 # Now for the biophysical model...
@@ -197,19 +198,19 @@ recip = A2 * A2.T
 i,j = np.where(recip)
 centroidNames = np.arange(len(centroids))
 recipNames = [tuple(sorted([centroidNames[i[k]],centroidNames[j[k]]])) for k in range(len(i))]
+nonRecipNames = list( set(edges.keys()) - set(recipNames) ) # subtract recip edges from all edges
 
+nonRecipDistances = [edges[k] for k in nonRecipNames]
 recipDistances = [edges[k] for k in recipNames]
 
 binnedRecipDistances = np.histogram(recipDistances,bins,normed=True)
 dx = bins[1]-bins[0]
-# Every reciprocal connection is counted twice, so divide by 2
-#proportionRecip = binnedRecipDistances[0]/(np.sum(binnedRecipDistances[0])*dx)
 proportionRecip = binnedRecipDistances[0]
-#/(binnedDistances[0]*2*dx)
 
 
-axs[2].hist(edges.values(),bins,normed=True,facecolor=color_scheme.PGPA)
-axs[2].plot(bins[0:len(bins)-1],proportionRecip,linewidth=3,color='k',linestyle='-')
+
+axs[2].hist(nonRecipDistances,bins,normed=True,facecolor='b',alpha=0.5)
+axs[2].hist(recipDistances,bins,normed=True,facecolor='g',alpha=0.5)
 axs[2].set_xticks(xticks)
 axs[2].set_xticklabels(xticks,fontsize=labelsize)
 axs[2].set_yticks(yticks)
@@ -217,13 +218,14 @@ axs[2].set_yticklabels([])
 axs[2].set_xlabel('Distance (mm)', fontsize=labelsize)
 axs[2].set_ylabel('Probability density', fontsize=28)
 axs[2].set_xlim([0,10.0])
-axs[2].set_title('PGPA Reciprocity')
-axs[2].legend(['Reciprocal edges', 'All edges'],prop={'size':legendsize})
+axs[2].set_title('PGPA model',fontsize=28)
+axs[2].legend(['Reciprocal edges', 'Nonreciprocal edges'],prop={'size':legendsize})
 
 
 # Finally add labels
-axs[0].text(0.1+2*0.05,0.3*0.925,'a',fontsize=labelsize,fontweight='bold')
-axs[1].text(10*0.05,0.75*0.925,'b',fontsize=labelsize,fontweight='bold')
+
+axs[0].text(10*0.05,0.75*0.925,'a',fontsize=labelsize,fontweight='bold')
+axs[1].text(0.1+2*0.05,0.3*0.925,'b',fontsize=labelsize,fontweight='bold')
 axs[2].text(10*0.05,0.75*0.925,'c',fontsize=labelsize,fontweight='bold')
 
 plt.show(block=False)
