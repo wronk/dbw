@@ -116,7 +116,7 @@ colors = [RAND_COLOR, WS_COLOR, BA_COLOR]
 graph_names = ['Random', 'Small-world', 'Scale-free']
 graph_ls = ['-', '-', '-']
 
-brain_label = 'Mouse\nConnectome'
+brain_label = 'Connectome'
 brain_lw = 0.5
 brain_alpha = 0.7
 
