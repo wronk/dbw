@@ -12,6 +12,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import extract.brain_graph
 import config
+import scipy.stats as stats
 
 from network_plot.change_settings import set_all_text_fontsizes, set_all_colors
 
@@ -74,12 +75,23 @@ fig, axs = plt.subplots(1, 4, facecolor=FACECOLOR, figsize=FIGSIZE,
                         tight_layout=True)
 
 # Brain
+x = np.linspace(0.01,160,501)
 axs[0].scatter(brain_degree, brain_clustering, color=BRAIN_COLOR)
+reg_brain = stats.linregress(np.log(brain_degree),np.log(brain_clustering))
+axs[0].plot(x,np.exp(reg_brain[1])*x**reg_brain[0],'k',linestyle='--',lw=3)
 
 # Standard random graphs
 axs[1].scatter(CM_degree, CM_clustering, color=RAND_COLOR)
+reg_CM = stats.linregress(np.log(CM_degree),np.log(CM_clustering))
+axs[1].plot(x,np.exp(reg_CM[1])*x**reg_CM[0],'k',linestyle='--',lw=3)
+
 axs[2].scatter(WS_degree, WS_clustering, color=WS_COLOR)
+reg_WS = stats.linregress(np.log(WS_degree),np.log(WS_clustering))
+axs[2].plot(x,np.exp(reg_WS[1])*x**reg_WS[0],'k',linestyle='--',lw=3)
+
 axs[3].scatter(BA_degree, BA_clustering, color=BA_COLOR)
+reg_BA = stats.linregress(np.log(BA_degree),np.log(BA_clustering))
+axs[3].plot(x,np.exp(reg_BA[1])*x**reg_BA[0],'k',linestyle='--',lw=3)
 
 # Set axis limits and ticks, and label subplots
 for ax_idx, ax in enumerate(axs.flatten()):
