@@ -52,7 +52,7 @@ CM_degree = nx.degree(G_CM).values()
 CM_clustering = nx.clustering(G_CM).values()
 
 # Watts-Strogatz
-G_WS = nx.watts_strogatz_graph(n_nodes, int(round(brain_degree_mean)), 0.159)
+G_WS = nx.watts_strogatz_graph(n_nodes, int(round(brain_degree_mean)), 0.23)
 WS_degree = nx.degree(G_WS).values()
 WS_clustering = nx.clustering(G_WS).values()
 
