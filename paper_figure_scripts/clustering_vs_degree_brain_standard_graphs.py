@@ -26,7 +26,7 @@ BA_COLOR = config.COLORS['scale-free']
 DEG_MAX = 150
 DEG_TICKS = [0, 50, 100, 150]
 CC_TICKS = [0, .2, .4, .6, .8, 1.0]
-graph_names = ['Mouse', 'Random', 'Small-world', 'Scale-free']
+graph_names = ['Connectome', 'Random', 'Small-world', 'Scale-free']
 labels = ['c', 'd', 'e', 'f']  # Upper corner labels for each plot
 plt.ion()
 plt.close('all')
@@ -46,7 +46,7 @@ brain_degree_mean = np.mean(brain_degree)
 
 # Build standard graphs & get their degree & clustering coefficient
 # Configuration model (random with fixed degree sequence)
-G_CM, _, _ = nx.random_degree_sequence_graph(brain_degree, tries=100)
+G_CM = nx.random_degree_sequence_graph(brain_degree, tries=100)
 CM_degree = nx.degree(G_CM).values()
 CM_clustering = nx.clustering(G_CM).values()
 
@@ -59,6 +59,12 @@ WS_clustering = nx.clustering(G_WS).values()
 G_BA = nx.barabasi_albert_graph(n_nodes, int(round(brain_degree_mean / 2.)))
 BA_degree = nx.degree(G_BA).values()
 BA_clustering = nx.clustering(G_BA).values()
+##################
+# Powerlaw fitting
+##################
+
+# TODO: Insert power law fitting here and calculate R^2 vals
+r_squared_vals = [0.9, 0.8, 0.7, 0.6]
 
 ############
 # Plot
@@ -91,12 +97,16 @@ for ax_idx, ax in enumerate(axs.flatten()):
     # Set titles
     ax.set_title(graph_names[ax_idx], fontsize=FONT_SIZE)
 
-# Hide x ticklabels in top row & y ticklabels in right columns
-for ax in axs[1:]:
-    ax.set_yticklabels('')
-
-axs[0].set_ylabel('Clustering\ncoefficient')
+    # Hide x ticklabels in top row & y ticklabels in right columns
+    if ax_idx == 0:
+        ax.set_ylabel('Clustering\ncoefficient')
+        ax.text(0.48, 0.85, r'$R^2=%0.2f$' % r_squared_vals[ax_idx],
+                color='k', fontsize=FONT_SIZE - 2, transform=ax.transAxes)
+    else:
+        ax.text(0.75, 0.85, '$%0.2f$' % r_squared_vals[ax_idx],
+                color='k', fontsize=FONT_SIZE - 2, transform=ax.transAxes)
+        ax.set_yticklabels('')
 
 fig.subplots_adjust(wspace=0.18)
 
-plt.draw()
+plt.show()
