@@ -63,11 +63,12 @@ left_main_ax.scatter(indeg_growth,outdeg_growth,c=color_scheme.PREFGROWTH,\
 left_main_ax.set_xlabel('In-degree')
 left_main_ax.set_ylabel('Out-degree')
 
-left_main_ax.set_xlim([0, 100])
-left_main_ax.set_ylim([0, 100])
+left_main_ax.set_xlim([0, 125])
+left_main_ax.set_ylim([0, 125])
 left_main_ax.set_aspect('auto')
-left_main_ax.set_xticks(np.arange(0, 101, 25))
-left_main_ax.set_yticks(np.arange(0, 101, 25))
+left_main_ax.set_xticks(np.arange(0, 121, 40))
+left_main_ax.set_yticks(np.arange(0, 121, 40))
+left_main_ax.text(150,150,'a',fontsize=26,fontweight='bold')
 #left_main_ax.legend(loc='best')
 
 # Top marginal (in-degree)
@@ -109,7 +110,7 @@ right_main_ax.xaxis.set_major_locator(plt.MaxNLocator(4))
 right_main_ax.set_yticks(np.arange(0, 1.1, .25))
 right_main_ax.set_ylim([0., 1.05])
 right_main_ax.set_xticks(np.arange(0, 151, 50))
-
+right_main_ax.text(140,1.25,'b',fontsize=26,fontweight='bold')
 
 for temp_ax in [left_main_ax, right_main_ax, top_margin_ax, right_margin_ax]:
     set_all_text_fontsizes(temp_ax, cf.FONTSIZE)

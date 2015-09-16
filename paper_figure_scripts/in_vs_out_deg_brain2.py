@@ -59,13 +59,13 @@ left_main_ax.scatter(indeg,outdeg,c=color_scheme.ATLAS,\
 left_main_ax.set_xlabel('In-degree')
 left_main_ax.set_ylabel('Out-degree')
 
-left_main_ax.set_xlim([0, 100])
-left_main_ax.set_ylim([0, 100])
+left_main_ax.set_xlim([0, 125])
+left_main_ax.set_ylim([0, 125])
 left_main_ax.set_aspect('auto')
-left_main_ax.set_xticks(np.arange(0, 101, 25))
-left_main_ax.set_yticks(np.arange(0, 101, 25))
+left_main_ax.set_xticks(np.arange(0, 121, 40))
+left_main_ax.set_yticks(np.arange(0, 121, 40))
 left_main_ax.legend(loc='best')
-
+left_main_ax.text(150,150,'a',fontsize=26,fontweight='bold')
 
 # Top marginal (in-degree)
 top_margin_ax.hist(indeg,bins=cf.OUTDEGREE_BINS,histtype='stepfilled',\
@@ -122,6 +122,7 @@ right_main_ax.xaxis.set_major_locator(plt.MaxNLocator(4))
 right_main_ax.set_yticks(np.arange(0, 1.1, .25))
 right_main_ax.set_ylim([0., 1.05])
 right_main_ax.set_xticks(np.arange(0, 151, 50))
+right_main_ax.text(140,1.25,'b',fontsize=26,fontweight='bold')
 
 top_margin_ax.set_ylabel('$P(K_\mathrm{in}=k)$')
 right_margin_ax.set_xlabel('$P(K_\mathrm{out}=k)$')
