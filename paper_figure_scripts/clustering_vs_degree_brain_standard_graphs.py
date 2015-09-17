@@ -47,7 +47,7 @@ brain_degree_mean = np.mean(brain_degree)
 
 # Build standard graphs & get their degree & clustering coefficient
 # Configuration model (random with fixed degree sequence)
-G_CM = nx.random_degree_sequence_graph(brain_degree, tries=100)
+#G_CM = nx.random_degree_sequence_graph(brain_degree, tries=100)
 CM_degree = nx.degree(G_CM).values()
 CM_clustering = nx.clustering(G_CM).values()
 
@@ -65,7 +65,18 @@ BA_clustering = nx.clustering(G_BA).values()
 ##################
 
 # TODO: Insert power law fitting here and calculate R^2 vals
-r_squared_vals = [0.9, 0.8, 0.7, 0.6]
+reg_brain = stats.linregress(np.log(brain_degree),np.log(brain_clustering))
+r_brain = stats.pearsonr(brain_clustering,np.exp(reg_brain[1])*brain_degree**reg_brain[0])
+reg_CM = stats.linregress(np.log(CM_degree),np.log(CM_clustering))
+r_CM = stats.pearsonr(CM_clustering,np.exp(reg_CM[1])*CM_degree**reg_CM[0])
+reg_WS = stats.linregress(np.log(WS_degree),np.log(WS_clustering))
+r_WS = stats.pearsonr(WS_clustering,np.exp(reg_WS[1])*WS_degree**reg_WS[0])
+reg_BA = stats.linregress(np.log(BA_degree),np.log(BA_clustering))
+r_BA = stats.pearsonr(BA_clustering,np.exp(reg_BA[1])*BA_degree**reg_BA[0])
+
+
+
+r_squared_vals = [r_brain[0]**2, r_CM[0]**2, r_WS[0]**2, r_BA[0]**2]
 
 ############
 # Plot
@@ -77,21 +88,20 @@ fig, axs = plt.subplots(1, 4, facecolor=FACECOLOR, figsize=FIGSIZE,
 # Brain
 x = np.linspace(0.01,160,501)
 axs[0].scatter(brain_degree, brain_clustering, color=BRAIN_COLOR)
-reg_brain = stats.linregress(np.log(brain_degree),np.log(brain_clustering))
 axs[0].plot(x,np.exp(reg_brain[1])*x**reg_brain[0],'k',linestyle='--',lw=3)
+
 
 # Standard random graphs
 axs[1].scatter(CM_degree, CM_clustering, color=RAND_COLOR)
-reg_CM = stats.linregress(np.log(CM_degree),np.log(CM_clustering))
 axs[1].plot(x,np.exp(reg_CM[1])*x**reg_CM[0],'k',linestyle='--',lw=3)
 
+
 axs[2].scatter(WS_degree, WS_clustering, color=WS_COLOR)
-reg_WS = stats.linregress(np.log(WS_degree),np.log(WS_clustering))
 axs[2].plot(x,np.exp(reg_WS[1])*x**reg_WS[0],'k',linestyle='--',lw=3)
 
 axs[3].scatter(BA_degree, BA_clustering, color=BA_COLOR)
-reg_BA = stats.linregress(np.log(BA_degree),np.log(BA_clustering))
 axs[3].plot(x,np.exp(reg_BA[1])*x**reg_BA[0],'k',linestyle='--',lw=3)
+
 
 # Set axis limits and ticks, and label subplots
 for ax_idx, ax in enumerate(axs.flatten()):
@@ -110,13 +120,17 @@ for ax_idx, ax in enumerate(axs.flatten()):
     ax.set_title(graph_names[ax_idx], fontsize=FONT_SIZE)
 
     # Hide x ticklabels in top row & y ticklabels in right columns
+
     if ax_idx == 0:
         ax.set_ylabel('Clustering\ncoefficient')
-        ax.text(0.48, 0.85, r'$R^2=%0.2f$' % r_squared_vals[ax_idx],
+        ax.text(0.5, 0.85, r'$\mathrm{R^{2}}$ = %.2f' % r_squared_vals[ax_idx],
                 color='k', fontsize=FONT_SIZE - 2, transform=ax.transAxes)
+
     else:
-        ax.text(0.75, 0.85, '$%0.2f$' % r_squared_vals[ax_idx],
+
+        ax.text(0.725, 0.85, '%0.2f' % r_squared_vals[ax_idx],
                 color='k', fontsize=FONT_SIZE - 2, transform=ax.transAxes)
+
         ax.set_yticklabels('')
 
 fig.subplots_adjust(wspace=0.18)
