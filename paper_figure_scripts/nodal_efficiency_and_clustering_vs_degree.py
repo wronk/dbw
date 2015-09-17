@@ -139,9 +139,21 @@ counts_nodal_efficiency_std_pg = np.array([G.counts_nodal_efficiency for G in gr
 counts_nodal_efficiency_mean_rand = np.array([G.counts_nodal_efficiency for G in graphs_rand]).mean(axis=0)
 counts_nodal_efficiency_std_rand = np.array([G.counts_nodal_efficiency for G in graphs_rand]).std(axis=0)
 
+# calculate mean and std of global efficiencies
+for name, graphs in zip(names, graphss):
+    nodal_effs = [np.sum(G.efficiency_matrix, axis=1) / (len(G.nodes()) - 1) for G in graphs]
+    global_effs = [nodal_eff.mean() for nodal_eff in nodal_effs]
+    print(
+        'global eff {}: mean = {}, std = {}'.format(
+            name, np.mean(global_effs), np.std(global_effs)
+        )
+    )
+
 # calculate nodal efficiency for brain
 G_brain.efficiency_matrix = metrics_bd.efficiency_matrix(G_brain)
 G_brain.nodal_efficiency = np.sum(G_brain.efficiency_matrix, axis=1) / (len(G_brain.nodes()) - 1)
+
+print('global eff brain: {}'.format(np.mean(G_brain.nodal_efficiency)))
 
 # calculate power-law fits for each graph type and brain
 power_law_fits = {}
