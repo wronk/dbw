@@ -236,7 +236,7 @@ for a_ctr, ax in enumerate(axs):
         ax.set_ylabel('Number of nodes')
 
 lines = [line_rand[0], line_pg[0], line_pgpa[0], hist_connectome[-1][0]]
-labels = ['Random', 'PG', 'PGPA', 'Connectome']
+labels = ['Random', 'SG', 'SGPA', 'Connectome']
 axs[1].legend(lines, labels, fontsize=FONT_SIZE)
 
 labels = ('a', 'b')

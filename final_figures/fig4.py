@@ -51,7 +51,7 @@ deg_growth = indeg_growth + outdeg_growth
 percent_indeg_attachment = indeg_attachment / deg_attachment.astype(float)
 percent_indeg_growth = indeg_growth / deg_growth.astype(float)
 
-legend = ['Preferential\nattachment', 'Preferential\ngrowth']
+legend = ['Target\nattraction', 'Source\ngrowth']
 a1 = 0.6
 
 

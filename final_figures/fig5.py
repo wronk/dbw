@@ -218,7 +218,7 @@ axs[2].set_yticklabels([])
 axs[2].set_xlabel('Distance (mm)', fontsize=labelsize)
 axs[2].set_ylabel('Probability density', fontsize=28)
 axs[2].set_xlim([0,10.0])
-axs[2].set_title('PGPA model',fontsize=28)
+axs[2].set_title('SGPA model',fontsize=28)
 axs[2].legend(['Reciprocal edges', 'Nonreciprocal edges'],prop={'size':legendsize})
 
 
