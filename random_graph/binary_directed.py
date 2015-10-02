@@ -527,3 +527,59 @@ def random_directed_deg_seq(in_sequence, out_sequence, simplify,
     D = aux_tools.dist_mat(centroids)
 
     return G, A, D
+
+
+def growing_SGPA_1(n_nodes, p_edge_split, l, brain_size, remove_extra_ccs):
+    """
+    Grow a source-growth-proximal-attachment graph by adding nodes one at a time.
+    :param n_nodes: number of total nodes
+    :param p_edge_split: probability that an edge splits in one time step
+    :param l: length constant
+    :param brain_size: size of brain to uniformly distribute node positions within
+    :param prune: whether or not to remove nodes that have no edges
+    :return: graph
+    """
+
+    def random_pos():
+        return np.random.uniform([0, 0, 0], brain_size)
+
+    # initialize new graph
+    G = nx.DiGraph()
+    G.add_node(0, {'pos': random_pos()})
+    G.add_edge(0, 0)
+
+    n_edges = 0
+
+    # loop over edge splits and node additions
+    for node_i in range(1, n_nodes):
+        # add new node with self edge
+        G.add_node(node_i, {'pos': random_pos()})
+        G.add_edge(node_i, node_i)
+
+        # add edges
+        for edge in np.array(G.edges()).copy():
+            if np.random.rand() < p_edge_split:
+                src = edge[0]
+                targs = [node for node in G.nodes() if node != src]
+                # determine target
+                dists = np.array(
+                    [np.linalg.norm(G.node[src]['pos'] - G.node[targ]['pos']) for targ in targs]
+                )
+                probs = np.exp(-dists/l)
+                probs /= probs.sum()
+                targ = np.random.choice(targs, p=probs)
+                G.add_edge(src, targ)
+                n_edges += 1
+                print n_edges
+
+    for node_i in range(n_nodes):
+        G.remove_edge(node_i, node_i)
+
+    if remove_extra_ccs:
+        ccs = list(nx.connected_components(G.to_undirected()))
+        max_cc_size = np.max([len(cc) for cc in ccs])
+        for cc in ccs:
+            if len(cc) != max_cc_size:
+                [G.remove_node(node) for node in cc]
+
+    return G
