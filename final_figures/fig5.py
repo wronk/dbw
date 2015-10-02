@@ -20,13 +20,13 @@ from network_compute import reciprocity
 
 import color_scheme
 
-fig,axs = plt.subplots(1,3,facecolor='white',edgecolor='white',figsize=(22,6))
+fig,axs = plt.subplots(1,3,facecolor='white',edgecolor='white',figsize=(7*2.54,2*2.54))
 
 #fig.set_figheight(3)
 #fig.set_figwidth(6)
 fig.subplots_adjust(bottom=0.15,wspace=0.3)
 
-# load brain graph, adjacency matrix, and labels
+# Set plot params
 labelsize = 24
 ticksize = 20
 legendsize = 18
@@ -61,7 +61,7 @@ outDeg = G.out_degree(); outDeg = [outDeg[node] for node in nodes]
 # Loop over 20 (to get a good mean value and SD estimate)
 for j in range(n_repeats):
     G_config = nx.directed_configuration_model(inDeg,outDeg)
-    A_config = nx.adjacency_matrix(G_config)
+    A_config = nx.adjacency_matrix(G_config).toarray()
     A_configInt = np.zeros(A_config.shape,dtype=int)
 
     # Was having some weird difficulties with this
@@ -105,9 +105,9 @@ axs[1].set_xticklabels(xticks,fontsize=labelsize,color='k')
 axs[1].set_yticklabels(yticks,fontsize=labelsize,color='k')
 axs[1].set_xlim([Ls[1],2])
 axs[1].set_ylim([0,0.3])
-leg = axs[1].legend(['PGPA model', 'Connectome', 'Random'],
-                    prop={'size':22})
-
+leg = axs[1].legend(['SGPA model', 'Connectome', 'SG/Random'],
+                    prop={'size':legendsize})
+axs[1].set_title('Length constant fit',fontsize=labelsize)
 
 ##################################
 # Get reciprocity
@@ -163,54 +163,70 @@ axs[0].set_xlabel('Distance (mm)', fontsize=labelsize)
 axs[0].set_ylabel('Probability density', fontsize=labelsize)
 axs[0].set_xlim([0,max(bins)])
 axs[0].set_title('Connectome',fontsize=28)
-axs[0].legend(['Reciprocal edges', 'Nonreciprocal edges'],prop={'size':legendsize})
-
+axs[0].legend(['Reciprocal', 'Nonreciprocal'],prop={'size':legendsize})
 
 
 ##################################
 # Now for the biophysical model...
 ##################################
-G, A, labels = biophysical_model(N=num_brain_nodes,
+G_sgpa, A_sgpa, labels_sgpa = biophysical_model(N=num_brain_nodes,
                                  N_edges=num_brain_edges_directed,
-                                 L=.75, gamma=1., brain_size='brain')
+                                 L=.75, gamma=1., brain_size=[7.,7.,7.])
 
-centroids = G.centroids
+G_sg, A_sg, labels_sg = biophysical_model(N=num_brain_nodes,
+                                 N_edges=num_brain_edges_directed,
+                                 L=np.inf, gamma=1., brain_size=[7.,7.,7.])
+Gs = [G_sgpa,G_sg]
+As = [A_sgpa,A_sg]
+all_labels = [labels_sgpa,labels_sg]
+recip_distances = []
+nonrecip_distances = []
+for i_G,G in enumerate(Gs):
+    centroids = G.centroids
+    A = As[i_G]
+    labels = all_labels[i_G]
 
-# get in & out degree
-indeg = np.array([G.in_degree()[node] for node in G])
-outdeg = np.array([G.out_degree()[node] for node in G])
-deg = indeg + outdeg
-deg_diff = outdeg - indeg
+    # get in & out degree
+    indeg = np.array([G.in_degree()[node] for node in G])
+    outdeg = np.array([G.out_degree()[node] for node in G])
+    deg = indeg + outdeg
+    deg_diff = outdeg - indeg
 
-edges = {} # distances
-actualEdges = G.edges()
+    edges = {} # distances
+    actualEdges = G.edges()
 
-for edge in actualEdges:
-    edges[edge] =  np.sqrt(np.sum((centroids[edge[0]] - centroids[edge[1]])**2))
-
-
-binnedDistances = np.histogram(edges.values(),bins)
-
-A2 = A.copy()
-np.fill_diagonal(A2,False)
-recip = A2 * A2.T
-
-i,j = np.where(recip)
-centroidNames = np.arange(len(centroids))
-recipNames = [tuple(sorted([centroidNames[i[k]],centroidNames[j[k]]])) for k in range(len(i))]
-nonRecipNames = list( set(edges.keys()) - set(recipNames) ) # subtract recip edges from all edges
-
-nonRecipDistances = [edges[k] for k in nonRecipNames]
-recipDistances = [edges[k] for k in recipNames]
-
-binnedRecipDistances = np.histogram(recipDistances,bins,normed=True)
-dx = bins[1]-bins[0]
-proportionRecip = binnedRecipDistances[0]
+    for edge in actualEdges:
+        edges[edge] =  np.sqrt(np.sum((centroids[edge[0]] - centroids[edge[1]])**2))
 
 
+    binnedDistances = np.histogram(edges.values(),bins)
 
-axs[2].hist(nonRecipDistances,bins,normed=True,facecolor='b',alpha=0.5)
-axs[2].hist(recipDistances,bins,normed=True,facecolor='g',alpha=0.5)
+    A2 = A.copy()
+    np.fill_diagonal(A2,False)
+    recip = A2 * A2.T
+
+    i,j = np.where(recip)
+    centroidNames = np.arange(len(centroids))
+    recipNames = [tuple(sorted([centroidNames[i[k]],centroidNames[j[k]]])) for k in range(len(i))]
+    nonRecipNames = list( set(edges.keys()) - set(recipNames) ) # subtract recip edges from all edges
+    
+    nonrecip_distances.append([edges[k] for k in nonRecipNames])
+    recip_distances.append([edges[k] for k in recipNames])
+
+    binnedRecipDistances = np.histogram(recip_distances,bins,normed=True)
+    dx = bins[1]-bins[0]
+    proportionRecip = binnedRecipDistances[0]
+
+
+
+axs[2].hist(nonrecip_distances[0],bins,normed=True,facecolor='b',alpha=0.5)
+axs[2].hist(recip_distances[0],bins,normed=True,facecolor='g',alpha=0.5)
+
+binned_recip_distances,line_bins = np.histogram(recip_distances[1],bins,normed=True)
+binned_nonrecip_distances,_ = np.histogram(nonrecip_distances[1],bins,normed=True)
+axs[2].plot(bins[0:len(bins)-1]+dx/2.,binned_nonrecip_distances,'--',lw=3,c='k')
+axs[2].plot(bins[0:len(bins)-1]+dx/2.,binned_recip_distances,'-',lw=3,c='k')
+
 axs[2].set_xticks(xticks)
 axs[2].set_xticklabels(xticks,fontsize=labelsize)
 axs[2].set_yticks(yticks)
@@ -219,11 +235,11 @@ axs[2].set_xlabel('Distance (mm)', fontsize=labelsize)
 axs[2].set_ylabel('Probability density', fontsize=28)
 axs[2].set_xlim([0,10.0])
 axs[2].set_title('SGPA model',fontsize=28)
-axs[2].legend(['Reciprocal edges', 'Nonreciprocal edges'],prop={'size':legendsize})
+leg=axs[2].legend(['SG: Nonreciprocal', 'SG: Reciprocal','SGPA: Reciprocal', 'SGPA: Nonreciprocal',\
+               ],prop={'size':legendsize})
 
 
 # Finally add labels
-
 axs[0].text(10*0.05,0.75*0.925,'a',fontsize=labelsize,fontweight='bold')
 axs[1].text(0.1+2*0.05,0.3*0.925,'b',fontsize=labelsize,fontweight='bold')
 axs[2].text(10*0.05,0.75*0.925,'c',fontsize=labelsize,fontweight='bold')
