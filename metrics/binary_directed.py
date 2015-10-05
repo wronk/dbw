@@ -14,16 +14,9 @@ from scipy import stats
 def reciprocity(G):
     """Calculate the reciprocity coefficient of a directed graph.
 
-    Reciprocity is defined as (n_directed - n_undirected) / n_undirected"""
+    Reciprocity is defined as the number of bidirectional links over the total number of links"""
 
-    # get number of directed edges
-    n_directed = len(G.edges())
-
-    # get number of undirected edges
-    n_undirected = len(G.to_undirected().edges())
-
-    # return reciprocity
-    return (n_directed - n_undirected) / float(n_undirected)
+    return len(G.to_undirected(reciprocal=True).edges()) / len(G.to_undirected(reciprocal=False).edges())
 
 
 def efficiency_matrix(G):

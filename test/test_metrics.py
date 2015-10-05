@@ -36,5 +36,23 @@ class NetworkXDirectedGraphsTestCase(unittest.TestCase):
         self.assertEqual(len(fit), 5)
 
 
+class CustomMetricsTestCase(unittest.TestCase):
+
+    def test_reciprocity(self):
+
+        G = nx.DiGraph()
+        G.add_nodes_from(range(4))
+        G.add_edge(0, 2)
+        G.add_edge(2, 0)
+        G.add_edge(1, 2)
+        G.add_edge(2, 1)
+        G.add_edge(2, 3)
+        G.add_edge(3, 1)
+
+        reciprocity_correct = 0.5
+
+        self.assertAlmostEqual(metrics_bd.reciprocity(G), reciprocity_correct)
+
+
 if __name__ == '__main__':
     unittest.main()
