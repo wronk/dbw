@@ -17,7 +17,7 @@ if save:
     save_path = os.environ['DBW_SAVE_CACHE']
 
 MARKERSIZE = 30.
-FONTSIZE = 14.
+FONTSIZE = 12.
 ALPHA = 0.6
 
 fig = plt.figure(figsize=(7.5, 4), facecolor='w', dpi=200.)
@@ -80,7 +80,7 @@ left_main_ax.set_ylim([0, 125])
 left_main_ax.set_aspect('auto')
 left_main_ax.set_xticks(np.arange(0, 121, 40))
 left_main_ax.set_yticks(np.arange(0, 121, 40))
-left_main_ax.text(150, 150, 'a', fontsize=FONTSIZE + 4, fontweight='bold')
+left_main_ax.text(150, 150, 'a', fontsize=FONTSIZE + 2, fontweight='bold')
 
 # Top marginal (in-degree)
 top_margin_ax.hist(indeg_attachment, bins=cf.OUTDEGREE_BINS,
@@ -126,7 +126,7 @@ right_main_ax.set_yticks(np.arange(0, 1.1, .25))
 right_main_ax.set_xticks(np.arange(0, 151, 50))
 right_main_ax.set_xlabel('Total degree (in + out)')
 right_main_ax.set_ylabel('Proportion in-degree')
-right_main_ax.text(1., 1.2, 'b', fontsize=FONTSIZE + 4, fontweight='bold',
+right_main_ax.text(1., 1.2, 'b', fontsize=FONTSIZE + 2, fontweight='bold',
                    transform=right_main_ax.transAxes, ha='right')
 right_main_ax.set_xlim([0., 150.])
 right_main_ax.set_ylim([-0.025, 1.025])

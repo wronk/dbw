@@ -13,7 +13,7 @@ import color_scheme
 import in_out_plot_config as cf
 
 cf.MARKERSIZE = 30.
-cf.FONTSIZE = 14.
+cf.FONTSIZE = 12.
 ALPHA = 0.6
 
 fig = plt.figure(figsize=(7.5,4),facecolor='w',dpi=200.)
@@ -69,7 +69,7 @@ left_main_ax.set_aspect('auto')
 left_main_ax.set_xticks(np.arange(0, 121, 40))
 left_main_ax.set_yticks(np.arange(0, 121, 40))
 left_main_ax.legend(loc='best')
-left_main_ax.text(150,150,'a',fontsize=cf.FONTSIZE+4,fontweight='bold')
+left_main_ax.text(150,150,'a',fontsize=cf.FONTSIZE+2,fontweight='bold')
 
 # Top marginal (in-degree)
 top_margin_ax.hist(indeg,bins=cf.OUTDEGREE_BINS,histtype='stepfilled',\
@@ -128,7 +128,7 @@ right_main_ax.xaxis.set_major_locator(plt.MaxNLocator(4))
 right_main_ax.set_yticks(np.arange(0, 1.1, .25))
 right_main_ax.set_ylim([0., 1.05])
 right_main_ax.set_xticks(np.arange(0, 151, 50))
-right_main_ax.text(1., 1.2, 'b', fontsize=cf.FONTSIZE + 4, fontweight='bold',
+right_main_ax.text(1., 1.2, 'b', fontsize=cf.FONTSIZE+2, fontweight='bold',
                    transform=right_main_ax.transAxes, ha='right')
 
 
