@@ -35,10 +35,10 @@ AX_COLOR = 'k'
 FONT_SIZE = 20
 
 # parameters for this particular plot
-FIG_SIZE = (19, 10)
+FIG_SIZE = (13, 5)
 INSET_COORDINATES = (0.27, 0.6, 0.2, 0.3)
 X_LIM_EFFICIENCY = (0, 1.)
-Y_LIM_EFFICIENCY = (0, 180)
+Y_LIM_EFFICIENCY = (0, 350)
 ALPHA_DEG_VS_CC = 0.7
 N_GRAPH_SAMPLES = 100
 DEGREE_VS_CLUSTERING_GRAPH_IDX = 1
@@ -63,10 +63,7 @@ if os.path.isfile(save_file_path):
         with open(save_file_path, 'rb') as f:
             data = pickle.load(f)
             graphs_er = data['graphs_er']
-            graphs_sgpa = data['graphs_sgpa']
             graphs_ta = data['graphs_ta']
-            graphs_sg = data['graphs_sg']
-            graphs_rand = data['graphs_rand']
     except Exception, e:
         raise IOError('Error loading data from file "{}"'.format(SAVE_FILE_NAME))
     else:
@@ -139,22 +136,16 @@ else:
         pickle.dump(save_dict, f)
     print('File "{}" saved successfully in directory "{}"'.format(SAVE_FILE_NAME, data_dir))
 
-names = ('er', 'sgpa', 'source-growth', 'target-attraction', 'random')
-graphss = (graphs_er, graphs_sgpa, graphs_sg, graphs_ta, graphs_rand)
+names = ('er', 'target-attraction')
+graphss = (graphs_er, graphs_ta)
 
 print('Taking averages and generating plots...')
 
 # calculate mean and std of nodal efficiency
-counts_nodal_efficiency_mean_sgpa = np.array([G.counts_nodal_efficiency for G in graphs_sgpa]).mean(axis=0)
-counts_nodal_efficiency_std_sgpa = np.array([G.counts_nodal_efficiency for G in graphs_sgpa]).std(axis=0)
-counts_nodal_efficiency_mean_sg = np.array([G.counts_nodal_efficiency for G in graphs_sg]).mean(axis=0)
-counts_nodal_efficiency_std_sg = np.array([G.counts_nodal_efficiency for G in graphs_sg]).std(axis=0)
 counts_nodal_efficiency_mean_ta = np.array([G.counts_nodal_efficiency for G in graphs_ta]).mean(axis=0)
 counts_nodal_efficiency_std_ta = np.array([G.counts_nodal_efficiency for G in graphs_ta]).std(axis=0)
 counts_nodal_efficiency_mean_er = np.array([G.counts_nodal_efficiency for G in graphs_er]).mean(axis=0)
 counts_nodal_efficiency_std_er = np.array([G.counts_nodal_efficiency for G in graphs_er]).std(axis=0)
-counts_nodal_efficiency_mean_rand = np.array([G.counts_nodal_efficiency for G in graphs_rand]).mean(axis=0)
-counts_nodal_efficiency_std_rand = np.array([G.counts_nodal_efficiency for G in graphs_rand]).std(axis=0)
 
 # calculate mean and std of global efficiencies
 for name, graphs in zip(names, graphss):
@@ -204,12 +195,11 @@ for a_ctr, ax in enumerate(axs):
         hist_connectome = ax.hist(G_brain.nodal_efficiency, bins=BINS_NODAL_EFFICIENCY, color=COLORS['brain'], lw=0)
 
     if a_ctr == 0:
-        Gs = [graphs_sgpa[DEGREE_VS_CLUSTERING_GRAPH_IDX],
-              graphs_sg[DEGREE_VS_CLUSTERING_GRAPH_IDX],
-              graphs_ta[DEGREE_VS_CLUSTERING_GRAPH_IDX],
-              graphs_er[DEGREE_VS_CLUSTERING_GRAPH_IDX],
-              graphs_rand[DEGREE_VS_CLUSTERING_GRAPH_IDX]]
-        labels = ['sgpa', 'source-growth', 'target-attraction', 'er', 'random']
+        Gs = [
+            graphs_er[DEGREE_VS_CLUSTERING_GRAPH_IDX],
+            graphs_ta[DEGREE_VS_CLUSTERING_GRAPH_IDX],
+        ]
+        labels = ['er', 'target-attraction']
 
         for G, label in zip(Gs, labels):
             cc = nx.clustering(G.to_undirected()).values()
@@ -227,40 +217,19 @@ for a_ctr, ax in enumerate(axs):
 
     elif a_ctr == 1:
 
-        # sgpa
-        line_sgpa = ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_sgpa, color=COLORS['sgpa'], lw=3, zorder=100)
-        ax.fill_between(BINCS_NODAL_EFFICIENCY,
-                        counts_nodal_efficiency_mean_sgpa - counts_nodal_efficiency_std_sgpa,
-                        counts_nodal_efficiency_mean_sgpa + counts_nodal_efficiency_std_sgpa,
-                        color=COLORS['sgpa'], alpha=0.5, zorder=100)
-
-        # source-growth
-        line_sg = ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_sg, color=COLORS['source-growth'], lw=3)
-        ax.fill_between(BINCS_NODAL_EFFICIENCY,
-                        counts_nodal_efficiency_mean_sg - counts_nodal_efficiency_std_sg,
-                        counts_nodal_efficiency_mean_sg + counts_nodal_efficiency_std_sg,
-                        color=COLORS['source-growth'], alpha=0.5, zorder=100)
-
         # target-attraction
-        line_ta = ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_sg, color=COLORS['target-attraction'], lw=3)
+        line_ta = ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_ta, color=COLORS['target-attraction'], lw=3)
         ax.fill_between(BINCS_NODAL_EFFICIENCY,
                         counts_nodal_efficiency_mean_ta - counts_nodal_efficiency_std_ta,
                         counts_nodal_efficiency_mean_ta + counts_nodal_efficiency_std_ta,
                         color=COLORS['target-attraction'], alpha=0.5, zorder=100)
 
         # erdos-renyi
-        line_er = ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_sg, color=COLORS['er'], lw=3)
+        line_er = ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_er, color=COLORS['er'], lw=3)
         ax.fill_between(BINCS_NODAL_EFFICIENCY,
                         counts_nodal_efficiency_mean_er - counts_nodal_efficiency_std_er,
                         counts_nodal_efficiency_mean_er + counts_nodal_efficiency_std_er,
                         color=COLORS['er'], alpha=0.5, zorder=100)
-
-        # deg-controlled rand
-        line_rand = ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_rand, color=COLORS['random'], lw=3)
-        ax.fill_between(BINCS_NODAL_EFFICIENCY,
-                        counts_nodal_efficiency_mean_rand - counts_nodal_efficiency_std_rand,
-                        counts_nodal_efficiency_mean_rand + counts_nodal_efficiency_std_rand,
-                        color=COLORS['random'], alpha=0.5, zorder=100)
 
         ax.set_xlim(X_LIM_EFFICIENCY)
         ax.set_ylim(Y_LIM_EFFICIENCY)
@@ -268,9 +237,9 @@ for a_ctr, ax in enumerate(axs):
         ax.set_xlabel('Nodal efficiency')
         ax.set_ylabel('Number of nodes')
 
-lines = [line_er[0], line_rand[0], line_ta[0], line_sg[0], line_sgpa[0], hist_connectome[-1][0]]
-labels = ['ER', 'Random', 'TA', 'SG', 'SGPA', 'Connectome']
-axs[1].legend(lines, labels, fontsize=FONT_SIZE)
+lines = [line_er[0], line_ta[0], hist_connectome[-1][0]]
+labels = ['ER', 'TA', 'Connectome']
+axs[1].legend(lines, labels, fontsize=FONT_SIZE-4)
 
 labels = ('a', 'b')
 for ax, label in zip(axs, labels):
@@ -281,7 +250,7 @@ for ax, label in zip(axs, labels):
 
 # add inset with power-law fit bar plot
 ax_inset = fig.add_axes(INSET_COORDINATES)
-bar_names = ('er', 'random', 'target-attraction', 'source-growth', 'sgpa')
+bar_names = ('er', 'target-attraction')
 gamma_means = [power_law_fits[name].mean() for name in bar_names]
 gamma_stds = [power_law_fits[name].std() for name in bar_names]
 gamma_median_r_squareds = [np.median(fits_r_squared[name]) for name in bar_names]
@@ -291,15 +260,15 @@ x_pos = np.arange(len(bar_names)) - bar_width/2
 error_kw = {'ecolor': 'k', 'elinewidth': 2, 'markeredgewidth': 2, 'capsize': 6}
 
 ax_inset.bar(x_pos, gamma_means, width=bar_width, color=colors, yerr=gamma_stds, error_kw=error_kw)
-ax_inset.bar([-bar_width/2 + 5], power_law_fits['brain'], width=bar_width, color=COLORS['brain'])
+ax_inset.bar([-bar_width/2 + 2], power_law_fits['brain'], width=bar_width, color=COLORS['brain'])
 ax_inset.set_xticks(np.arange(len(bar_names) + 1))
-ax_inset.set_xticklabels(['ER', 'Random', 'TA', 'SG', 'SGPA', 'Connectome'], rotation='vertical')
+ax_inset.set_xticklabels(['ER', 'TA', 'Connectome'], rotation='vertical')
 
 ax_inset.set_yticks([0, -0.2, -0.4, -0.6])
 ax_inset.set_ylabel(r'$\gamma$')
 
 change_settings.set_all_colors(ax_inset, AX_COLOR)
-change_settings.set_all_text_fontsizes(ax_inset, FONT_SIZE)
+change_settings.set_all_text_fontsizes(ax_inset, FONT_SIZE-4)
 
 print(zip(names, gamma_median_r_squareds))
 print('brain: ', fits_r_squared['brain'])
