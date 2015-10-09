@@ -168,4 +168,5 @@ for tick in right_log_ticks:
 for tick in right_log_ticks+right_lin_ticks:
     tick.set_rotation(270)
 
+fig.subplots_adjust(left=0.125, top=0.925, right=0.95, bottom=0.225)
 plt.show(block=False)
