@@ -1,5 +1,5 @@
 """
-Calculate the node betweenness and node-averaged inverse shortest path length distributions for the brain and the ER and PGPA models (the latter two averaged over several instantiations).
+Calculate the node betweenness and node-averaged inverse shortest path length distributions for the brain and the ER and SGPA models (the latter two averaged over several instantiations).
 """
 from __future__ import print_function, division
 
@@ -11,15 +11,28 @@ import matplotlib.pyplot as plt
 plt.ion()
 
 from extract import brain_graph
-from random_graph.binary_directed import biophysical_reverse_outdegree as pgpa
-from random_graph.binary_directed import biophysical_indegree as pa
+from random_graph.binary_directed import biophysical_reverse_outdegree as sgpa
+from random_graph.binary_directed import biophysical_indegree as ta
 from random_graph.binary_directed import random_directed_deg_seq
 from metrics import binary_directed as metrics_bd
 from network_plot import change_settings
 
 import brain_constants as bc
-from config.graph_parameters import LENGTH_SCALE
-from config import COLORS, FACE_COLOR, AX_COLOR, FONT_SIZE
+
+LENGTH_SCALE = 0.75
+COLORS = {
+    'brain': np.array([170, 68, 153]) / 255,
+    'er': np.array([204, 102, 119]) / 255,
+    'random': np.array([153, 153, 51]) / 255,
+    'small-world': np.array([17, 119, 51]) / 255,
+    'scale-free': np.array([51, 34, 136]) / 255,
+    'target-attraction': np.array([221, 204, 119]) / 255,
+    'source-growth': np.array([68, 170, 53]) / 255,
+    'sgpa': np.array([136, 204, 238]) / 255,
+}
+FACE_COLOR = 'w'
+AX_COLOR = 'k'
+FONT_SIZE = 20
 
 # parameters for this particular plot
 FIG_SIZE = (15, 6)
@@ -33,7 +46,7 @@ DEGREE_VS_CLUSTERING_GRAPH_IDX = 0
 BINS_NODAL_EFFICIENCY = np.linspace(0, 1, 25)
 BINCS_NODAL_EFFICIENCY = 0.5 * (BINS_NODAL_EFFICIENCY[:-1] + BINS_NODAL_EFFICIENCY[1:])
 
-SAVE_FILE_NAME = 'er_and_pgpa_graphs_with_efficiency.pickle'
+SAVE_FILE_NAME = 'model_graphs_with_efficiency.pickle'
 
 
 # load brain graph
@@ -50,9 +63,9 @@ if os.path.isfile(save_file_path):
         with open(save_file_path, 'rb') as f:
             data = pickle.load(f)
             graphs_er = data['graphs_er']
-            graphs_pgpa = data['graphs_pgpa']
-            graphs_pa = data['graphs_pa']
-            graphs_pg = data['graphs_pg']
+            graphs_sgpa = data['graphs_sgpa']
+            graphs_ta = data['graphs_ta']
+            graphs_sg = data['graphs_sg']
             graphs_rand = data['graphs_rand']
     except Exception, e:
         raise IOError('Error loading data from file "{}"'.format(SAVE_FILE_NAME))
@@ -62,9 +75,9 @@ else:
     print('looping over {} graph instantiations...'.format(N_GRAPH_SAMPLES))
 
     graphs_er = []
-    graphs_pgpa = []
-    graphs_pg = []
-    graphs_pa = []
+    graphs_sgpa = []
+    graphs_sg = []
+    graphs_ta = []
     graphs_rand = []  # approximate degree-controlled random graphs
 
     in_degree_brain = G_brain.in_degree().values()
@@ -77,14 +90,14 @@ else:
                                     bc.p_brain_edge_directed,
                                     directed=True)
 
-        # create pgpa graph
-        G_pgpa, _, _ = pgpa(N=bc.num_brain_nodes, N_edges=bc.num_brain_edges_directed, L=LENGTH_SCALE)
+        # create sgpa graph
+        G_sgpa, _, _ = sgpa(N=bc.num_brain_nodes, N_edges=bc.num_brain_edges_directed, L=LENGTH_SCALE)
 
-        # create preferential growth only graph
-        G_pg, _, _ = pgpa(N=bc.num_brain_nodes, N_edges=bc.num_brain_edges_directed, L=np.inf)
+        # create source growth only graph
+        G_sg, _, _ = sgpa(N=bc.num_brain_nodes, N_edges=bc.num_brain_edges_directed, L=np.inf)
 
-        # create preferential attachment graph
-        G_pa, _, _ = pa(N=bc.num_brain_nodes, N_edges=bc.num_brain_edges_directed, L=np.inf)
+        # create target attraction graph
+        G_ta, _, _ = ta(N=bc.num_brain_nodes, N_edges=bc.num_brain_edges_directed, L=np.inf)
 
         # create directed degree-controlled random graph
         G_rand, _, _ = random_directed_deg_seq(in_sequence=in_degree_brain,
@@ -92,8 +105,8 @@ else:
                                                simplify=True)
 
         # calculate things for both types of graph
-        labels = ['er', 'pgpa', 'pref-growth', 'pref-attachment', 'random']
-        Gs = [G_er, G_pgpa, G_pg, G_pa, G_rand]
+        labels = ['er', 'sgpa', 'source-growth', 'target-attraction', 'random']
+        Gs = [G_er, G_sgpa, G_sg, G_ta, G_rand]
         for label, G in zip(labels, Gs):
 
             G.efficiency_matrix = metrics_bd.efficiency_matrix(G)
@@ -103,12 +116,12 @@ else:
 
             if label == 'er':
                 graphs_er += [G]
-            elif label == 'pgpa':
-                graphs_pgpa += [G]
-            elif label == 'pref-growth':
-                graphs_pg += [G]
-            elif label == 'pref-attachment':
-                graphs_pa += [G]
+            elif label == 'sgpa':
+                graphs_sgpa += [G]
+            elif label == 'source-growth':
+                graphs_sg += [G]
+            elif label == 'target-attraction':
+                graphs_ta += [G]
             elif label == 'random':
                 graphs_rand += [G]
 
@@ -119,23 +132,23 @@ else:
     print('Saving file to disk...')
     with open(save_file_path, 'wb') as f:
         save_dict = {'graphs_er': graphs_er,
-                     'graphs_pgpa': graphs_pgpa,
-                     'graphs_pg': graphs_pg,
-                     'graphs_pa': graphs_pa,
+                     'graphs_sgpa': graphs_sgpa,
+                     'graphs_sg': graphs_sg,
+                     'graphs_ta': graphs_ta,
                      'graphs_rand': graphs_rand}
         pickle.dump(save_dict, f)
     print('File "{}" saved successfully in directory "{}"'.format(SAVE_FILE_NAME, data_dir))
 
-names = ('er', 'pgpa', 'pref-growth', 'pref-attachment', 'random')
-graphss = (graphs_er, graphs_pgpa, graphs_pg, graphs_pa, graphs_rand)
+names = ('er', 'sgpa', 'source-growth', 'target-attraction', 'random')
+graphss = (graphs_er, graphs_sgpa, graphs_sg, graphs_ta, graphs_rand)
 
 print('Taking averages and generating plots...')
 
 # calculate mean and std of nodal efficiency
-counts_nodal_efficiency_mean_pgpa = np.array([G.counts_nodal_efficiency for G in graphs_pgpa]).mean(axis=0)
-counts_nodal_efficiency_std_pgpa = np.array([G.counts_nodal_efficiency for G in graphs_pgpa]).std(axis=0)
-counts_nodal_efficiency_mean_pg = np.array([G.counts_nodal_efficiency for G in graphs_pg]).mean(axis=0)
-counts_nodal_efficiency_std_pg = np.array([G.counts_nodal_efficiency for G in graphs_pg]).std(axis=0)
+counts_nodal_efficiency_mean_sgpa = np.array([G.counts_nodal_efficiency for G in graphs_sgpa]).mean(axis=0)
+counts_nodal_efficiency_std_sgpa = np.array([G.counts_nodal_efficiency for G in graphs_sgpa]).std(axis=0)
+counts_nodal_efficiency_mean_sg = np.array([G.counts_nodal_efficiency for G in graphs_sg]).mean(axis=0)
+counts_nodal_efficiency_std_sg = np.array([G.counts_nodal_efficiency for G in graphs_sg]).std(axis=0)
 counts_nodal_efficiency_mean_rand = np.array([G.counts_nodal_efficiency for G in graphs_rand]).mean(axis=0)
 counts_nodal_efficiency_std_rand = np.array([G.counts_nodal_efficiency for G in graphs_rand]).std(axis=0)
 
@@ -187,10 +200,10 @@ for a_ctr, ax in enumerate(axs):
         hist_connectome = ax.hist(G_brain.nodal_efficiency, bins=BINS_NODAL_EFFICIENCY, color=COLORS['brain'], lw=0)
 
     if a_ctr == 0:
-        Gs = [graphs_pgpa[DEGREE_VS_CLUSTERING_GRAPH_IDX],
-              graphs_pg[DEGREE_VS_CLUSTERING_GRAPH_IDX],
+        Gs = [graphs_sgpa[DEGREE_VS_CLUSTERING_GRAPH_IDX],
+              graphs_sg[DEGREE_VS_CLUSTERING_GRAPH_IDX],
               graphs_rand[DEGREE_VS_CLUSTERING_GRAPH_IDX]]
-        labels = ['pgpa', 'pref-growth', 'random']
+        labels = ['sgpa', 'source-growth', 'random']
 
         for G, label in zip(Gs, labels):
             cc = nx.clustering(G.to_undirected()).values()
@@ -208,19 +221,19 @@ for a_ctr, ax in enumerate(axs):
 
     elif a_ctr == 1:
 
-        # pgpa
-        line_pgpa = ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_pgpa, color=COLORS['pgpa'], lw=3, zorder=100)
+        # sgpa
+        line_sgpa = ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_sgpa, color=COLORS['sgpa'], lw=3, zorder=100)
         ax.fill_between(BINCS_NODAL_EFFICIENCY,
-                        counts_nodal_efficiency_mean_pgpa - counts_nodal_efficiency_std_pgpa,
-                        counts_nodal_efficiency_mean_pgpa + counts_nodal_efficiency_std_pgpa,
-                        color=COLORS['pgpa'], alpha=0.5, zorder=100)
+                        counts_nodal_efficiency_mean_sgpa - counts_nodal_efficiency_std_sgpa,
+                        counts_nodal_efficiency_mean_sgpa + counts_nodal_efficiency_std_sgpa,
+                        color=COLORS['sgpa'], alpha=0.5, zorder=100)
 
-        # pref-growth
-        line_pg = ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_pg, color=COLORS['pref-growth'], lw=3)
+        # source-growth
+        line_sg = ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_sg, color=COLORS['source-growth'], lw=3)
         ax.fill_between(BINCS_NODAL_EFFICIENCY,
-                        counts_nodal_efficiency_mean_pg - counts_nodal_efficiency_std_pg,
-                        counts_nodal_efficiency_mean_pg + counts_nodal_efficiency_std_pg,
-                        color=COLORS['pref-growth'], alpha=0.5, zorder=100)
+                        counts_nodal_efficiency_mean_sg - counts_nodal_efficiency_std_sg,
+                        counts_nodal_efficiency_mean_sg + counts_nodal_efficiency_std_sg,
+                        color=COLORS['source-growth'], alpha=0.5, zorder=100)
 
         # deg-controlled rand
         line_rand = ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_rand, color=COLORS['random'], lw=3)
@@ -235,7 +248,7 @@ for a_ctr, ax in enumerate(axs):
         ax.set_xlabel('Nodal efficiency')
         ax.set_ylabel('Number of nodes')
 
-lines = [line_rand[0], line_pg[0], line_pgpa[0], hist_connectome[-1][0]]
+lines = [line_rand[0], line_sg[0], line_sgpa[0], hist_connectome[-1][0]]
 labels = ['Random', 'SG', 'SGPA', 'Connectome']
 axs[1].legend(lines, labels, fontsize=FONT_SIZE)
 
@@ -248,7 +261,7 @@ for ax, label in zip(axs, labels):
 
 # add inset with power-law fit bar plot
 ax_inset = fig.add_axes(INSET_COORDINATES)
-bar_names = ('random', 'pref-growth', 'pgpa')
+bar_names = ('random', 'source-growth', 'sgpa')
 gamma_means = [power_law_fits[name].mean() for name in bar_names]
 gamma_stds = [power_law_fits[name].std() for name in bar_names]
 gamma_median_r_squareds = [np.median(fits_r_squared[name]) for name in names]
@@ -260,7 +273,7 @@ error_kw = {'ecolor': 'k', 'elinewidth': 2, 'markeredgewidth': 2, 'capsize': 6}
 ax_inset.bar(x_pos, gamma_means, width=bar_width, color=colors, yerr=gamma_stds, error_kw=error_kw)
 ax_inset.bar([-bar_width/2 + 3], power_law_fits['brain'], width=bar_width, color=COLORS['brain'])
 ax_inset.set_xticks(np.arange(len(bar_names) + 1))
-ax_inset.set_xticklabels(['Random', 'PG', 'PGPA', 'Connectome'], rotation='vertical')
+ax_inset.set_xticklabels(['Random', 'SG', 'SGPA', 'Connectome'], rotation='vertical')
 
 ax_inset.set_yticks([0, -0.2, -0.4, -0.6])
 ax_inset.set_ylabel(r'$\gamma$')
@@ -270,6 +283,8 @@ change_settings.set_all_text_fontsizes(ax_inset, FONT_SIZE)
 
 print(zip(names, gamma_median_r_squareds))
 print('brain: ', fits_r_squared['brain'])
+
+fig.savefig('/Users/rkp/Desktop/nodal_eff_and_cc.png')
 
 plt.draw()
 plt.show(block=True)
