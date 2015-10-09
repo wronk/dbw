@@ -570,7 +570,6 @@ def growing_SGPA_1(n_nodes, p_edge_split, l, brain_size, remove_extra_ccs):
                 targ = np.random.choice(targs, p=probs)
                 G.add_edge(src, targ)
                 n_edges += 1
-                print n_edges
 
     for node_i in range(n_nodes):
         G.remove_edge(node_i, node_i)
@@ -582,4 +581,6 @@ def growing_SGPA_1(n_nodes, p_edge_split, l, brain_size, remove_extra_ccs):
             if len(cc) != max_cc_size:
                 [G.remove_node(node) for node in cc]
 
+    print "{} edges".format(len(G.edges()))
+    print "{} nodes".format(len(G.nodes()))
     return G
