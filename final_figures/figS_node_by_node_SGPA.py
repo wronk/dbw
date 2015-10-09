@@ -2,21 +2,27 @@ from __future__ import division
 import numpy as np
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
+import networkx as nx
+import os
 
 from random_graph.binary_directed import growing_SGPA_1
-
 from network_plot.change_settings import set_all_text_fontsizes, set_all_colors
-
+from metrics import binary_directed as metrics_bd
+from network_plot import change_settings
 import in_out_plot_config as cf
 
 N_NODES = 426
-P_EDGE_SPLIT = .015
+P_EDGE_SPLIT = .016
 L = 0.75
 BRAIN_SIZE = [7, 7, 7]
 
+FONT_SIZE = 20
+
+SAVE_DIR = '/Users/rkp/Desktop'
 
 # create model
 G = growing_SGPA_1(N_NODES, P_EDGE_SPLIT, L, BRAIN_SIZE, remove_extra_ccs=True)
+G = nx.convert_node_labels_to_integers(G)  # since nodes not attached to main network get removed
 
 # Initialize the figure and axes objects
 
@@ -49,9 +55,9 @@ top_dummy_ax = top_margin_ax.twinx()
 right_dummy_ax = right_margin_ax.twiny()
 
 # Get in- & out-degree
-indeg = np.array([G.in_degree()[node] for node in G])
-outdeg = np.array([G.out_degree()[node] for node in G])
 nodes = np.sort(G.nodes())
+indeg = np.array([G.in_degree()[node] for node in nodes])
+outdeg = np.array([G.out_degree()[node] for node in nodes])
 node_ages = nodes / nodes.max()
 deg = indeg + outdeg
 
@@ -157,4 +163,32 @@ for tick in top_log_ticks+right_log_ticks:
 for tick in right_log_ticks+right_lin_ticks:
     tick.set_rotation(270)
 
-plt.show(block=True)
+fig.savefig(os.path.join(SAVE_DIR, 'node_by_node_in_and_out.png'))
+
+# plot clustering vs degree and nodal efficiency
+fig, axs = plt.subplots(1, 2, figsize=(15, 6), facecolor='white', tight_layout=True)
+
+cc_full = nx.clustering(G.to_undirected())
+deg_full = nx.degree(G.to_undirected())
+cc = [cc_full[node] for node in nodes]
+deg = [deg_full[node] for node in nodes]
+
+# calculate nodal efficiency
+G.efficiency_matrix = metrics_bd.efficiency_matrix(G)
+nodal_efficiency = np.sum(G.efficiency_matrix, axis=1) / (len(G.nodes()) - 1)
+
+axs[0].scatter(deg, cc, c=node_ages, cmap=cm.jet)
+axs[0].set_xlim(0, 150)
+axs[0].set_ylim(0, 1)
+axs[0].set_xlabel('Degree')
+axs[0].set_ylabel('Clustering coefficient')
+
+axs[1].hist(nodal_efficiency, bins=20)
+axs[1].set_xlim(0, 1)
+axs[1].set_xlabel('Nodal efficiency')
+axs[1].set_ylabel('Number of nodes')
+
+for ax in axs:
+    change_settings.set_all_text_fontsizes(ax, fontsize=FONT_SIZE)
+
+fig.savefig(os.path.join(SAVE_DIR, 'node_by_node_cc_deg_nodal_eff.png'))
