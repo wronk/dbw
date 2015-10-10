@@ -130,7 +130,7 @@ right_main_ax.text(1., 1.2, 'b', fontsize=FONTSIZE + 2, fontweight='bold',
                    transform=right_main_ax.transAxes, ha='right')
 right_main_ax.set_xlim([0., 150.])
 right_main_ax.set_ylim([-0.025, 1.025])
-leg = right_main_ax.legend(loc=(-0.35, 1.12), prop={'size': 13.5})
+leg = right_main_ax.legend(loc=(-0.35, 1.12), prop={'size': 12})
 
 for temp_ax in [left_main_ax, right_main_ax, top_margin_ax, right_margin_ax]:
     set_all_text_fontsizes(temp_ax, FONTSIZE)
