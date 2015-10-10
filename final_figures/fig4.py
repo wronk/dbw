@@ -16,11 +16,11 @@ save = False
 if save:
     save_path = os.environ['DBW_SAVE_CACHE']
 
-MARKERSIZE = 30.
+MARKERSIZE = 25.
 FONTSIZE = 12.
-ALPHA = 0.6
+ALPHA = 0.5
 
-fig = plt.figure(figsize=(7.5, 4), facecolor='w', dpi=200.)
+fig = plt.figure(figsize=(7.5, 4), facecolor='w', dpi=300.)
 plt.subplots_adjust(hspace=0.45, wspace=0.55)
 
 left_main_ax = plt.subplot2grid(cf.subplot_divisions, cf.left_main_location,
@@ -42,14 +42,13 @@ right_margin_ax = plt.subplot2grid(cf.subplot_divisions,
                                    colspan=cf.right_margin_colspan,
                                    sharey=left_main_ax)
 
-# create attachment and growht models
-Gattachment, _, _ = biophysical_indegree(N=bc.num_brain_nodes,
-                                         N_edges=bc.num_brain_edges_directed,
-                                         L=np.inf, gamma=1.)
-
+# create attachment and growth models
 Ggrowth, _, _ = biophysical_reverse_outdegree(N=bc.num_brain_nodes,
                                               N_edges=bc.num_brain_edges_directed,
                                               L=np.inf, gamma=1.)
+Gattachment, _, _ = biophysical_indegree(N=bc.num_brain_nodes,
+                                         N_edges=bc.num_brain_edges_directed,
+                                         L=np.inf, gamma=1.)
 
 # Get in- & out-degree
 indeg_attachment = np.array([Gattachment.in_degree()[node]
@@ -93,9 +92,9 @@ top_margin_ax.hist(indeg_growth, bins=cf.OUTDEGREE_BINS, histtype='stepfilled',
 
 # Right marginal (out-degree)
 right_margin_ax.hist(outdeg_attachment, bins=cf.OUTDEGREE_BINS,
-                     histtype='stepfilled', color=color_scheme.TARGETATTRACTION,
-                     alpha=ALPHA, orientation='horizontal', normed=True,
-                     stacked=True)
+                     histtype='stepfilled',
+                     color=color_scheme.TARGETATTRACTION, alpha=ALPHA,
+                     orientation='horizontal', normed=True, stacked=True)
 right_margin_ax.hist(outdeg_growth, bins=cf.OUTDEGREE_BINS,
                      histtype='stepfilled', color=color_scheme.SRCGROWTH,
                      alpha=ALPHA, orientation='horizontal', normed=True,
