@@ -40,7 +40,7 @@ def construct_graph_list_und(graphs_to_const):
     """Construct and return a list of graphs so graph construction is easily
     repeatable"""
 
-    graph_check = ['Random', 'Small-world', 'Scale-free', 'PGPA']
+    graph_check = ['Random', 'Small-world', 'Scale-free', 'SGPA']
     graph_list = []
 
     # Always construct and add Allen Institute mouse brain to list
@@ -69,12 +69,12 @@ def construct_graph_list_und(graphs_to_const):
         graph_list.append(nx.barabasi_albert_graph(
             n_nodes, int(round(brain_degree_mean / 2.))))
 
-    # Construct PGPA graph
+    # Construct SGPA graph
     if graph_check[3] in graphs_to_const:
-        G_PGPA, _, _ = pgpa_dir(bc.num_brain_nodes,
+        G_SGPA, _, _ = pgpa_dir(bc.num_brain_nodes,
                                 bc.num_brain_edges_directed,
                                 L=LENGTH_SCALE)
-        graph_list.append(G_PGPA.to_undirected())
+        graph_list.append(G_SGPA.to_undirected())
 
     # Error check that we created correct number of graphs
     assert len(graph_list) == len(graphs_to_const), (
@@ -112,9 +112,9 @@ def construct_graph_list_dir(graphs_to_const):
 
     # Construct pgpa graph
     if graph_check[1] in graphs_to_const:
-        G_PGPA, _, _ = pgpa(bc.num_brain_nodes, bc.num_brain_edges_directed,
+        G_SGPA, _, _ = pgpa(bc.num_brain_nodes, bc.num_brain_edges_directed,
                             L=LENGTH_SCALE)
-        graph_list.append(G_PGPA)
+        graph_list.append(G_SGPA)
 
     # Error check that we created correct number of graphs
     assert (len(graph_list) == len(graphs_to_const),
@@ -128,10 +128,10 @@ def construct_graph_list_dir(graphs_to_const):
 ##################
 
 if gen_directed:
-    graph_names = ['Connectome', 'Random', 'PGPA']
+    graph_names = ['Connectome', 'Random', 'SGPA']
 else:
     graph_names = ['Connectome', 'Random', 'Small-world', 'Scale-free',
-                   'PGPA']
+                   'SGPA']
 
 # Directed
 if gen_directed:
