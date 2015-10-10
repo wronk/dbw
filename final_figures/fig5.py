@@ -5,6 +5,7 @@ import graph_tools.auxiliary as aux_tools
 import networkx as nx
 import os
 import pandas as pd
+import pickle
 
 from numpy import concatenate as cc
 
@@ -15,83 +16,177 @@ from network_plot.change_settings import set_all_text_fontsizes as set_fontsize
 import aux_random_graphs
 
 from brain_constants import *
-
 from network_compute import reciprocity
-
 import color_scheme
 
-fig,axs = plt.subplots(1,3,facecolor='white',edgecolor='white',figsize=(7*2.54,2*2.54))
-
-#fig.set_figheight(3)
-#fig.set_figwidth(6)
-fig.subplots_adjust(bottom=0.15,wspace=0.3)
+data_dir=os.getenv('DBW_DATA_DIRECTORY')
+pickle_file = data_dir + '/growth_degs.pickle'
+n_runs = 20
 
 # Set plot params
-labelsize = 24
-ticksize = 20
-legendsize = 18
+labelsize = 10
+ticksize = 9
+legendsize = 8
 
-### First we do stuff for the brain
+fig,axs = plt.subplots(1,3,facecolor='white',edgecolor='white',figsize=(7.5,2.3),dpi=200.)
+fig.subplots_adjust(bottom=0.15,wspace=0.55,hspace=0.45)
+
+
+graphs = ['sgpa','sg','brain']
+### Compute/load distances ###
+if not os.path.isfile(pickle_file):    
+    # init to empty lists
+    recip_distances = {};
+    nonrecip_distances = {}
+    for graph in graphs:
+        recip_distances[graph] = []
+        nonrecip_distances[graph] = []
+
+
+
+    for i in range(n_runs):
+        print "iteration %i" % (i+1)
+        G_sgpa, A_sgpa, _ = biophysical_model(N=num_brain_nodes,
+                                            N_edges=num_brain_edges_directed,
+                                            L=.75, gamma=1., brain_size=[7.,7.,7.])
+
+        G_sg, A_sg, _ = biophysical_model(N=num_brain_nodes,
+                                            N_edges=num_brain_edges_directed,
+                                            L=np.inf, gamma=1., brain_size=[7.,7.,7.])
+
+        # Only run brain the first time
+        if i == 0:
+            G_brain, A_brain, labels = brain_graph()
+            centroids = G_brain.centroids
+            label_mapping = {k:labels[k] for k in range(len(labels))}
+            G_brain = nx.relabel_nodes(G_brain,label_mapping)
+            G_brain.centroids = centroids
+            Gs = [G_sgpa,G_sg,G_brain]
+            As = [A_sgpa,A_sg,A_brain]
+        else:
+            Gs = [G_sgpa,G_sg]
+            As = [A_sgpa,A_sg]
+                
+        for i_G,G in enumerate(Gs):
+            centroids = G.centroids
+            A = As[i_G]
+
+            indeg = np.array([G.in_degree()[node] for node in G])
+            outdeg = np.array([G.out_degree()[node] for node in G])
+
+            edges = {} # distances
+            actual_edges = G.edges()
+
+            # List of all edges and the the Euclidean distance
+            recip_names = []
+            nonrecip_names = []
+            for edge in actual_edges:                
+                edges[edge] =  np.sqrt(np.sum((centroids[edge[0]] - centroids[edge[1]])**2))
+                if edges.has_key((edge[1],edge[0])):                    
+                    recip_names.append(edge)
+                else:
+                    nonrecip_names.append(edge)
+
+            # append the appropriate edges to the correct list
+            nonrecip_distances[graphs[i_G]].extend([edges[k] for k in nonrecip_names])
+            recip_distances[graphs[i_G]].extend([edges[k] for k in recip_names])
+
+
+    pickle.dump([nonrecip_distances,recip_distances],open(pickle_file,'wb'))
+
+        
+
+else:    
+    with open(pickle_file,'r') as f:
+        distances = pickle.load(f)
+        nonrecip_distances = distances[0]
+        recip_distances = distances[1]
+
+
+
+### Compute reciprocity ###
+########################
+### MOUSE CONNECTOME ###
+########################
 # load brain graph, adjacency matrix, and labels
-G, A, labels = brain_graph()
-label_mapping = {k:labels[k] for k in range(len(labels))}
-G = nx.relabel_nodes(G,label_mapping)
-G_shuffled = nx.configuration_model(G.degree().values())
+G_brain, A_brain, labels_brain = brain_graph()
+brain_reciprocity = reciprocity(A_brain)
 
+
+##################
+### SGPA MODEL ###
+##################
 Ls = np.linspace(0,2,21)
+# Load the saved reciprocity values
+model_reciprocity = pd.read_csv(data_dir+'/reciprocity2.csv',index_col=0)
+mean_reciprocity = np.mean(model_reciprocity,axis=1)
+std_reciprocity = np.std(model_reciprocity,axis=1)
 
-# Load the saved reciprocity values (this is from like 200 runs of the model,
-# which takes forever to run..
-data_dir=os.getenv('DBW_DATA_DIRECTORY')
-modelReciprocity = pd.read_csv(data_dir+'/reciprocity2.csv',
-                               index_col=0).as_matrix()
 
-meanReciprocity = np.mean(modelReciprocity,axis=1)
-stdReciprocity = np.std(modelReciprocity,axis=1)
-
-brainReciprocity = reciprocity(A)
+####################
+### CONFIG MODEL ###
+####################
+label_mapping = {k:labels_brain[k] for k in range(len(labels_brain))}
+G_remap= nx.relabel_nodes(G_brain,label_mapping)
 n_repeats = 20
+config_reciprocity = np.zeros([n_repeats,1])
 
-# Get a mean value for the shuffled connectome
-configReciprocity = np.zeros([n_repeats,1])
 # First get lists of in and out deg to feed to config function
-nodes = G.nodes()
-inDeg = G.in_degree(); inDeg = [inDeg[node] for node in nodes]
-outDeg = G.out_degree(); outDeg = [outDeg[node] for node in nodes]
+nodes = G_remap.nodes()
+indeg = G_remap.in_degree(); indeg = [indeg[node] for node in nodes]
+outdeg = G_remap.out_degree(); outdeg = [outdeg[node] for node in nodes]
+
 # Loop over 20 (to get a good mean value and SD estimate)
 for j in range(n_repeats):
-    G_config = nx.directed_configuration_model(inDeg,outDeg)
+    G_config = nx.directed_configuration_model(indeg,outdeg)
     A_config = nx.adjacency_matrix(G_config).toarray()
-    A_configInt = np.zeros(A_config.shape,dtype=int)
-
-    # Was having some weird difficulties with this
-    A_configInt[A_config < 0.5] = 0
-    A_configInt[A_config >= 0.5] = 1
-
-    configReciprocity[j] = reciprocity(A_configInt)
+    config_reciprocity[j] = reciprocity(A_config)
 
 
-# Now plot everything
+#####################
+### GENERATE PLOT ###
+#####################
+bins = np.linspace(0,10,31)
+dx = bins[1]-bins[0]
+
+### Figure 5a ###
+dist_yticks = [0,0.15,0.3,0.45,0.6,0.75]
+dist_xticks = [0,2.5,5.0,7.5,10.0]
+axs[0].hist(nonrecip_distances['brain'],bins,normed=True,facecolor='b',alpha=0.5)
+axs[0].hist(recip_distances['brain'],bins,normed=True,facecolor='g',alpha=0.5)
+
+axs[0].set_xticks(dist_xticks)
+axs[0].set_xticklabels(dist_xticks,fontsize=labelsize)
+axs[0].set_yticks(dist_yticks)
+axs[0].set_yticklabels(dist_yticks,fontsize=labelsize)
+axs[0].set_xlabel('Distance (mm)', fontsize=labelsize)
+axs[0].set_ylabel('Probability density', fontsize=labelsize)
+axs[0].set_xlim([0,max(bins)])
+axs[0].set_title('Connectome',fontsize=labelsize+2)
+axs[0].legend(['Nonreciprocal','Reciprocal'],prop={'size':legendsize})
+
+
+### Figure 5b ###
 # First plot mean reciprocity and fill in +/- 1 SD
-axs[1].plot(Ls[1:],meanReciprocity[1:],linewidth=2,color=color_scheme.PGPA)
-axs[1].fill_between(Ls[1:],meanReciprocity[1:]-stdReciprocity[1:],
-                    meanReciprocity[1:]+stdReciprocity[1:],
+axs[1].plot(Ls[1:],mean_reciprocity[1:],lw=2,color=color_scheme.PGPA)
+axs[1].fill_between(Ls[1:],mean_reciprocity[1:]-std_reciprocity[1:],
+                    mean_reciprocity[1:]+std_reciprocity[1:],
                     facecolor=color_scheme.PGPA,
-                    alpha=0.2,antialiased=True,linewidth=3,linestyle='-',
+                    alpha=0.2,antialiased=True,lw=2,linestyle='-',
                     edgecolor=color_scheme.PGPA)
 
 # Plot brain reciprocity
-axs[1].plot([0,2],[brainReciprocity,brainReciprocity],linewidth=4,
+axs[1].plot([0,2],[brain_reciprocity,brain_reciprocity],lw=2,
             color=color_scheme.ATLAS,linestyle='--')
 
 # Plot configuration reciprocity
-configX = [0,2]; configY = [np.mean(configReciprocity),
-                            np.mean(configReciprocity)]
-axs[1].plot(configX,configY,linewidth=2,color=color_scheme.CONFIG)
-axs[1].fill_between(configX,configY-np.std(configReciprocity),
-                    configY+np.std(configReciprocity),
+configX = [0,2]; configY = [np.mean(config_reciprocity),
+                            np.mean(config_reciprocity)]
+axs[1].plot(configX,configY,lw=2,color=color_scheme.CONFIG)
+axs[1].fill_between(configX,configY-np.std(config_reciprocity),
+                    configY+np.std(config_reciprocity),
                     facecolor=color_scheme.CONFIG,alpha=0.2,antialiased=True,
-                    linewidth=3,linestyle=':', edgecolor=color_scheme.CONFIG)
+                    lw=2,linestyle=':', edgecolor=color_scheme.CONFIG)
 
 
 # Set ticks, labels, and font sizes
@@ -107,141 +202,44 @@ axs[1].set_xlim([Ls[1],2])
 axs[1].set_ylim([0,0.3])
 leg = axs[1].legend(['SGPA model', 'Connectome', 'SG/Random'],
                     prop={'size':legendsize})
-axs[1].set_title('Length constant fit',fontsize=labelsize)
+axs[1].set_title('Length constant fit',fontsize=labelsize+2)
 
-##################################
-# Get reciprocity
-##################################
 
-centroidsUncorrected = aux_random_graphs.get_coords()
-# This is because the coordinates are off by a factor of 10
-centroids = {k:centroidsUncorrected[k]/10. for k in centroidsUncorrected}
 
-# get in & out degree
-indeg = np.array([G.in_degree()[node] for node in G])
-outdeg = np.array([G.out_degree()[node] for node in G])
-deg = indeg + outdeg
-deg_diff = outdeg - indeg
 
-edges = {} # distances
-actualEdges = G.edges()
+# binned reciprocal distances for SGPA model
+binned_rd_sgpa = np.histogram(recip_distances['sgpa'],bins,normed=True)
 
-for edge in actualEdges:
-    edges[edge] =  np.sqrt(np.sum((centroids[edge[0]] - centroids[edge[1]])**2))
-
-bins = np.linspace(0,10,40)
-binnedDistances = np.histogram(edges.values(),bins)
-
-A2 = A.copy()
-np.fill_diagonal(A2,False)
-recip = A2 * A2.T
-
-i,j = np.where(recip)
-centroidNames = labels
-recipNames = [tuple([centroidNames[i[k]],centroidNames[j[k]]]) for k in range(len(i))]
-nonRecipNames = list( set(edges.keys()) - set(recipNames) ) # subtract recip edges from all edges
-
-nonRecipDistances = [edges[k] for k in nonRecipNames]
-recipDistances = [edges[k] for k in recipNames]
-
-binnedRecipDistances = np.histogram(recipDistances,bins,normed=True)
-
+binned_recip_distances = np.histogram(recip_distances,bins,normed=True)
 dx = bins[1]-bins[0]
-proportionRecip = binnedRecipDistances[0]
+proportionRecip = binned_recip_distances[0]
 
-yticks = [0,0.15,0.3,0.45,0.6,0.75]
-xticks = [0,2.5,5.0,7.5,10.0]
+axs[2].hist(nonrecip_distances['sgpa'],bins,normed=True,facecolor='b',alpha=0.5)
+axs[2].hist(recip_distances['sgpa'],bins,normed=True,facecolor='g',alpha=0.5)
 
-axs[0].hist(nonRecipDistances,bins,normed=True,facecolor='b',alpha=0.5)
-axs[0].hist(recipDistances,bins,normed=True,facecolor='g',alpha=0.5)
+binned_rd_sg,_ = np.histogram(recip_distances['sg'],bins,normed=True)
+binned_nrd_sg,_ = np.histogram(nonrecip_distances['sg'],bins,normed=True)
 
-axs[0].set_xticks(xticks)
-axs[0].set_xticklabels(xticks,fontsize=labelsize)
-axs[0].set_yticks(yticks)
-axs[0].set_yticklabels(yticks,fontsize=labelsize)
-axs[0].set_xlabel('Distance (mm)', fontsize=labelsize)
-axs[0].set_ylabel('Probability density', fontsize=labelsize)
-axs[0].set_xlim([0,max(bins)])
-axs[0].set_title('Connectome',fontsize=28)
-axs[0].legend(['Reciprocal', 'Nonreciprocal'],prop={'size':legendsize})
+axs[2].plot(bins[0:len(bins)-1]+dx/2.,binned_nrd_sg,'-',lw=2,c='r')
+axs[2].plot(bins[0:len(bins)-1]+dx/2.,binned_rd_sg,'-',lw=1,c='k')
 
-
-##################################
-# Now for the biophysical model...
-##################################
-G_sgpa, A_sgpa, labels_sgpa = biophysical_model(N=num_brain_nodes,
-                                 N_edges=num_brain_edges_directed,
-                                 L=.75, gamma=1., brain_size=[7.,7.,7.])
-
-G_sg, A_sg, labels_sg = biophysical_model(N=num_brain_nodes,
-                                 N_edges=num_brain_edges_directed,
-                                 L=np.inf, gamma=1., brain_size=[7.,7.,7.])
-Gs = [G_sgpa,G_sg]
-As = [A_sgpa,A_sg]
-all_labels = [labels_sgpa,labels_sg]
-recip_distances = []
-nonrecip_distances = []
-for i_G,G in enumerate(Gs):
-    centroids = G.centroids
-    A = As[i_G]
-    labels = all_labels[i_G]
-
-    # get in & out degree
-    indeg = np.array([G.in_degree()[node] for node in G])
-    outdeg = np.array([G.out_degree()[node] for node in G])
-    deg = indeg + outdeg
-    deg_diff = outdeg - indeg
-
-    edges = {} # distances
-    actualEdges = G.edges()
-
-    for edge in actualEdges:
-        edges[edge] =  np.sqrt(np.sum((centroids[edge[0]] - centroids[edge[1]])**2))
-
-
-    binnedDistances = np.histogram(edges.values(),bins)
-
-    A2 = A.copy()
-    np.fill_diagonal(A2,False)
-    recip = A2 * A2.T
-
-    i,j = np.where(recip)
-    centroidNames = np.arange(len(centroids))
-    recipNames = [tuple(sorted([centroidNames[i[k]],centroidNames[j[k]]])) for k in range(len(i))]
-    nonRecipNames = list( set(edges.keys()) - set(recipNames) ) # subtract recip edges from all edges
-    
-    nonrecip_distances.append([edges[k] for k in nonRecipNames])
-    recip_distances.append([edges[k] for k in recipNames])
-
-    binnedRecipDistances = np.histogram(recip_distances,bins,normed=True)
-    dx = bins[1]-bins[0]
-    proportionRecip = binnedRecipDistances[0]
-
-
-
-axs[2].hist(nonrecip_distances[0],bins,normed=True,facecolor='b',alpha=0.5)
-axs[2].hist(recip_distances[0],bins,normed=True,facecolor='g',alpha=0.5)
-
-binned_recip_distances,line_bins = np.histogram(recip_distances[1],bins,normed=True)
-binned_nonrecip_distances,_ = np.histogram(nonrecip_distances[1],bins,normed=True)
-axs[2].plot(bins[0:len(bins)-1]+dx/2.,binned_nonrecip_distances,'--',lw=3,c='k')
-axs[2].plot(bins[0:len(bins)-1]+dx/2.,binned_recip_distances,'-',lw=3,c='k')
-
-axs[2].set_xticks(xticks)
-axs[2].set_xticklabels(xticks,fontsize=labelsize)
-axs[2].set_yticks(yticks)
+axs[2].set_xticks(dist_xticks)
+axs[2].set_xticklabels(dist_xticks,fontsize=labelsize)
+axs[2].set_yticks(dist_yticks)
 axs[2].set_yticklabels([])
 axs[2].set_xlabel('Distance (mm)', fontsize=labelsize)
-axs[2].set_ylabel('Probability density', fontsize=28)
+axs[2].set_ylabel('Probability density', fontsize=labelsize)
 axs[2].set_xlim([0,10.0])
-axs[2].set_title('SGPA model',fontsize=28)
-leg=axs[2].legend(['SG: Nonreciprocal', 'SG: Reciprocal','SGPA: Reciprocal', 'SGPA: Nonreciprocal',\
-               ],prop={'size':legendsize})
+axs[2].set_title('Growth models',fontsize=labelsize+2)
+leg=axs[2].legend(['SG: Nonreciprocal', 'SG: Reciprocal', 'SGPA: Nonreciprocal','SGPA: Reciprocal']\
+               ,prop={'size':legendsize})
 
-
+leg.draggable()
 # Finally add labels
 axs[0].text(10*0.05,0.75*0.925,'a',fontsize=labelsize,fontweight='bold')
 axs[1].text(0.1+2*0.05,0.3*0.925,'b',fontsize=labelsize,fontweight='bold')
 axs[2].text(10*0.05,0.75*0.925,'c',fontsize=labelsize,fontweight='bold')
 
+fig.subplots_adjust(left=0.125, top=0.9, right=0.95, bottom=0.225)
 plt.show(block=False)
+
