@@ -10,6 +10,7 @@ COLORS = {
     'pref-attachment': np.array([221, 204, 119]) / 255,
     'pref-growth': np.array([68, 170, 53]) / 255,
     'pgpa': np.array([136, 204, 238]) / 255,
+    'sgpa': np.array([136, 204, 238]) / 255
 }
 
 FACE_COLOR = 'w'

@@ -1,8 +1,4 @@
 """
-Created on June 17, 2015
-
-@author: wronk
-
 Create and save percolation data for standard, brain, and model graphs.
 """
 
