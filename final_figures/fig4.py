@@ -12,16 +12,16 @@ import brain_constants as bc
 import color_scheme
 import in_out_plot_config as cf
 
-save = False
+save = True
 if save:
     save_path = os.environ['DBW_SAVE_CACHE']
 
-MARKERSIZE = 30.
+MARKERSIZE = 25.
 FONTSIZE = 12.
-ALPHA = 0.6
+ALPHA = 0.5
 
-fig = plt.figure(figsize=(7.5, 4), facecolor='w', dpi=200.)
-plt.subplots_adjust(hspace=0.45, wspace=0.55)
+fig = plt.figure(figsize=(7.5, 4), facecolor='w', dpi=300.)
+plt.subplots_adjust(hspace=0.45, wspace=0.45)
 
 left_main_ax = plt.subplot2grid(cf.subplot_divisions, cf.left_main_location,
                                 rowspan=cf.left_main_rowspan,
@@ -42,14 +42,13 @@ right_margin_ax = plt.subplot2grid(cf.subplot_divisions,
                                    colspan=cf.right_margin_colspan,
                                    sharey=left_main_ax)
 
-# create attachment and growht models
-Gattachment, _, _ = biophysical_indegree(N=bc.num_brain_nodes,
-                                         N_edges=bc.num_brain_edges_directed,
-                                         L=np.inf, gamma=1.)
-
+# create attachment and growth models
 Ggrowth, _, _ = biophysical_reverse_outdegree(N=bc.num_brain_nodes,
                                               N_edges=bc.num_brain_edges_directed,
                                               L=np.inf, gamma=1.)
+Gattachment, _, _ = biophysical_indegree(N=bc.num_brain_nodes,
+                                         N_edges=bc.num_brain_edges_directed,
+                                         L=np.inf, gamma=1.)
 
 # Get in- & out-degree
 indeg_attachment = np.array([Gattachment.in_degree()[node]
@@ -67,10 +66,10 @@ percent_indeg_attachment = indeg_attachment / deg_attachment.astype(float)
 percent_indeg_growth = indeg_growth / deg_growth.astype(float)
 
 # Left main plot (in vs out degree)
+left_main_ax.scatter(indeg_growth, outdeg_growth, c=color_scheme.SRCGROWTH,
+                     s=MARKERSIZE, lw=0, alpha=ALPHA, zorder=3)
 left_main_ax.scatter(indeg_attachment, outdeg_attachment,
                      c=color_scheme.TARGETATTRACTION,
-                     s=MARKERSIZE, lw=0, alpha=ALPHA)
-left_main_ax.scatter(indeg_growth, outdeg_growth, c=color_scheme.SRCGROWTH,
                      s=MARKERSIZE, lw=0, alpha=ALPHA)
 left_main_ax.set_xlabel('In-degree')
 left_main_ax.set_ylabel('Out-degree')
@@ -93,9 +92,9 @@ top_margin_ax.hist(indeg_growth, bins=cf.OUTDEGREE_BINS, histtype='stepfilled',
 
 # Right marginal (out-degree)
 right_margin_ax.hist(outdeg_attachment, bins=cf.OUTDEGREE_BINS,
-                     histtype='stepfilled', color=color_scheme.TARGETATTRACTION,
-                     alpha=ALPHA, orientation='horizontal', normed=True,
-                     stacked=True)
+                     histtype='stepfilled',
+                     color=color_scheme.TARGETATTRACTION, alpha=ALPHA,
+                     orientation='horizontal', normed=True, stacked=True)
 right_margin_ax.hist(outdeg_growth, bins=cf.OUTDEGREE_BINS,
                      histtype='stepfilled', color=color_scheme.SRCGROWTH,
                      alpha=ALPHA, orientation='horizontal', normed=True,
@@ -117,7 +116,7 @@ right_margin_ax.set_xlabel('$P(K_\mathrm{out} = k)$', va='top')
 # Right main plot (proportion in vs total degree)
 right_main_ax.scatter(deg_growth, percent_indeg_growth, s=MARKERSIZE, lw=0,
                       c=color_scheme.SRCGROWTH, alpha=ALPHA,
-                      label='Source growth')
+                      label='Source growth', zorder=3)
 right_main_ax.scatter(deg_attachment, percent_indeg_attachment,
                       s=MARKERSIZE, lw=0, c=color_scheme.TARGETATTRACTION,
                       alpha=ALPHA, label='Target attraction')
@@ -130,7 +129,7 @@ right_main_ax.text(1., 1.2, 'b', fontsize=FONTSIZE + 2, fontweight='bold',
                    transform=right_main_ax.transAxes, ha='right')
 right_main_ax.set_xlim([0., 150.])
 right_main_ax.set_ylim([-0.025, 1.025])
-leg = right_main_ax.legend(loc=(-0.35, 1.12), prop={'size': 12})
+right_main_ax.legend(loc=(-0.35, 1.12), prop={'size': 12})
 
 for temp_ax in [left_main_ax, right_main_ax, top_margin_ax, right_margin_ax]:
     set_all_text_fontsizes(temp_ax, FONTSIZE)
