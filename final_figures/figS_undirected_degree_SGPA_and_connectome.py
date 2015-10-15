@@ -69,26 +69,38 @@ ctss = np.array(ctss)
 cts_mean = ctss.mean(axis=0)
 cts_std = ctss.std(axis=0)
 
-fig, axs = plt.subplots(1, 2, facecolor='white', figsize=FIG_SIZE, tight_layout=True)
+labels = ('a', 'b')
+fig, axs = plt.subplots(1, 2, facecolor='white', figsize=FIG_SIZE,
+                        tight_layout=True)
 
 axs[0].hist(degree_brain, bins=BINS, color=COLORS['brain'], normed=True)
 axs[0].plot(bincs, cts_mean, lw=2, color=COLORS['sgpa'])
-axs[0].fill_between(bincs, cts_mean - cts_std, cts_mean + cts_std, color=COLORS['sgpa'], alpha=0.3)
+axs[0].fill_between(bincs, cts_mean - cts_std, cts_mean + cts_std,
+                    color=COLORS['sgpa'], alpha=0.3, zorder=2)
 axs[0].set_xlim(0, 150)
+axs[0].set_ylim(0, 0.04)
 axs[0].set_xticks(np.arange(0, 151, 30))
 axs[0].set_xlabel('Undirected Degree')
-axs[0].set_ylabel('Counts (normalized)')
+axs[0].set_ylabel('Probability')
+axs[0].locator_params(axis='x', nbins=5)
 
-brain_handle = axs[1].hist(degree_brain, bins=BINS, color=COLORS['brain'], normed=True)
+brain_handle = axs[1].hist(degree_brain, bins=BINS, color=COLORS['brain'],
+                           normed=True)
 sgpa_handle = axs[1].plot(bincs, cts_mean, lw=2, color=COLORS['sgpa'])
-axs[1].fill_between(bincs, cts_mean - cts_std, cts_mean + cts_std, color=COLORS['sgpa'], alpha=0.3)
+axs[1].fill_between(bincs, cts_mean - cts_std, cts_mean + cts_std,
+                    color=COLORS['sgpa'], alpha=0.3, zorder=2)
 axs[1].set_xlim(0, 150)
+axs[1].set_ylim(1e-4, 1e-1)
 axs[1].set_xticks(np.arange(0, 151, 30))
 axs[1].set_xlabel('Undirected Degree')
-axs[1].set_ylabel('Log[Counts] (normalized)')
+axs[1].set_ylabel('Log probability')
 axs[1].set_yscale('log')
 axs[1].legend([brain_handle[-1][0], sgpa_handle[0]], ['Connectome', 'SGPA'])
 
 [change_settings.set_all_text_fontsizes(ax, FONT_SIZE) for ax in axs]
+for ax, label in zip(axs, labels):
+    ax.text(0.05, 0.95, label, fontsize=20, fontweight='bold',
+            transform=ax.transAxes,  ha='center', va='center')
+
 
 fig.savefig('/Users/rkp/Desktop/undirected_degree.png')
