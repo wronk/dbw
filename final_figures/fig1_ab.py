@@ -37,7 +37,7 @@ plt.rcParams['ps.fonttype'] = 42
 plt.rcParams['pdf.fonttype'] = 42
 
 n_bins = 50
-repeats = 100
+repeats = 1
 
 hist_brain = True  # Plot brain as histogram bars? Otherwise, as line
 ###############################################
@@ -103,7 +103,7 @@ for r in np.arange(repeats):
 
     # Watts-Strogatz
     WS_deg_mat[r, :] = ws(n_nodes, int(round(brain_degree_mean)),
-                          0.159).degree().values()
+                          0.23).degree().values()
 
     # Barabasi-Albert
     BA_deg_mat[r, :] = ba(n_nodes,
