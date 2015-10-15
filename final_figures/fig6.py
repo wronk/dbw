@@ -197,7 +197,7 @@ for a_ctr, ax in enumerate(axs):
         ax.scatter(deg, cc, lw=0, alpha=ALPHA_DEG_VS_CC, c=COLORS['brain'])
 
     elif a_ctr == 1:
-        hist_connectome = ax.hist(G_brain.nodal_efficiency, bins=BINS_NODAL_EFFICIENCY, color=COLORS['brain'], lw=0)
+        hist_connectome = ax.hist(G_brain.nodal_efficiency, bins=BINS_NODAL_EFFICIENCY, color=COLORS['brain'])
 
     if a_ctr == 0:
         Gs = [graphs_sgpa[DEGREE_VS_CLUSTERING_GRAPH_IDX],
