@@ -177,7 +177,7 @@ deg = [deg_full[node] for node in nodes]
 G.efficiency_matrix = metrics_bd.efficiency_matrix(G)
 nodal_efficiency = np.sum(G.efficiency_matrix, axis=1) / (len(G.nodes()) - 1)
 
-axs[0].scatter(deg, cc, c=node_ages, cmap=cm.jet)
+axs[0].scatter(deg, cc, c=node_ages, cmap=cm.jet, lw=0)
 axs[0].set_xlim(0, 150)
 axs[0].set_ylim(0, 1)
 axs[0].set_xlabel('Degree')
