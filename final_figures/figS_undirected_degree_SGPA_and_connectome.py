@@ -82,7 +82,6 @@ axs[0].set_ylim(0, 0.04)
 axs[0].set_xticks(np.arange(0, 151, 30))
 axs[0].set_xlabel('Undirected Degree')
 axs[0].set_ylabel('Probability')
-axs[0].locator_params(axis='x', nbins=5)
 
 brain_handle = axs[1].hist(degree_brain, bins=BINS, color=COLORS['brain'],
                            normed=True)
