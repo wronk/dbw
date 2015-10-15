@@ -1,5 +1,7 @@
 """
-Calculate the node betweenness and node-averaged inverse shortest path length distributions for the brain and the ER and SGPA models (the latter two averaged over several instantiations).
+Calculate the node betweenness and node-averaged inverse shortest path length
+distributions for the brain and the ER and SGPA models (the latter two averaged
+over several instantiations).
 """
 from __future__ import print_function, division
 
@@ -8,7 +10,6 @@ import pickle
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
-plt.ion()
 
 from extract import brain_graph
 from random_graph.binary_directed import biophysical_reverse_outdegree as sgpa
@@ -19,6 +20,7 @@ from network_plot import change_settings
 
 import brain_constants as bc
 
+plt.ion()
 LENGTH_SCALE = 0.75
 COLORS = {
     'brain': np.array([170, 68, 153]) / 255,
@@ -47,7 +49,6 @@ BINS_NODAL_EFFICIENCY = np.linspace(0, 1, 25)
 BINCS_NODAL_EFFICIENCY = 0.5 * (BINS_NODAL_EFFICIENCY[:-1] + BINS_NODAL_EFFICIENCY[1:])
 
 SAVE_FILE_NAME = 'model_graphs_with_efficiency.pickle'
-
 
 # load brain graph
 G_brain, _, _ = brain_graph.binary_directed()
@@ -109,7 +110,8 @@ else:
             G.efficiency_matrix = metrics_bd.efficiency_matrix(G)
             # calculate nodal efficiency
             nodal_efficiency = np.sum(G.efficiency_matrix, axis=1) / (len(G.nodes()) - 1)
-            G.counts_nodal_efficiency = np.histogram(nodal_efficiency, bins=BINS_NODAL_EFFICIENCY)[0]
+            G.counts_nodal_efficiency = np.histogram(nodal_efficiency,
+                                                     bins=BINS_NODAL_EFFICIENCY)[0]
 
             if label == 'er':
                 graphs_er += [G]
@@ -149,13 +151,11 @@ counts_nodal_efficiency_std_er = np.array([G.counts_nodal_efficiency for G in gr
 
 # calculate mean and std of global efficiencies
 for name, graphs in zip(names, graphss):
-    nodal_effs = [np.sum(G.efficiency_matrix, axis=1) / (len(G.nodes()) - 1) for G in graphs]
+    nodal_effs = [np.sum(G.efficiency_matrix, axis=1) / (len(G.nodes()) - 1)
+                  for G in graphs]
     global_effs = [nodal_eff.mean() for nodal_eff in nodal_effs]
-    print(
-        'global eff {}: mean = {}, std = {}'.format(
-            name, np.mean(global_effs), np.std(global_effs)
-        )
-    )
+    print('global eff {}: mean = {}, std = {}'.format(
+            name, np.mean(global_effs), np.std(global_effs)))
 
 # calculate nodal efficiency for brain
 G_brain.efficiency_matrix = metrics_bd.efficiency_matrix(G_brain)
@@ -182,7 +182,8 @@ power_law_fits['brain'] = power_law_fit_brain[0]
 fits_r_squared['brain'] = power_law_fit_brain[2] ** 2
 
 # plot clustering vs. degree and nodal_efficiencies for brain and three models
-fig, axs = plt.subplots(1, 2, facecolor=FACE_COLOR, figsize=FIG_SIZE, tight_layout=True)
+fig, axs = plt.subplots(1, 2, facecolor=FACE_COLOR, figsize=FIG_SIZE,
+                        tight_layout=True)
 
 for a_ctr, ax in enumerate(axs):
     # brain
@@ -192,13 +193,12 @@ for a_ctr, ax in enumerate(axs):
         ax.scatter(deg, cc, lw=0, alpha=ALPHA_DEG_VS_CC, c=COLORS['brain'])
 
     elif a_ctr == 1:
-        hist_connectome = ax.hist(G_brain.nodal_efficiency, bins=BINS_NODAL_EFFICIENCY, color=COLORS['brain'], lw=0)
+        hist_connectome = ax.hist(G_brain.nodal_efficiency, bins=BINS_NODAL_EFFICIENCY,
+                                  color=COLORS['brain'], lw=0)
 
     if a_ctr == 0:
-        Gs = [
-            graphs_er[DEGREE_VS_CLUSTERING_GRAPH_IDX],
-            graphs_ta[DEGREE_VS_CLUSTERING_GRAPH_IDX],
-        ]
+        Gs = [graphs_er[DEGREE_VS_CLUSTERING_GRAPH_IDX],
+              graphs_ta[DEGREE_VS_CLUSTERING_GRAPH_IDX]]
         labels = ['er', 'target-attraction']
 
         for G, label in zip(Gs, labels):
@@ -218,14 +218,16 @@ for a_ctr, ax in enumerate(axs):
     elif a_ctr == 1:
 
         # target-attraction
-        line_ta = ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_ta, color=COLORS['target-attraction'], lw=3)
+        line_ta = ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_ta,
+                          color=COLORS['target-attraction'], lw=3)
         ax.fill_between(BINCS_NODAL_EFFICIENCY,
                         counts_nodal_efficiency_mean_ta - counts_nodal_efficiency_std_ta,
                         counts_nodal_efficiency_mean_ta + counts_nodal_efficiency_std_ta,
                         color=COLORS['target-attraction'], alpha=0.5, zorder=100)
 
         # erdos-renyi
-        line_er = ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_er, color=COLORS['er'], lw=3)
+        line_er = ax.plot(BINCS_NODAL_EFFICIENCY, counts_nodal_efficiency_mean_er,
+                          color=COLORS['er'], lw=3)
         ax.fill_between(BINCS_NODAL_EFFICIENCY,
                         counts_nodal_efficiency_mean_er - counts_nodal_efficiency_std_er,
                         counts_nodal_efficiency_mean_er + counts_nodal_efficiency_std_er,
@@ -253,14 +255,17 @@ ax_inset = fig.add_axes(INSET_COORDINATES)
 bar_names = ('er', 'target-attraction')
 gamma_means = [power_law_fits[name].mean() for name in bar_names]
 gamma_stds = [power_law_fits[name].std() for name in bar_names]
-gamma_median_r_squareds = [np.median(fits_r_squared[name]) for name in bar_names]
+gamma_median_r_squareds = [np.median(fits_r_squared[name])
+                           for name in bar_names]
 colors = [COLORS[name] for name in bar_names]
 bar_width = .8
 x_pos = np.arange(len(bar_names)) - bar_width/2
 error_kw = {'ecolor': 'k', 'elinewidth': 2, 'markeredgewidth': 2, 'capsize': 6}
 
-ax_inset.bar(x_pos, gamma_means, width=bar_width, color=colors, yerr=gamma_stds, error_kw=error_kw)
-ax_inset.bar([-bar_width/2 + 2], power_law_fits['brain'], width=bar_width, color=COLORS['brain'])
+ax_inset.bar(x_pos, gamma_means, width=bar_width, color=colors,
+             yerr=gamma_stds, error_kw=error_kw)
+ax_inset.bar([-bar_width/2 + 2], power_law_fits['brain'], width=bar_width,
+             color=COLORS['brain'])
 ax_inset.set_xticks(np.arange(len(bar_names) + 1))
 ax_inset.set_xticklabels(['ER', 'TA', 'Connectome'], rotation='vertical')
 
