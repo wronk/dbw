@@ -117,7 +117,6 @@ right_dummy_ax.set_xscale('log')
 top_margin_ax.set_yticks([0, 0.04, 0.08])
 top_margin_ax.set_ylim([0, 0.08])
 
-
 plt.setp(right_margin_ax.get_yticklabels() + top_margin_ax.get_xticklabels(),
          visible=False)
 
@@ -162,7 +161,20 @@ for tick in top_log_ticks+right_log_ticks:
 
 for tick in right_log_ticks+right_lin_ticks:
     tick.set_rotation(270)
+
 fig.subplots_adjust(right=0.95, bottom=0.2)
+
+# Add colorbar
+rightAx_bbox = right_main_ax.get_position()
+cbar_ax_rect = (rightAx_bbox.xmin, rightAx_bbox.y1 + 0.095, 0.2, .045)
+cbar_ax = fig.add_axes(cbar_ax_rect, xticks=[0, 255],
+                       xticklabels=['Old', 'New'], yticks=[])
+cbar_ax.xaxis.set_tick_params(size=0)
+cbar_ax.yaxis.set_tick_params(size=0)
+
+jet_grad = np.linspace(0, 1, 256)  # Jet gradient for Old->New
+cbar_ax.imshow(np.vstack((jet_grad, jet_grad)), aspect='auto', cmap=cm.jet)
+
 fig.savefig(os.path.join(SAVE_DIR, 'node_by_node_in_and_out.png'), dpi=300)
 
 # plot clustering vs degree and nodal efficiency
@@ -187,6 +199,19 @@ axs[0].set_xlabel('Degree')
 axs[0].set_ylabel('Clustering coefficient')
 axs[0].locator_params(axis='x', nbins=6)
 
+# Add colorbar
+ax0_bbox = axs[0].get_position()
+ax0_yCenter = np.mean([ax0_bbox.y0, ax0_bbox.y1])
+cbar_ax_rect = (ax0_bbox.xmax - 0.05, ax0_yCenter - 0.065,
+                0.03, .35)
+cbar_ax = fig.add_axes(cbar_ax_rect, yticks=[0, 255],
+                       yticklabels=['New', 'Old'], xticks=[])
+cbar_ax.xaxis.set_tick_params(size=0)
+cbar_ax.yaxis.set_tick_params(size=0)
+
+jet_grad = np.linspace(1, 0, 256)  # Jet gradient for Old->New
+cbar_ax.imshow(np.vstack((jet_grad, jet_grad)).T, aspect='auto', cmap=cm.jet)
+
 axs[1].hist(nodal_efficiency, bins=20)
 axs[1].set_xlim(0, 1)
 axs[1].set_xlabel('Nodal efficiency')
@@ -194,7 +219,7 @@ axs[1].set_ylabel('Number of nodes')
 
 for ax, label in zip(axs, labels):
     change_settings.set_all_text_fontsizes(ax, fontsize=FONT_SIZE)
-    ax.text(0.90, 0.90, label, fontsize=FONT_SIZE + 2, fontweight='bold',
+    ax.text(0.915, 0.925, label, fontsize=FONT_SIZE + 2, fontweight='bold',
             transform=ax.transAxes,  ha='center', va='center')
 
 fig.savefig(os.path.join(SAVE_DIR, 'node_by_node_cc_deg_nodal_eff.png'),
