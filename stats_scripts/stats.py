@@ -110,7 +110,7 @@ def distance_cc_corr(G):
 
 if __name__ == "__main__":
     run_graphs = True
-    n_runs = 10
+    n_runs = 100
 
     if n_runs%2 == 0: # this must be odd, otherwise the median will be an average
         n_runs += 1
@@ -193,7 +193,7 @@ if __name__ == "__main__":
     # Spearman correlation between edge distance and clustering, showing spatially localized topological clustering
     # Page 10
     # For the model:
-    rho,p = distance_clustering(G)
+    rho,p = distance_cc_corr(G)
 
     print 'Connectome: rho=%.3f, p=%.2e'%(rho,p)
     for g in graphs:
@@ -203,4 +203,3 @@ if __name__ == "__main__":
         p_dist_cc_median = dist_cc_stats[g][rdcm_index,1]
         rho_temp = r_dist_cc_median; p_temp = p_dist_cc_median
         print '%s model: rho=%.3f, p=%.2e'%(g,rho_temp,p_temp)
-        
