@@ -21,15 +21,15 @@ import color_scheme
 
 data_dir=os.getenv('DBW_DATA_DIRECTORY')
 pickle_file = data_dir + '/growth_degs.pickle'
-n_runs = 20
+n_runs = 1
 
 # Set plot params
 labelsize = 10
 ticksize = 9
 legendsize = 8
 
-fig,axs = plt.subplots(1,3,facecolor='white',edgecolor='white',figsize=(7.5,2.3),dpi=200.)
-fig.subplots_adjust(bottom=0.15,wspace=0.55,hspace=0.45)
+fig,axs = plt.subplots(1,3,facecolor='white',edgecolor='white',figsize=(7.5,2.3),dpi=300.)
+fig.subplots_adjust(bottom=0.15,wspace=0.42,hspace=0.35)
 
 
 graphs = ['sgpa','sg','brain']
@@ -177,7 +177,7 @@ axs[1].fill_between(Ls[1:],mean_reciprocity[1:]-std_reciprocity[1:],
 
 # Plot brain reciprocity
 axs[1].plot([0,2],[brain_reciprocity,brain_reciprocity],lw=2,
-            color=color_scheme.ATLAS,linestyle='--')
+            color=color_scheme.ATLAS,linestyle='--',dashes=(4,4))
 
 # Plot configuration reciprocity
 configX = [0,2]; configY = [np.mean(config_reciprocity),
@@ -232,7 +232,7 @@ axs[2].set_ylabel('Probability density', fontsize=labelsize)
 axs[2].set_xlim([0,10.0])
 axs[2].set_title('Growth models',fontsize=labelsize+2)
 leg=axs[2].legend(['SG: Nonreciprocal', 'SG: Reciprocal', 'SGPA: Nonreciprocal','SGPA: Reciprocal']\
-               ,prop={'size':legendsize})
+               ,prop={'size':legendsize},bbox_to_anchor=(1.2,1.0))
 
 leg.draggable()
 # Finally add labels
@@ -241,5 +241,7 @@ axs[1].text(0.1+2*0.05,0.3*0.925,'b',fontsize=labelsize,fontweight='bold')
 axs[2].text(10*0.05,0.75*0.925,'c',fontsize=labelsize,fontweight='bold')
 
 fig.subplots_adjust(left=0.125, top=0.9, right=0.95, bottom=0.225)
-plt.show(block=False)
 
+fig_dir = os.getenv('DBW_SAVE_CACHE')
+fig.savefig(fig_dir+'fig5.pdf')
+plt.draw()
