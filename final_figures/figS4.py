@@ -1,42 +1,47 @@
+"""
+Plot proportion in-degree of mouse connectome
+"""
 
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-from random_graph.binary_directed import biophysical_indegree, biophysical_reverse_outdegree
 from extract.brain_graph import binary_directed as brain_graph
-from network_plot.change_settings import set_all_text_fontsizes, set_all_colors
-
-import brain_constants as bc
-
 import color_scheme
-import in_out_plot_config as cf
+
+fontsize = 12
+save_dir = os.environ['DBW_SAVE_CACHE']
+
+# Load connectome graph
+G = brain_graph()[0]
 
 
-fig,axs = plt.subplots(1,facecolor='w',figsize=(3.5,2.75),dpi=200.)
-fig.subplots_adjust(bottom=0.2,left=0.2)
-
-labelsize=11
-ticksize=10
-
-
-#G, _, _ = biophysical_reverse_outdegree(N=bc.num_brain_nodes,
-#                                              N_edges=bc.num_brain_edges_directed,
-#                                              L=.75)
-
-G,_,_ = brain_graph()
-
+# Calculate proportion in-degree
 outdeg = G.out_degree()
 indeg = G.in_degree()
 nodes = G.nodes()
-sumdeg = [float(outdeg[node]+indeg[node]) for node in nodes]
+sumdeg = [float(outdeg[node] + indeg[node]) for node in nodes]
+prop_indeg = [indeg[node] / sumdeg[node] for node in nodes]
 
-prop_indeg = [indeg[node]/sumdeg[node] for node in nodes]
-bins = np.linspace(0,1,11)
-axs.hist(prop_indeg,bins,facecolor=color_scheme.ATLAS)
-axs.set_xlabel('Proportion in-degree',fontsize=labelsize)
-axs.set_ylabel('Count',fontsize=labelsize)
-xticks = [0,0.25,0.5,0.75,1.0]
-yticks = np.arange(0,100,20)
-axs.set_xticks(xticks); axs.set_xticklabels(xticks,size=ticksize)
-axs.set_yticks(yticks); axs.set_yticklabels(yticks,size=ticksize)
-plt.show(block=False)
+# Plot in-degree
+fig, ax = plt.subplots(1, facecolor='w', figsize=(3.5, 2.75))
+fig.subplots_adjust(bottom=0.2, left=0.2)
+bins = np.linspace(0, 1, 11)
+ax.hist(prop_indeg, bins, facecolor=color_scheme.ATLAS)
+
+# Add labels and ticks
+ax.set_xlabel('Proportion in-degree', fontsize=fontsize)
+ax.set_ylabel('Count', fontsize=fontsize)
+xticks = [0, 0.25, 0.5, 0.75, 1.0]
+yticks = np.arange(0, 100, 20)
+ax.set_xticks(xticks)
+ax.set_xticklabels(xticks, size=fontsize)
+ax.set_yticks(yticks)
+ax.set_yticklabels(yticks, size=fontsize)
+
+# Save plot
+plt.subplots_adjust(left=0.15, right=0.95, bottom=0.2, top=0.9)
+plt.savefig(os.path.join(save_dir, 'figS4.png'), dpi=300)
+plt.savefig(os.path.join(save_dir, 'figS4.pdf'), dpi=300)
+
+plt.show()
