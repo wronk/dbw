@@ -5,10 +5,22 @@ import os
 import scipy.stats as stats
 
 from extract.brain_graph import binary_directed
-import brain_constants as bc
+from random_graph.binary_directed import biophysical_reverse_outdegree as biophysical_model
+
+from brain_constants import *
+from network_compute import reciprocity
 
 
 def get_gamma(G):
+    # Fits clustering coefficient as a power of degree.
+    # Usage: gamma,R2,p = get_gamma(G)
+    # Input:
+    # G: an undirected networkx graph object.
+    # Returns:
+    # gamma: the fitted power
+    # R2: the R^2 value (percent of variance accounted for by power law)
+    # p: the associated p-value.
+    
     nodes = G.nodes()
     deg_dict = G.degree()
     cc_dict = nx.clustering(G)
@@ -20,6 +32,19 @@ def get_gamma(G):
     return gamma,R2,p
 
 def in_out_corr(G,connectome=False):
+    # Computes Spearman correlation between in- and out-degree.
+    # Usage: r,p = in_out_corr(G)
+    # Input:
+    # G: a directed networkx graph object
+    # Returns:
+    # r: Spearman rank correlation coefficient
+    # p: the associated p-value
+    #
+    # Note: The argument connectome=True should be set if running
+    # with the connectome. The connectome has 213 independent
+    # nodes because it is mirrored along the hemispheric divide
+    # in order to construct a complete graph.
+    
     nodes = G.nodes()
     indeg_dict = G.in_degree()
     outdeg_dict = G.out_degree()
@@ -39,6 +64,19 @@ def in_out_corr(G,connectome=False):
     return r,p
 
 def cc_deg_corr(G,connectome=False):
+    # Correlation between clustering and degree.
+    # Usage: r,p = cc_deg_corr(G)
+    # Input:
+    # G: an undirected networkx graph object
+    # Returns:
+    # r: Spearman rank correlation coefficient
+    # p: the associated p-value
+    #
+    # Note: The argument connectome=True should be set if running
+    # with the connectome. The connectome has 213 independent
+    # nodes because it is mirrored along the hemispheric divide
+    # in order to construct a complete graph.
+    
     nodes = G.nodes()
     cc_dict = nx.clustering(G)
     deg_dict = G.degree()
@@ -50,9 +88,23 @@ def cc_deg_corr(G,connectome=False):
         deg = np.array(deg)[0:len(nodes)/2]
 
     corr = stats.spearmanr(cc,deg)
-    return corr.correlation,corr.pvalue
+    r = corr.correlation; p = corr.pvalue
+    return r,p
 
 def get_edge_distances(G,split_recip=False):
+    # Compute edge distances for graph. Graph must have a custom-set field
+    # called centroids which specifies the XYZ coordinates of the node.
+    # Usage; edges = get_edge_distances(G)
+    # Returns:
+    # edges: An array containing all the edge lengths of the network
+    # OR
+    # Usage: nonrecip_edges,recip_edges = get_edge_distances(G,split_recip=True)
+    # nonrecip_edges: Edge lengths of all the nonreciprocal edges in the network
+    # recip_edges: Edge lengths of all the reciprocal edges in the network
+    #
+    # Note: The optional argument split_recip=True will make the function return two
+    # arrays: one for nonreciprocal and one for reciprocal edges.
+    
     centroids = G.centroids
 
     indeg = np.array([G.in_degree()[node] for node in G])
@@ -82,12 +134,28 @@ def get_edge_distances(G,split_recip=False):
         return edges
 
 def cohen_d(x,y):
+    # Computes Cohen's d (similar to d')
+    # Usage: d = cohen_d(x,y)
+    # Input:
+    # x and y: two normally distributed vectors
+    # Returns:
+    # d: Cohen's d (difference between mean(x) and mean(y), expressed
+    # in units of the pooled SD)
+    
     pooled_var = (np.var(x)*(len(x)-1) + np.var(y)*(len(y)-1))/(len(x)+len(y)-2)
     diff = np.abs(np.mean(x)-np.mean(y))
     return diff/np.sqrt(pooled_var)
 
 
 def distance_cc_corr(G):
+    # Rank correlation between distance (edge lengths) and clustering coefficient.
+    # Usage: rho,p = distance_cc_corr(G)
+    # Input:
+    # G: An undirected networkx graph object
+    # Returns:
+    # rho: rank correlation coefficient
+    # p: the associated p-value
+    
     nodes = G.nodes()
     edge_distances = get_edge_distances(G)
     mean_edge_distances = {}
