@@ -1,7 +1,9 @@
 
+
 import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx
+import os
 
 from network_plot.change_settings import set_all_text_fontsizes, set_all_colors
 
@@ -11,8 +13,14 @@ import color_scheme
 import in_out_plot_config as cf
 
 # Initialize the figure and axes objects
+MARKERSIZE = 25.
+FONTSIZE = 12.
+cf.FONTSIZE = FONTSIZE
+ALPHA = 0.5
+save = True
+save_path = os.getenv('DBW_SAVE_CACHE')
 
-fig = plt.figure(figsize=(7*2.54,3.5*2.54),facecolor='w')
+fig = plt.figure(figsize=(7.5, 4), facecolor='w', dpi=300.)
 plt.subplots_adjust(bottom=0.15,hspace=0.45,wspace=0.55)
 
 left_main_ax = plt.subplot2grid(cf.subplot_divisions,cf.left_main_location,rowspan=cf.left_main_rowspan,\
@@ -51,7 +59,7 @@ color_scheme.RANDOM = [0.9,0.1,0.0]
 
 # Left main plot (in vs out degree)
 left_main_ax.scatter(indeg,outdeg,c=color_scheme.RANDOM,\
-                     s=cf.MARKERSIZE,lw=0)
+                     s=cf.MARKERSIZE,lw=0,alpha=ALPHA)
 
 left_main_ax.set_xlabel('In-degree')
 left_main_ax.set_ylabel('Out-degree')
@@ -62,6 +70,7 @@ left_main_ax.set_aspect('auto')
 left_main_ax.set_xticks(np.arange(0, 101, 25))
 left_main_ax.set_yticks(np.arange(0, 101, 25))
 left_main_ax.legend(loc='best')
+left_main_ax.text(120,120,'a',fontsize=cf.FONTSIZE+2,fontweight='bold')
 
 
 # Top marginal (in-degree)
@@ -75,7 +84,7 @@ indeg_x = indeg_hist[1][0:len(indeg_hist[0])]
 indeg_y = indeg_hist[0]
 indeg_y = indeg_y/float(indeg_y.sum())
 
-top_dummy_ax.plot(indeg_x,indeg_y,linestyle='-',lw=3,color='b')
+top_dummy_ax.plot(indeg_x,indeg_y,linestyle='-',lw=2,color='b')
 top_dummy_ax.yaxis.tick_right()
 top_dummy_ax.yaxis.set_label_position('right')
 top_dummy_ax.set_yscale('log')
@@ -94,7 +103,7 @@ outdeg_x = outdeg_hist[1][0:len(outdeg_hist[0])]
 outdeg_y = outdeg_hist[0]
 outdeg_y = outdeg_y/float(outdeg_y.sum())
 
-right_dummy_ax.plot(outdeg_y,outdeg_x,linestyle='-',lw=3,color='b')
+right_dummy_ax.plot(outdeg_y,outdeg_x,linestyle='-',lw=2,color='b')
 right_dummy_ax.xaxis.tick_top()
 right_dummy_ax.xaxis.set_label_position('top')
 right_dummy_ax.set_xscale('log')
@@ -111,7 +120,7 @@ right_margin_ax.set_xlim([0,0.1])
 
 # Right main plot (proportion in vs total degree)
 right_main_ax.scatter(deg, percent_indeg, s=cf.MARKERSIZE, lw=0,
-            c=color_scheme.RANDOM)
+            c=color_scheme.RANDOM,alpha=ALPHA)
 
 right_main_ax.set_xlabel('Total degree (in + out)')
 right_main_ax.set_ylabel('Proportion in-degree')
@@ -119,9 +128,12 @@ right_main_ax.xaxis.set_major_locator(plt.MaxNLocator(4))
 right_main_ax.set_yticks(np.arange(0, 1.1, .25))
 right_main_ax.set_ylim([0., 1.05])
 right_main_ax.set_xticks(np.arange(0, 151, 50))
+right_main_ax.text(1., 1.2, 'b', fontsize=cf.FONTSIZE+2, fontweight='bold',
+                   transform=right_main_ax.transAxes, ha='right')
 
-top_margin_ax.set_ylabel('$P(K_\mathrm{in}=k)$')
-right_margin_ax.set_xlabel('$P(K_\mathrm{out}=k)$')
+
+top_margin_ax.set_ylabel('$P(K_\mathrm{in}=k)$',va='baseline')
+right_margin_ax.set_xlabel('$P(K_\mathrm{out}=k)$',va='top')
 
 
 for temp_ax in [left_main_ax, right_main_ax, top_margin_ax, right_margin_ax,top_dummy_ax,right_dummy_ax]:
@@ -143,9 +155,22 @@ for tick in top_lin_ticks+right_lin_ticks:
     
 for tick in top_log_ticks+right_log_ticks:
     tick.set_color('blue')
-    tick.set_fontsize(20)
+    tick.set_fontsize(7.5)
+
+for tick in top_log_ticks:
+    pos = tick.get_position()
+    tick.set_position((1.0,pos[1]))
+
+for tick in right_log_ticks:
+    pos = tick.get_position()
+    tick.set_position((pos[0],1.0))
 
 for tick in right_log_ticks+right_lin_ticks:
     tick.set_rotation(270)
 
+fig.subplots_adjust(left=0.125, top=0.925, right=0.95, bottom=0.225)
+
+if save:
+    fig.savefig(os.path.join(save_path, 'figure_S1.png'), dpi=300)
+    fig.savefig(os.path.join(save_path, 'figure_S1.pdf'), dpi=300)
 plt.show(block=False)

@@ -49,7 +49,6 @@ def cc_deg_corr(G,connectome=False):
         cc = np.array(cc)[0:len(nodes)/2]
         deg = np.array(deg)[0:len(nodes)/2]
 
-
     corr = stats.spearmanr(cc,deg)
     return corr.correlation,corr.pvalue
 
@@ -67,9 +66,10 @@ def get_edge_distances(G,split_recip=False):
     nonrecip_names = []
     for edge in actual_edges:
         edges[edge] =  np.sqrt(np.sum((centroids[edge[0]] - centroids[edge[1]])**2))
-        if edges.has_key((edge[1],edge[0])):                    
-            recip_names.append(edge)
-        else:
+        if edges.has_key((edge[1],edge[0])):
+            if (edge[1],edge[0]) not in recip_names:
+                recip_names.append(edge)
+        else:            
             nonrecip_names.append(edge)
         
     nonrecip_edges = [edges[k] for k in nonrecip_names]
@@ -110,7 +110,7 @@ def distance_cc_corr(G):
 
 if __name__ == "__main__":
     run_graphs = True
-    n_runs = 100
+    n_runs = 10
 
     if n_runs%2 == 0: # this must be odd, otherwise the median will be an average
         n_runs += 1
