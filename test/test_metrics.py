@@ -49,7 +49,7 @@ class CustomMetricsTestCase(unittest.TestCase):
         G.add_edge(2, 3)
         G.add_edge(3, 1)
 
-        reciprocity_correct = 0.5
+        reciprocity_correct = 1 / 3
 
         self.assertAlmostEqual(metrics_bd.reciprocity(G), reciprocity_correct)
 
