@@ -72,6 +72,7 @@ brain_metrics = calc_metrics(G_brain, metrics)
 for met_i, bm in enumerate(metrics):
     met_arr[graph_names.index('Connectome'), :, met_i] = bm(G_brain)
 
+print 'Running metric table with %d repeats\n' % repeats
 for rep in np.arange(repeats):
     # PGPA model
     if 'PGPA' in graph_names:
