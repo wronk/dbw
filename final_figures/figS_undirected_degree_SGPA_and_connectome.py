@@ -76,10 +76,11 @@ fig, axs = plt.subplots(1, 2, facecolor='white', figsize=FIG_SIZE,
 axs[0].hist(degree_brain, bins=BINS, color=COLORS['brain'], normed=True)
 axs[0].plot(bincs, cts_mean, lw=2, color=COLORS['sgpa'])
 axs[0].fill_between(bincs, cts_mean - cts_std, cts_mean + cts_std,
-                    color=COLORS['sgpa'], alpha=0.3, zorder=2)
+                    color=COLORS['sgpa'], alpha=0.5, zorder=2)
 axs[0].set_xlim(0, 150)
 axs[0].set_ylim(0, 0.04)
 axs[0].set_xticks(np.arange(0, 151, 30))
+axs[0].set_yticks(np.linspace(0, 0.04, 5, endpoint=True))
 axs[0].set_xlabel('Undirected Degree')
 axs[0].set_ylabel('Probability')
 
@@ -87,7 +88,7 @@ brain_handle = axs[1].hist(degree_brain, bins=BINS, color=COLORS['brain'],
                            normed=True)
 sgpa_handle = axs[1].plot(bincs, cts_mean, lw=2, color=COLORS['sgpa'])
 axs[1].fill_between(bincs, cts_mean - cts_std, cts_mean + cts_std,
-                    color=COLORS['sgpa'], alpha=0.3, zorder=2)
+                    color=COLORS['sgpa'], alpha=0.5, zorder=2)
 axs[1].set_xlim(0, 150)
 axs[1].set_ylim(1e-4, 1e-1)
 axs[1].set_xticks(np.arange(0, 151, 30))
